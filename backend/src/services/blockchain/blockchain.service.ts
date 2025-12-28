@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
 import abi from '../../lib/contract.abi.json';
-import { CreateRecordDto } from 'src/dto/create_record.dto';
+import { Record } from 'src/entities/record.entity';
 
 @Injectable()
 export class BlockChainService {
@@ -21,8 +21,10 @@ export class BlockChainService {
     this.contract = new ethers.Contract(contract_address, abi.abi, this.wallet);
   }
 
-  addRecord(record: CreateRecordDto) {
-    return this.contract.addRecord(...Object.values(record));
+  addRecord(record: Record) {
+    const { id, dataHash, expiration } = record;
+
+    return this.contract.addRecord(id, dataHash, expiration);
   }
 
   revokeRecord(recordId: string) {

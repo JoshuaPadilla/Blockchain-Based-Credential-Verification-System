@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { RecordService } from './record.service';
 import { BlockChainService } from 'src/services/blockchain/blockchain.service';
 import { Record } from 'src/interfaces/record.interface';
-import { CreateRecordDto } from 'src/dto/create_record.dto';
+import { IssueCredentialDto } from 'src/dto/issue_credential.dto';
 
 @Controller('record')
 export class RecordController {
@@ -11,7 +11,7 @@ export class RecordController {
   @Post()
   addRecord(
     @Body()
-    record: CreateRecordDto,
+    record: IssueCredentialDto,
   ) {
     return this.recordService.addRecord(record);
   }

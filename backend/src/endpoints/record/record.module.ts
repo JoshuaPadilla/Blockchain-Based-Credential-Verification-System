@@ -3,9 +3,11 @@ import { RecordService } from './record.service';
 import { RecordController } from './record.controller';
 import { BlockChainModule } from 'src/services/blockchain/blockchain.module';
 import { BlockChainService } from 'src/services/blockchain/blockchain.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Record } from 'src/entities/record.entity';
 
 @Module({
-  imports: [BlockChainModule],
+  imports: [TypeOrmModule.forFeature([Record]), BlockChainModule],
   controllers: [RecordController],
   providers: [RecordService],
 })
