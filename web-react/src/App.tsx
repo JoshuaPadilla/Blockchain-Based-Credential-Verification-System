@@ -1,35 +1,41 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import "./App.css";
+import { DiplomaPDF } from "./components/diploma/diploma_pdf";
+import ReactPDF, { PDFViewer } from "@react-pdf/renderer";
+import QRCode from "qrcode";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [qrUrl, setQrUrl] = useState("");
+
+  useEffect(() => {
+    const generateQR = async () => {
+      const data = JSON.stringify({
+        name: "Joshua Vincent Padilla",
+        degree: "BS Computer Science",
+        date: "2025-12-30",
+        id: "DIP-2025-001",
+      });
+
+      const url = await QRCode.toDataURL(data, {
+        width: 300,
+        margin: 1,
+      });
+
+      setQrUrl(url);
+    };
+
+    generateQR();
+  }, []);
+
+  if (!qrUrl) return null;
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="bg-white w-full h-screen flex justify-center items-center">
+      <PDFViewer width="100%" height="100%">
+        <DiplomaPDF qrUrl={qrUrl} />
+      </PDFViewer>
+    </div>
+  );
 }
 
-export default App
+export default App;

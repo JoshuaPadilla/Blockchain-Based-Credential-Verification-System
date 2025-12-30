@@ -13,6 +13,7 @@ export class RecordController {
     @Body()
     record: IssueCredentialDto,
   ) {
+    console.log('here');
     return this.recordService.addRecord(record);
   }
 

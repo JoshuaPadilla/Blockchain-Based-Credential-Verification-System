@@ -6,6 +6,7 @@ import { RecordModule } from './endpoints/record/record.module';
 import { BlockChainModule } from './services/blockchain/blockchain.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Record } from './entities/record.entity';
+import { PdfModule } from './endpoints/pdf/pdf.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { Record } from './entities/record.entity';
     }),
     RecordModule,
     BlockChainModule,
+    PdfModule,
   ],
   controllers: [AppController],
   providers: [AppService],
