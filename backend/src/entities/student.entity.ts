@@ -1,0 +1,55 @@
+import {
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { PreviousEducation } from './previous_education.entity';
+import { StudentAcademicRecord } from './student_academic_record';
+
+@Entity()
+export class Student {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column()
+  firstName: string;
+
+  @Column()
+  middleName: string;
+
+  @Column()
+  lastName: string;
+
+  @Column()
+  address: string;
+
+  @Column({ type: 'date' })
+  dateOfBirth: Date;
+
+  @Column()
+  placeOfBirth: string;
+
+  @Column()
+  guardianName: string;
+
+  @Column({ type: 'int', default: 1 })
+  yearLevel: number;
+
+  @Column()
+  course: string;
+
+  @Column(() => PreviousEducation, { prefix: 'elementary_' })
+  elementary: PreviousEducation;
+
+  @Column(() => PreviousEducation, { prefix: 'secondary_' })
+  secondary: PreviousEducation;
+
+  @OneToMany(
+    () => StudentAcademicRecord,
+    (studentAcademicRecord) => studentAcademicRecord.student,
+    { cascade: true },
+  )
+  academicRecords: StudentAcademicRecord[];
+}

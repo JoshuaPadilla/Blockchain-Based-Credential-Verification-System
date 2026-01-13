@@ -31,9 +31,7 @@ function App() {
 
   return (
     <div className="bg-white w-full h-screen flex justify-center items-center">
-      <PDFViewer width="100%" height="100%">
-        <DiplomaPDF qrUrl={qrUrl} />
-      </PDFViewer>
+      
     </div>
   );
 }

@@ -31,7 +31,8 @@ export const styles = StyleSheet.create({
     position: "absolute",
     height: "100px",
     width: "100px",
-    top: "75%", // Adjust these coordinates to place the name where you want
+    top: "75%",  
+    
     left: "50%", // Moves the left edge to the center
     marginLeft: -50,
   },

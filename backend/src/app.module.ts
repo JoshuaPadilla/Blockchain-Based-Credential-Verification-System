@@ -7,6 +7,13 @@ import { BlockChainModule } from './services/blockchain/blockchain.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Record } from './entities/record.entity';
 import { PdfModule } from './endpoints/pdf/pdf.module';
+import { SubjectModule } from './endpoints/subject/subject.module';
+import { StudentModule } from './endpoints/student/student.module';
+import { AcademicRecordModule } from './endpoints/academic_record/academic_record.module';
+import { Subject } from './entities/subject.entity';
+import { Student } from './entities/student.entity';
+import { StudentAcademicRecord } from './entities/student_academic_record';
+import { SubjectTaken } from './entities/subjectTaken.entity';
 
 @Module({
   imports: [
@@ -15,18 +22,20 @@ import { PdfModule } from './endpoints/pdf/pdf.module';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: '172.24.160.1',
+      host: 'localhost',
       port: 5432,
       password: '09461674500',
-      username: 'postgres',
-      database: 'ThesisDB',
+      username: 'thesis',
+      database: 'thesis_db',
       synchronize: true,
-      logging: true,
-      entities: [Record],
+      entities: [Record, Subject, Student, StudentAcademicRecord, SubjectTaken],
     }),
     RecordModule,
     BlockChainModule,
     PdfModule,
+    SubjectModule,
+    StudentModule,
+    AcademicRecordModule,
   ],
   controllers: [AppController],
   providers: [AppService],
