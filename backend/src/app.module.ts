@@ -9,7 +9,7 @@ import { Record } from './entities/record.entity';
 import { PdfModule } from './endpoints/pdf/pdf.module';
 import { SubjectModule } from './endpoints/subject/subject.module';
 import { StudentModule } from './endpoints/student/student.module';
-import { AcademicRecordModule } from './endpoints/academic_record/academic_record.module';
+import { AcademicRecordModule } from './endpoints/student_academic_record/student_academic_record.module';
 import { Subject } from './entities/subject.entity';
 import { Student } from './entities/student.entity';
 import { StudentAcademicRecord } from './entities/student_academic_record';
