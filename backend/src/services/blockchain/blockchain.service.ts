@@ -38,10 +38,12 @@ export class BlockChainService {
   async getRecord(recordId: string) {
     const record = await this.contract.records(recordId);
 
+    console.log(record);
+
     // Destructure the fields and convert the BigInt
     return {
       dataHash: record.dataHash,
-      signature: record.signature,
+      txHash: record.txHash,
       expiration: record.expiration.toString(), // Convert BigInt to String
       isRevoked: record.isRevoked,
     }; // mapping getter

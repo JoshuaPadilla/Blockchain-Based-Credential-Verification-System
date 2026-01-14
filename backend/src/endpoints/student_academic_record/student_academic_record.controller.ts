@@ -1,6 +1,7 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Param, Patch, Post } from '@nestjs/common';
 import { AcademicRecordService } from './student_academic_record.service';
 import { CreateStudentAcademicRecordDto } from 'src/dto/create_academic.dto';
+import { AddSubjectTakenDto } from 'src/dto/add_subject_taken.dto';
 
 @Controller('academic-record')
 export class AcademicRecordController {
@@ -11,5 +12,13 @@ export class AcademicRecordController {
     @Body() createStudentAcademicRecordDto: CreateStudentAcademicRecordDto,
   ) {
     return this.academicRecordService.create(createStudentAcademicRecordDto);
+  }
+
+  @Patch('add-subject-taken/:id')
+  addSubjectTaken(
+    @Param('id') id: string,
+    @Body() subjectsTakenDto: AddSubjectTakenDto,
+  ) {
+    return this.academicRecordService.addSubjectTaken(id, subjectsTakenDto);
   }
 }

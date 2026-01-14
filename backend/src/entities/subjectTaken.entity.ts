@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { Subject } from './subject.entity';
 import { StudentAcademicRecord } from './student_academic_record';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class SubjectTaken {
@@ -20,5 +21,6 @@ export class SubjectTaken {
   grade: number;
 
   @ManyToOne(() => StudentAcademicRecord, (record) => record.subjectsTaken)
+  @Exclude()
   academicRecord: StudentAcademicRecord;
 }
