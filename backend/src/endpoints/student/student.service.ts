@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CreateStudentDto } from 'src/dto/create_student.dto';
-import { Student } from 'src/entities/student.entity';
-import { Repository } from 'typeorm';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { CreateStudentDto } from "src/dto/create_student.dto";
+import { Student } from "src/entities/student.entity";
+import { Repository } from "typeorm";
 
 @Injectable()
 export class StudentService {
@@ -13,7 +13,7 @@ export class StudentService {
 
   async findAll(): Promise<Student[]> {
     return this.studentRepository.find({
-      relations: ['academicRecords', 'academicRecords.subjectsTaken'],
+      relations: ["academicRecords", "academicRecords.subjectsTaken"],
     });
   }
 
@@ -24,7 +24,7 @@ export class StudentService {
 
     return this.studentRepository.findOneOrFail({
       where: { id: student.id },
-      relations: ['academicRecords', 'academicRecords.subjectsTaken'], // <--- Specify relations here
+      relations: ["academicRecords", "academicRecords.subjectsTaken"], // <--- Specify relations here
     });
   }
 
@@ -39,7 +39,7 @@ export class StudentService {
     const student = await this.studentRepository.findOneBy({ id });
 
     if (!student) {
-      throw new NotFoundException('student not found');
+      throw new NotFoundException("student not found");
     }
 
     await this.studentRepository.save({
@@ -50,7 +50,7 @@ export class StudentService {
     // 3. Fetch the FRESH complete record with relations to return
     return this.studentRepository.findOneOrFail({
       where: { id },
-      relations: ['academicRecords', 'academicRecords.subjectsTaken'], // <--- Specify relations here
+      relations: ["academicRecords", "academicRecords.subjectsTaken"], // <--- Specify relations here
     });
   }
 }

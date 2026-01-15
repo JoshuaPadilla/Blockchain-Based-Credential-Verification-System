@@ -2,11 +2,13 @@ import {
   Column,
   CreateCollectionOptions,
   Entity,
+  ManyToOne,
   PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { randomUUID } from 'crypto';
 import { CredentialType } from 'src/enums/credential_type.enum';
+import { Student } from './student.entity';
 
 @Entity()
 export class Record {
@@ -27,4 +29,7 @@ export class Record {
 
   @Column({ type: 'enum', enum: CredentialType, nullable: true })
   credentialType: CredentialType;
+
+  @ManyToOne(() => Student, (student) => student.credentialsRecord)
+  student: Student;
 }

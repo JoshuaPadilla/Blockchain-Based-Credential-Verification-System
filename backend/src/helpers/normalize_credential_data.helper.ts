@@ -1,10 +1,17 @@
+import { NotFoundException } from '@nestjs/common';
 import { Student } from 'src/entities/student.entity';
 import { CredentialType } from 'src/enums/credential_type.enum';
 
 export const normalizedData = (
-  student: Student,
+  student: Student | null,
   credentialType: CredentialType,
 ): string => {
+  if (!student || !credentialType) {
+    throw new NotFoundException(
+      'No Student or Credential Type to be normalized',
+    );
+  }
+
   switch (credentialType) {
     case CredentialType.TOR:
       return normalizeTOR(student);
@@ -62,8 +69,10 @@ const normalizeTOR = (student: Student): string => {
       traverse(restOfItem);
     });
   });
+
   return result.join(' ');
 };
+
 const normalizeDiploma = (student: Student): string => {
   return '';
 };

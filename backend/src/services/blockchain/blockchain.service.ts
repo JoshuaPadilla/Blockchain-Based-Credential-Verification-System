@@ -4,6 +4,7 @@ import { ethers } from 'ethers';
 import abi from '../../lib/contract.abi.json';
 import { Record } from 'src/entities/record.entity';
 import { getCredentialTypeIndex } from 'src/helpers/get_credential_type_index.helper';
+import { OnChainRecord } from 'src/interfaces/onchain_record.interface';
 
 @Injectable()
 export class BlockChainService {
@@ -50,9 +51,9 @@ export class BlockChainService {
     // Destructure the fields and convert the BigInt
     return {
       dataHash: record.dataHash,
-      txHash: record.txHash,
       expiration: record.expiration.toString(), // Convert BigInt to String
       isRevoked: record.isRevoked,
-    }; // mapping getter
+      credentialType: record.credentialType,
+    } as OnChainRecord; // mapping getter
   }
 }

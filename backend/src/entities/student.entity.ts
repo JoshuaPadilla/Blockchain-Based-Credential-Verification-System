@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { PreviousEducation } from './previous_education.entity';
 import { StudentAcademicRecord } from './student_academic_record';
+import { Record } from './record.entity';
 
 @Entity()
 export class Student {
@@ -52,4 +53,7 @@ export class Student {
     { cascade: true },
   )
   academicRecords: StudentAcademicRecord[];
+
+  @OneToMany(() => Record, (record) => record.student)
+  credentialsRecord: Record[];
 }

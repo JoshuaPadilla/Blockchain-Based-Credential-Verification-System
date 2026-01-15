@@ -9,6 +9,7 @@ import { CredentialType } from "src/enums/credential_type.enum";
 import { Expiration } from "src/enums/expiration.enum";
 import { getExpiration } from "src/helpers/get_expiration.helper";
 import { normalizedData } from "src/helpers/normalize_credential_data.helper";
+import { OnChainRecord } from "src/interfaces/onchain_record.interface";
 import { BlockChainService } from "src/services/blockchain/blockchain.service";
 import { Repository } from "typeorm";
 
@@ -46,6 +47,7 @@ export class RecordService {
       dataHash,
       expiration,
       credentialType: credentialDto.credentialType,
+      student: student,
     });
 
     const result = await this.blockchainService.addRecord(newRecord);
@@ -61,7 +63,35 @@ export class RecordService {
   }
 
   async verify(recordId: string) {
-    const onChainRecord = await this.blockchainService.getRecord(recordId);
+    const onChainRecord: OnChainRecord =
+      await this.blockchainService.getRecord(recordId);
+
+    const offChainRecord = await this.recordRepository.findOne({
+      where: { id: recordId },
+      relations: ["student"],
+    });
+
+    if (!offChainRecord || !onChainRecord) {
+      throw new NotFoundException("Record not found!");
+    }
+
+    const student = await this.studentRepository.findOne({
+      where: { id: offChainRecord?.student.id },
+      relations: [
+        "academicRecords",
+        "academicRecords.subjectsTaken",
+        "academicRecords.subjectsTaken.subject",
+      ],
+    });
+
+    const normalizedCredentialData = normalizedData(
+      student,
+      offChainRecord?.credentialType,
+    );
+
+    const dataHash = ethers.keccak256(
+      ethers.toUtf8Bytes(normalizedCredentialData),
+    );
 
     if (
       !onChainRecord ||
@@ -70,6 +100,8 @@ export class RecordService {
     ) {
       throw new NotFoundException("Record not found on blockchain");
     }
+
+    console.log(dataHash === onChainRecord.dataHash);
   }
 
   async getAllRecords() {
