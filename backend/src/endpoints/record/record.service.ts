@@ -45,6 +45,7 @@ export class RecordService {
     const newRecord = this.recordRepository.create({
       dataHash,
       expiration,
+      credentialType: credentialDto.credentialType,
     });
 
     const result = await this.blockchainService.addRecord(newRecord);
@@ -54,7 +55,6 @@ export class RecordService {
     const savedRecord = await this.recordRepository.save({
       ...newRecord,
       txHash,
-      credentialType: credentialDto.credentialType,
     });
 
     return savedRecord;

@@ -5,10 +5,25 @@ pragma solidity  0.8.19;
 contract CredentialVerifier {
     address public owner;
 
+    enum CredentialType {
+        TOR,     
+        DIPLOMA, 
+        HONORABLE_DISMISSAL,
+        GOOD_MORAL,
+        CERT_GRADES,
+        CERT_OF_ENROLLMENT,
+        UNITS_EARNED,
+        GWA,
+        LIST_OF_GRADES,
+        CAV 
+    }
+
     struct Record {
         bytes32 dataHash;
         uint256 expiration;
         bool isRevoked;
+        CredentialType credentialType;
+        
     }
 
     mapping(string => Record) public records;
@@ -32,11 +47,12 @@ contract CredentialVerifier {
 
 
 
-    function addRecord(string calldata _recordId, bytes32 _dataHash, uint256 _expiration) public onlyOwner() {
+    function addRecord(string calldata _recordId, bytes32 _dataHash, uint256 _expiration, CredentialType _credentialType) public onlyOwner() {
         records[_recordId] = Record({
             dataHash: _dataHash,
             expiration: _expiration,
-            isRevoked: false
+            isRevoked: false,
+            credentialType: _credentialType
         });
 
     }

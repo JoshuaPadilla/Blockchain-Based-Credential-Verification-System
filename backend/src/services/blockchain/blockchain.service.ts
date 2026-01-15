@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
 import abi from '../../lib/contract.abi.json';
 import { Record } from 'src/entities/record.entity';
+import { getCredentialTypeIndex } from 'src/helpers/get_credential_type_index.helper';
 
 @Injectable()
 export class BlockChainService {
@@ -22,9 +23,17 @@ export class BlockChainService {
   }
 
   addRecord(record: Record) {
-    const { id, dataHash, expiration } = record;
+    const { id, dataHash, expiration, credentialType } = record;
 
-    return this.contract.addRecord(id, dataHash, expiration);
+    // convert the credential type to its index
+    const credentialTypeIndex = getCredentialTypeIndex(credentialType);
+
+    return this.contract.addRecord(
+      id,
+      dataHash,
+      expiration,
+      credentialTypeIndex,
+    );
   }
 
   revokeRecord(recordId: string) {
@@ -37,8 +46,6 @@ export class BlockChainService {
 
   async getRecord(recordId: string) {
     const record = await this.contract.records(recordId);
-
-    console.log(record);
 
     // Destructure the fields and convert the BigInt
     return {
