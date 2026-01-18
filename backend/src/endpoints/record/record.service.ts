@@ -7,8 +7,8 @@ import { Record } from "src/entities/record.entity";
 import { Student } from "src/entities/student.entity";
 import { CredentialType } from "src/enums/credential_type.enum";
 import { Expiration } from "src/enums/expiration.enum";
+import { CredentialNormalizer } from "src/helpers/data_normalizer.class";
 import { getExpiration } from "src/helpers/get_expiration.helper";
-import { normalizedData } from "src/helpers/normalize_credential_data.helper";
 import { OnChainRecord } from "src/interfaces/onchain_record.interface";
 import { BlockChainService } from "src/services/blockchain/blockchain.service";
 import { Repository } from "typeorm";
@@ -37,7 +37,12 @@ export class RecordService {
       throw new NotFoundException("Student not found");
     }
 
-    const normalizeData = normalizedData(student, credentialDto.credentialType);
+    const normalizeData = CredentialNormalizer.normalize(
+      student,
+      credentialDto.credentialType,
+      credentialDto.cutOffYear,
+      credentialDto.cutOffSemester,
+    );
 
     const dataHash = ethers.keccak256(ethers.toUtf8Bytes(normalizeData));
 
@@ -48,6 +53,8 @@ export class RecordService {
       expiration,
       credentialType: credentialDto.credentialType,
       student: student,
+      cutOffSemester: credentialDto.cutOffSemester,
+      cutOffYear: credentialDto.cutOffYear,
     });
 
     const result = await this.blockchainService.addRecord(newRecord);
@@ -64,7 +71,7 @@ export class RecordService {
 
   async verify(recordId: string) {
     const onChainRecord: OnChainRecord =
-      await this.blockchainService.getRecord(recordId);
+      await this.blockchainService.verify(recordId);
 
     const offChainRecord = await this.recordRepository.findOne({
       where: { id: recordId },
@@ -84,9 +91,11 @@ export class RecordService {
       ],
     });
 
-    const normalizedCredentialData = normalizedData(
+    const normalizedCredentialData = CredentialNormalizer.normalize(
       student,
       offChainRecord?.credentialType,
+      offChainRecord.cutOffYear,
+      offChainRecord.cutOffSemester,
     );
 
     const dataHash = ethers.keccak256(
@@ -100,12 +109,12 @@ export class RecordService {
     ) {
       throw new NotFoundException("Record not found on blockchain");
     }
-
-    console.log(dataHash === onChainRecord.dataHash);
   }
 
   async getAllRecords() {
-    return this.recordRepository.find();
+    return this.recordRepository.find({
+      relations: ["student"],
+    });
   }
 
   async deleteRecords() {

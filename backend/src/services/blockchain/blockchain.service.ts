@@ -1,16 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
 import abi from '../../lib/contract.abi.json';
 import { Record } from 'src/entities/record.entity';
 import { getCredentialTypeIndex } from 'src/helpers/get_credential_type_index.helper';
 import { OnChainRecord } from 'src/interfaces/onchain_record.interface';
+import { EMPTY_BYTES } from 'src/constants/empty_bytes.constant';
+import { CredentialType } from 'src/enums/credential_type.enum';
 
 @Injectable()
 export class BlockChainService {
   private provider: ethers.JsonRpcProvider;
-  private wallet: ethers.Wallet;
-  private contract: ethers.Contract;
+  private ownerWallet: ethers.Wallet;
+  private ownerContract: ethers.Contract;
 
   constructor(private configService: ConfigService) {
     const rpc_url = this.configService.get<string>('RPC_URL') || '';
@@ -19,8 +21,12 @@ export class BlockChainService {
       this.configService.get<string>('CONTRACT_ADDRESS') || '';
 
     this.provider = new ethers.JsonRpcProvider(rpc_url);
-    this.wallet = new ethers.Wallet(private_key, this.provider);
-    this.contract = new ethers.Contract(contract_address, abi.abi, this.wallet);
+    this.ownerWallet = new ethers.Wallet(private_key, this.provider);
+    this.ownerContract = new ethers.Contract(
+      contract_address,
+      abi.abi,
+      this.ownerWallet,
+    );
   }
 
   addRecord(record: Record) {
@@ -29,7 +35,7 @@ export class BlockChainService {
     // convert the credential type to its index
     const credentialTypeIndex = getCredentialTypeIndex(credentialType);
 
-    return this.contract.addRecord(
+    return this.ownerContract.addRecord(
       id,
       dataHash,
       expiration,
@@ -38,16 +44,23 @@ export class BlockChainService {
   }
 
   revokeRecord(recordId: string) {
-    return this.contract.revokeRecord(recordId);
+    return this.ownerContract.revokeRecord(recordId);
   }
 
   restoreRecord(recordId: string) {
-    return this.contract.restoreRecord(recordId);
+    return this.ownerContract.restoreRecord(recordId);
   }
 
-  async getRecord(recordId: string) {
-    const record = await this.contract.records(recordId);
+  async verify(recordId: string) {
+    const record = await this.ownerContract.records(recordId);
 
+    if (record.hash === EMPTY_BYTES) {
+      throw new NotFoundException('Record does not exist on the blockchain');
+    }
+
+    const isFullySigned = await this.ownerContract.isFullySigned(recordId);
+
+    console.log('Is fully signed:', isFullySigned);
     // Destructure the fields and convert the BigInt
     return {
       dataHash: record.dataHash,
@@ -56,4 +69,12 @@ export class BlockChainService {
       credentialType: record.credentialType,
     } as OnChainRecord; // mapping getter
   }
+
+  async setRequiredSigners(credentialType: number, addresses: string[]) {
+    await this.ownerContract.setRequiredSigners(credentialType, addresses);
+  }
+  // async isFullySigned(recordId: string) {
+  //   const isFullySigned = await this.ownerContract.records(recordId);
+  //   console.log(isFullySigned);
+  // }
 }

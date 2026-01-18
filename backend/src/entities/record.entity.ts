@@ -9,6 +9,7 @@ import {
 import { randomUUID } from 'crypto';
 import { CredentialType } from 'src/enums/credential_type.enum';
 import { Student } from './student.entity';
+import { Semester } from 'src/enums/semester.enum';
 
 @Entity()
 export class Record {
@@ -26,6 +27,16 @@ export class Record {
 
   @Column({ default: false, nullable: true }) // issued, revoked, or pending
   revoked: boolean;
+
+  @Column({ type: 'text', nullable: true })
+  cutOffYear: string;
+
+  @Column({
+    type: 'enum',
+    enum: Semester,
+    nullable: true,
+  })
+  cutOffSemester: Semester;
 
   @Column({ type: 'enum', enum: CredentialType, nullable: true })
   credentialType: CredentialType;

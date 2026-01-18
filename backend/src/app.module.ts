@@ -14,11 +14,15 @@ import { Subject } from './entities/subject.entity';
 import { Student } from './entities/student.entity';
 import { StudentAcademicRecord } from './entities/student_academic_record';
 import { SubjectTaken } from './entities/subjectTaken.entity';
+import { AdminModule } from './endpoints/admin/admin.module';
+import { AuthModule } from './endpoints/auth/auth.module';
+import { User } from './entities/user.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true, // This makes the config available everywhere!
+      envFilePath: '.env',
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -28,7 +32,14 @@ import { SubjectTaken } from './entities/subjectTaken.entity';
       username: 'thesis',
       database: 'thesis_db',
       synchronize: true,
-      entities: [Record, Subject, Student, StudentAcademicRecord, SubjectTaken],
+      entities: [
+        Record,
+        Subject,
+        Student,
+        StudentAcademicRecord,
+        SubjectTaken,
+        User,
+      ],
     }),
     RecordModule,
     BlockChainModule,
@@ -36,6 +47,8 @@ import { SubjectTaken } from './entities/subjectTaken.entity';
     SubjectModule,
     StudentModule,
     AcademicRecordModule,
+    AdminModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
