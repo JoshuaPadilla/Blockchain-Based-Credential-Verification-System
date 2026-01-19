@@ -2,6 +2,8 @@ import {
   Column,
   CreateCollectionOptions,
   Entity,
+  JoinColumn,
+  ManyToMany,
   ManyToOne,
   PrimaryColumn,
   PrimaryGeneratedColumn,
@@ -10,6 +12,8 @@ import { randomUUID } from 'crypto';
 import { CredentialType } from 'src/enums/credential_type.enum';
 import { Student } from './student.entity';
 import { Semester } from 'src/enums/semester.enum';
+import { CredentialTypeEntity } from './credential_type.entity';
+import { User } from './user.entity';
 
 @Entity()
 export class Record {
@@ -38,8 +42,18 @@ export class Record {
   })
   cutOffSemester: Semester;
 
-  @Column({ type: 'enum', enum: CredentialType, nullable: true })
-  credentialType: CredentialType;
+  @ManyToOne(() => CredentialTypeEntity, {
+    eager: true, // Optional: Automatically loads the credential type info when you fetch a record
+  })
+  @JoinColumn({ name: 'credential_type_id' }) // Explicitly names the DB column
+  credentialType: CredentialTypeEntity;
+
+  @ManyToMany(() => User)
+  @JoinColumn({ name: 'record_signers' })
+  signers: User[];
+
+  @Column({ type: 'int', default: 0 })
+  currentSignatures: number;
 
   @ManyToOne(() => Student, (student) => student.credentialsRecord)
   student: Student;

@@ -17,6 +17,8 @@ import { SubjectTaken } from './entities/subjectTaken.entity';
 import { AdminModule } from './endpoints/admin/admin.module';
 import { AuthModule } from './endpoints/auth/auth.module';
 import { User } from './entities/user.entity';
+import { CredentialTypeEntity } from './entities/credential_type.entity';
+import { CredentialTypesModule } from './endpoints/credentials/credentials.module';
 
 @Module({
   imports: [
@@ -39,6 +41,7 @@ import { User } from './entities/user.entity';
         StudentAcademicRecord,
         SubjectTaken,
         User,
+        CredentialTypeEntity,
       ],
     }),
     RecordModule,
@@ -49,6 +52,7 @@ import { User } from './entities/user.entity';
     AcademicRecordModule,
     AdminModule,
     AuthModule,
+    CredentialTypesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

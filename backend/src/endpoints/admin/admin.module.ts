@@ -3,9 +3,15 @@ import { AdminService } from "./admin.service";
 import { AdminController } from "./admin.controller";
 import { BlockChainService } from "src/services/blockchain/blockchain.service";
 import { BlockChainModule } from "src/services/blockchain/blockchain.module";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { User } from "src/entities/user.entity";
+import { CredentialTypeEntity } from "src/entities/credential_type.entity";
 
 @Module({
-  imports: [BlockChainModule],
+  imports: [
+    BlockChainModule,
+    TypeOrmModule.forFeature([User, CredentialTypeEntity]),
+  ],
   controllers: [AdminController],
   providers: [AdminService],
 })

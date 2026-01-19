@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ethers } from 'ethers';
+import { ethers, id } from 'ethers';
 import abi from '../../lib/contract.abi.json';
 import { Record } from 'src/entities/record.entity';
 import { getCredentialTypeIndex } from 'src/helpers/get_credential_type_index.helper';
@@ -30,16 +30,15 @@ export class BlockChainService {
   }
 
   addRecord(record: Record) {
-    const { id, dataHash, expiration, credentialType } = record;
+    const { id: recordId, dataHash, expiration, credentialType } = record;
 
     // convert the credential type to its index
-    const credentialTypeIndex = getCredentialTypeIndex(credentialType);
 
     return this.ownerContract.addRecord(
-      id,
+      recordId,
       dataHash,
       expiration,
-      credentialTypeIndex,
+      id(credentialType.id),
     );
   }
 
@@ -70,7 +69,7 @@ export class BlockChainService {
     } as OnChainRecord; // mapping getter
   }
 
-  async setRequiredSigners(credentialType: number, addresses: string[]) {
+  async setRequiredSigners(credentialType: string, addresses: string[]) {
     await this.ownerContract.setRequiredSigners(credentialType, addresses);
   }
   // async isFullySigned(recordId: string) {

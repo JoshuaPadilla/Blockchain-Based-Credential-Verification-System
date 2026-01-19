@@ -12,7 +12,7 @@ export class CredentialNormalizer {
 
   static normalize(
     student: Student | null,
-    credentialType: CredentialType,
+    credentialType: CredentialType | null,
     cutOffYear?: string,
     cutOffSemester?: Semester,
   ): string {

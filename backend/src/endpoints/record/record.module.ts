@@ -6,9 +6,13 @@ import { BlockChainService } from "src/services/blockchain/blockchain.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Record } from "src/entities/record.entity";
 import { Student } from "src/entities/student.entity";
+import { CredentialTypeEntity } from "src/entities/credential_type.entity";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Record, Student]), BlockChainModule],
+  imports: [
+    TypeOrmModule.forFeature([Record, Student, CredentialTypeEntity]),
+    BlockChainModule,
+  ],
   controllers: [RecordController],
   providers: [RecordService],
 })

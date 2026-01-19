@@ -18,10 +18,10 @@ export class RecordController {
     return this.recordService.addRecord(issueCredentialDto);
   }
 
-  @Get(":recordId")
-  getRecord(@Param("recordId") recordId: string) {
-    return this.recordService.verify(recordId);
-  }
+  // @Get(":recordId")
+  // getRecord(@Param("recordId") recordId: string) {
+  //   return this.recordService.verify(recordId);
+  // }
 
   @Delete()
   deleteRecords() {

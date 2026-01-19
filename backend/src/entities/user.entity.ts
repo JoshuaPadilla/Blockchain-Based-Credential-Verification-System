@@ -9,6 +9,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Entity,
+  ManyToMany,
 } from 'typeorm';
 
 // distinct from STI: No @Entity decorator here!

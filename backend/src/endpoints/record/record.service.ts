@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ethers } from "ethers";
 import { EMPTY_BYTES } from "src/constants/empty_bytes.constant";
 import { IssueCredentialDto } from "src/dto/issue_credential.dto";
+import { CredentialTypeEntity } from "src/entities/credential_type.entity";
 import { Record } from "src/entities/record.entity";
 import { Student } from "src/entities/student.entity";
 import { CredentialType } from "src/enums/credential_type.enum";
@@ -20,6 +21,8 @@ export class RecordService {
     private recordRepository: Repository<Record>,
     @InjectRepository(Student)
     private studentRepository: Repository<Student>,
+    @InjectRepository(CredentialTypeEntity)
+    private credentialTypeRepository: Repository<CredentialTypeEntity>,
     private readonly blockchainService: BlockChainService,
   ) {}
 
@@ -33,13 +36,20 @@ export class RecordService {
       ],
     });
 
+    const credentialType = await this.credentialTypeRepository.findOneBy({
+      id: credentialDto.credentialTypeId,
+    });
+
+    if (!student) {
+      throw new NotFoundException("Credential type not found");
+    }
     if (!student) {
       throw new NotFoundException("Student not found");
     }
 
     const normalizeData = CredentialNormalizer.normalize(
       student,
-      credentialDto.credentialType,
+      credentialType!.name,
       credentialDto.cutOffYear,
       credentialDto.cutOffSemester,
     );
@@ -51,7 +61,7 @@ export class RecordService {
     const newRecord = this.recordRepository.create({
       dataHash,
       expiration,
-      credentialType: credentialDto.credentialType,
+      credentialType: credentialType!,
       student: student,
       cutOffSemester: credentialDto.cutOffSemester,
       cutOffYear: credentialDto.cutOffYear,
@@ -69,47 +79,47 @@ export class RecordService {
     return savedRecord;
   }
 
-  async verify(recordId: string) {
-    const onChainRecord: OnChainRecord =
-      await this.blockchainService.verify(recordId);
+  // async verify(recordId: string) {
+  //   const onChainRecord: OnChainRecord =
+  //     await this.blockchainService.verify(recordId);
 
-    const offChainRecord = await this.recordRepository.findOne({
-      where: { id: recordId },
-      relations: ["student"],
-    });
+  //   const offChainRecord = await this.recordRepository.findOne({
+  //     where: { id: recordId },
+  //     relations: ["student"],
+  //   });
 
-    if (!offChainRecord || !onChainRecord) {
-      throw new NotFoundException("Record not found!");
-    }
+  //   if (!offChainRecord || !onChainRecord) {
+  //     throw new NotFoundException("Record not found!");
+  //   }
 
-    const student = await this.studentRepository.findOne({
-      where: { id: offChainRecord?.student.id },
-      relations: [
-        "academicRecords",
-        "academicRecords.subjectsTaken",
-        "academicRecords.subjectsTaken.subject",
-      ],
-    });
+  //   const student = await this.studentRepository.findOne({
+  //     where: { id: offChainRecord?.student.id },
+  //     relations: [
+  //       "academicRecords",
+  //       "academicRecords.subjectsTaken",
+  //       "academicRecords.subjectsTaken.subject",
+  //     ],
+  //   });
 
-    const normalizedCredentialData = CredentialNormalizer.normalize(
-      student,
-      offChainRecord?.credentialType,
-      offChainRecord.cutOffYear,
-      offChainRecord.cutOffSemester,
-    );
+  //   const normalizedCredentialData = CredentialNormalizer.normalize(
+  //     student,
+  //     offChainRecord?.credentialType,
+  //     offChainRecord.cutOffYear,
+  //     offChainRecord.cutOffSemester,
+  //   );
 
-    const dataHash = ethers.keccak256(
-      ethers.toUtf8Bytes(normalizedCredentialData),
-    );
+  //   const dataHash = ethers.keccak256(
+  //     ethers.toUtf8Bytes(normalizedCredentialData),
+  //   );
 
-    if (
-      !onChainRecord ||
-      !onChainRecord.dataHash ||
-      onChainRecord.dataHash === EMPTY_BYTES
-    ) {
-      throw new NotFoundException("Record not found on blockchain");
-    }
-  }
+  //   if (
+  //     !onChainRecord ||
+  //     !onChainRecord.dataHash ||
+  //     onChainRecord.dataHash === EMPTY_BYTES
+  //   ) {
+  //     throw new NotFoundException("Record not found on blockchain");
+  //   }
+  // }
 
   async getAllRecords() {
     return this.recordRepository.find({

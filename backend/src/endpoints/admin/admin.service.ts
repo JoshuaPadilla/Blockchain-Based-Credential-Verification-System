@@ -1,20 +1,65 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { id } from "node_modules/ethers/lib.esm";
+import { CredentialTypeEntity } from "src/entities/credential_type.entity";
+import { User } from "src/entities/user.entity";
 import { CredentialType } from "src/enums/credential_type.enum";
-import { getCredentialTypeIndex } from "src/helpers/get_credential_type_index.helper";
 import { BlockChainService } from "src/services/blockchain/blockchain.service";
+import { In, Repository } from "typeorm";
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly blockchainService: BlockChainService) {}
+  constructor(
+    private readonly blockchainService: BlockChainService,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    @InjectRepository(CredentialTypeEntity)
+    private credentialTypeRepository: Repository<CredentialTypeEntity>,
+  ) {}
 
   async setRequiredSigners(
-    credentialType: CredentialType,
-    addresses: string[],
+    credentialTypeName: CredentialType,
+    singersIds: string[],
   ) {
-    const credentialTypeIndex = getCredentialTypeIndex(credentialType);
+    const credentialType = await this.credentialTypeRepository.findOne({
+      where: { name: credentialTypeName },
+      relations: ["signers"],
+    });
+
+    if (!credentialType) {
+      throw new NotFoundException("Credential Type not found");
+    }
+
+    // 2. Fetch the NEW signers only
+    const newSignersEntities = await this.userRepository.find({
+      where: { id: In(singersIds) },
+    });
+
+    if (newSignersEntities.length === 0) {
+      throw new NotFoundException("Signers IDs not found");
+    }
+
+    // 3. MERGE & REMOVE DUPLICATES
+    // We use a Map or checks to ensure we don't add the same person twice
+    const existingSignerIds = new Set(credentialType.signers.map((s) => s.id));
+
+    // Filter out any new signers that are ALREADY in the list
+    const uniqueNewSigners = newSignersEntities.filter(
+      (s) => !existingSignerIds.has(s.id),
+    );
+
+    // Combine them for the final list
+    const finalSignerList = [...credentialType.signers, ...uniqueNewSigners];
+
+    credentialType.signers = finalSignerList;
+    await this.credentialTypeRepository.save(credentialType);
+
+    const signerAddresses = finalSignerList.map((s) => s.publicAddress);
+
+    const credentialTypeHash = id(credentialType!.id);
     await this.blockchainService.setRequiredSigners(
-      credentialTypeIndex,
-      addresses,
+      credentialTypeHash,
+      signerAddresses,
     );
   }
 }

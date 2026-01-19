@@ -6,8 +6,8 @@ export class IssueCredentialDto {
   @IsString()
   studentId: string;
 
-  @IsEnum(CredentialType)
-  credentialType: CredentialType;
+  @IsString()
+  credentialTypeId: string;
 
   @IsEnum(Semester)
   cutOffSemester: Semester;
