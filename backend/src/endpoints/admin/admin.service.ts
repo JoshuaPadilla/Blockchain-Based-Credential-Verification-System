@@ -72,7 +72,7 @@ export class AdminService {
   async signRecord(recordId: string, signerId: string) {
     const signer = await this.userRepository.findOne({
       where: { id: signerId },
-      select: ["privateKey"],
+      select: ["privateKey", "publicAddress"],
     });
 
     if (!signer) {
@@ -87,6 +87,19 @@ export class AdminService {
     const allowed =
       await this.blockchainService.isAuthorizedSigner(signerPublicAddress);
 
-    console.log(allowed);
+    console.log(this.isAuthorizedSigner);
+  }
+
+  async setAuthorizedSigner(signerId: string, allowed: boolean) {
+    const signer = await this.userRepository.findOneBy({ id: signerId });
+
+    if (!signer) {
+      throw new NotFoundException("No Signer found");
+    }
+
+    await this.blockchainService.setAuthorizedSigners(
+      signer.publicAddress,
+      allowed,
+    );
   }
 }

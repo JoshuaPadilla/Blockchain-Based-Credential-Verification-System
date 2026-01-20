@@ -10,6 +10,9 @@ import abi from '../../lib/contract.abi.json';
 import { Record } from 'src/entities/record.entity';
 import { OnChainRecord } from 'src/interfaces/onchain_record.interface';
 import { EMPTY_BYTES } from 'src/constants/empty_bytes.constant';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/entities/user.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class BlockChainService implements OnModuleInit {
@@ -18,7 +21,13 @@ export class BlockChainService implements OnModuleInit {
   private ownerWallet: ethers.Wallet;
   private ownerContract: ethers.Contract;
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    @InjectRepository(Record)
+    private recordRepository: Repository<Record>,
+  ) {}
 
   async onModuleInit() {
     const rpcUrl = this.configService.get<string>('RPC_URL') || '';
@@ -84,6 +93,7 @@ export class BlockChainService implements OnModuleInit {
   }
 
   async setAuthorizedSigners(address: string, allowed: boolean) {
+    console.log(address, allowed);
     // FIXED: Function name is 'anvil' in your Solidity code
     await this.ownerContract.setAuthorizedSigner(address, allowed);
   }
@@ -106,16 +116,47 @@ export class BlockChainService implements OnModuleInit {
     return await this.ownerContract.authorizedSigners(publicAddress);
   }
 
+  private async AddSignToRecord(
+    recordId: string,
+    signerPublicAddress,
+    timestamp: string,
+  ) {
+    console.log('Record ID:', recordId);
+    console.log('Signer Address:', signerPublicAddress);
+    console.log('Timestamp:', timestamp);
+
+    const record = await this.recordRepository.findOne({
+      where: { id: recordId },
+      relations: ['signers'],
+    });
+
+    const signer = await this.userRepository.findOneBy({
+      publicAddress: signerPublicAddress,
+    });
+
+    if (!signer) {
+      throw new NotFoundException('Signer not found');
+    }
+
+    if (!record) {
+      throw new NotFoundException('No record found!');
+    }
+
+    const updatedSigners = [...record.signers, signer];
+
+    record.signers = updatedSigners;
+    record.currentSignatures++;
+
+    await this.recordRepository.save(record);
+  }
+
   // FIXED: Removed "function" keyword & used class properties
   listenForSignatures() {
     this.logger.log('Listening for RecordSigned events...');
 
     // Using the existing contract instance
     this.ownerContract.on('RecordSigned', (recordId, signer, timestamp) => {
-      this.logger.log(`New Signature Detected!`);
-      this.logger.log(`Record ID: ${recordId}`);
-      this.logger.log(`Signed By: ${signer}`);
-
+      this.AddSignToRecord(recordId, signer, timestamp);
       // TODO: Call an internal method to update your DB status
       // e.g., this.handleSignatureEvent(recordId, signer);
     });

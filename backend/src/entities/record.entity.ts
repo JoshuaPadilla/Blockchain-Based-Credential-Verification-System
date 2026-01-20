@@ -3,6 +3,7 @@ import {
   CreateCollectionOptions,
   Entity,
   JoinColumn,
+  JoinTable,
   ManyToMany,
   ManyToOne,
   PrimaryColumn,
@@ -49,7 +50,7 @@ export class Record {
   credentialType: CredentialTypeEntity;
 
   @ManyToMany(() => User)
-  @JoinColumn({ name: 'record_signers' })
+  @JoinTable({ name: 'record_signers' })
   signers: User[];
 
   @Column({ type: 'int', default: 0 })

@@ -5,7 +5,7 @@ pragma solidity  0.8.19;
 contract CredentialVerifier {
     address public owner;
 
-   event RecordSigned(string indexed recordId, address indexed signer, uint256 timestamp);
+   event RecordSigned(string recordIdRaw, address indexed signer, uint256 timestamp);
 
     mapping(address => bool) public authorizedSigners;
     mapping(string => Record) public records;
