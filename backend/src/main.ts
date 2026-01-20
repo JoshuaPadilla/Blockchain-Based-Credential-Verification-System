@@ -1,6 +1,6 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -17,7 +17,6 @@ async function bootstrap() {
     }),
   );
   app.enableCors();
-
   await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 }
 

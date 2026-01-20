@@ -5,7 +5,7 @@ pragma solidity  0.8.19;
 contract CredentialVerifier {
     address public owner;
 
-   
+   event RecordSigned(string indexed recordId, address indexed signer, uint256 timestamp);
 
     mapping(address => bool) public authorizedSigners;
     mapping(string => Record) public records;
@@ -86,6 +86,8 @@ contract CredentialVerifier {
 
         r.signedBy[msg.sender] = true;
         r.currentSignatures++;
+
+        emit RecordSigned(recordId, msg.sender, block.timestamp);
     }
 
     // check record if it is fully signed
@@ -102,6 +104,8 @@ contract CredentialVerifier {
     // add signer to credential type who should sign
     function setRequiredSigners(bytes32 _credentialTypeId, address[] calldata signers) external onlyOwner {
         require(signers.length > 0, "Empty signer list");
+
+        
 
         requiredSigners[_credentialTypeId] = signers;
         requiredSignatureCount[_credentialTypeId] = uint8(signers.length);

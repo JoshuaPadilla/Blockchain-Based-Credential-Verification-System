@@ -40,6 +40,8 @@ export class RecordService {
       id: credentialDto.credentialTypeId,
     });
 
+    console.log(credentialType);
+
     if (!student) {
       throw new NotFoundException("Credential type not found");
     }

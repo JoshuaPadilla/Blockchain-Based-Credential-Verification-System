@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { Sign } from "crypto";
 import { id } from "node_modules/ethers/lib.esm";
 import { CredentialTypeEntity } from "src/entities/credential_type.entity";
 import { User } from "src/entities/user.entity";
 import { CredentialType } from "src/enums/credential_type.enum";
+import { decrypt } from "src/helpers/encryption.helper";
 import { BlockChainService } from "src/services/blockchain/blockchain.service";
 import { In, Repository } from "typeorm";
 
@@ -61,5 +63,30 @@ export class AdminService {
       credentialTypeHash,
       signerAddresses,
     );
+  }
+
+  async setAuthorizedSigners(address: string, allowed: boolean) {
+    await this.blockchainService.setAuthorizedSigners(address, allowed);
+  }
+
+  async signRecord(recordId: string, signerId: string) {
+    const signer = await this.userRepository.findOne({
+      where: { id: signerId },
+      select: ["privateKey"],
+    });
+
+    if (!signer) {
+      throw new NotFoundException("No signer found");
+    }
+
+    const signerPrivateKey = await decrypt(signer.privateKey);
+    await this.blockchainService.signRecord(recordId, signerPrivateKey);
+  }
+
+  async isAuthorizedSigner(signerPublicAddress: string) {
+    const allowed =
+      await this.blockchainService.isAuthorizedSigner(signerPublicAddress);
+
+    console.log(allowed);
   }
 }

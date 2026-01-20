@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Post, Query } from "@nestjs/common";
 import { AdminService } from "./admin.service";
 import { CredentialType } from "src/enums/credential_type.enum";
 import { SetRequiredSignersDto } from "src/dto/set_required_signers.dto";
@@ -13,5 +13,15 @@ export class AdminController {
       body.credentialType,
       body.signersIds,
     );
+  }
+
+  @Post("set-authorized-signer")
+  setAuthorizedSigner(@Query() query: { address: string; allowed: boolean }) {
+    return this.adminService.setAuthorizedSigners(query.address, query.allowed);
+  }
+
+  @Post("sign-record")
+  signRecord(@Body() body: { recordId: string; signerId: string }) {
+    return this.adminService.signRecord(body.recordId, body.signerId);
   }
 }

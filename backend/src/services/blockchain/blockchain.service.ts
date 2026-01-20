@@ -1,44 +1,53 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  OnModuleInit,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ethers, id } from 'ethers';
+import { ethers, id } from 'ethers'; // "id" is keccak256 in v6
 import abi from '../../lib/contract.abi.json';
 import { Record } from 'src/entities/record.entity';
-import { getCredentialTypeIndex } from 'src/helpers/get_credential_type_index.helper';
 import { OnChainRecord } from 'src/interfaces/onchain_record.interface';
 import { EMPTY_BYTES } from 'src/constants/empty_bytes.constant';
-import { CredentialType } from 'src/enums/credential_type.enum';
 
 @Injectable()
-export class BlockChainService {
+export class BlockChainService implements OnModuleInit {
+  private readonly logger = new Logger(BlockChainService.name);
   private provider: ethers.JsonRpcProvider;
   private ownerWallet: ethers.Wallet;
   private ownerContract: ethers.Contract;
 
-  constructor(private configService: ConfigService) {
-    const rpc_url = this.configService.get<string>('RPC_URL') || '';
-    const private_key = this.configService.get<string>('PRIVATE_KEY') || '';
-    const contract_address =
+  constructor(private readonly configService: ConfigService) {}
+
+  async onModuleInit() {
+    const rpcUrl = this.configService.get<string>('RPC_URL') || '';
+    const privateKey = this.configService.get<string>('PRIVATE_KEY') || '';
+    const contractAddress =
       this.configService.get<string>('CONTRACT_ADDRESS') || '';
 
-    this.provider = new ethers.JsonRpcProvider(rpc_url);
-    this.ownerWallet = new ethers.Wallet(private_key, this.provider);
+    this.provider = new ethers.JsonRpcProvider(rpcUrl);
+    this.ownerWallet = new ethers.Wallet(privateKey, this.provider);
+
+    // Connect the contract
     this.ownerContract = new ethers.Contract(
-      contract_address,
+      contractAddress,
       abi.abi,
       this.ownerWallet,
     );
+
+    // Start listening immediately upon initialization
+    this.listenForSignatures();
   }
 
   addRecord(record: Record) {
     const { id: recordId, dataHash, expiration, credentialType } = record;
 
-    // convert the credential type to its index
-
     return this.ownerContract.addRecord(
       recordId,
       dataHash,
       expiration,
-      id(credentialType.id),
+      id(credentialType.id), // Hashing string to bytes32
     );
   }
 
@@ -53,27 +62,62 @@ export class BlockChainService {
   async verify(recordId: string) {
     const record = await this.ownerContract.records(recordId);
 
-    if (record.hash === EMPTY_BYTES) {
+    // FIXED: Solidity struct property is 'dataHash', not 'hash'
+    if (record.dataHash === EMPTY_BYTES) {
       throw new NotFoundException('Record does not exist on the blockchain');
     }
 
     const isFullySigned = await this.ownerContract.isFullySigned(recordId);
 
-    console.log('Is fully signed:', isFullySigned);
-    // Destructure the fields and convert the BigInt
     return {
       dataHash: record.dataHash,
-      expiration: record.expiration.toString(), // Convert BigInt to String
+      expiration: record.expiration.toString(),
       isRevoked: record.isRevoked,
-      credentialType: record.credentialType,
-    } as OnChainRecord; // mapping getter
+      credentialType: record.credentialTypeId, // Note: check your struct property name here too
+      isFullySigned, // Added this as it's useful
+    };
   }
 
   async setRequiredSigners(credentialType: string, addresses: string[]) {
-    await this.ownerContract.setRequiredSigners(credentialType, addresses);
+    // FIXED: Must hash the string to bytes32 to match Solidity
+    await this.ownerContract.setRequiredSigners(id(credentialType), addresses);
   }
-  // async isFullySigned(recordId: string) {
-  //   const isFullySigned = await this.ownerContract.records(recordId);
-  //   console.log(isFullySigned);
-  // }
+
+  async setAuthorizedSigners(address: string, allowed: boolean) {
+    // FIXED: Function name is 'anvil' in your Solidity code
+    await this.ownerContract.setAuthorizedSigner(address, allowed);
+  }
+
+  async signRecord(recordId: string, signerPrivateKey: string) {
+    const signerWallet = new ethers.Wallet(signerPrivateKey, this.provider);
+
+    // Connect a new instance for this specific signer
+    const contractAsSigner = this.ownerContract.connect(
+      signerWallet,
+    ) as ethers.Contract;
+
+    const tx = await contractAsSigner.signRecord(recordId);
+    const receipt = await tx.wait();
+
+    return receipt.hash;
+  }
+
+  async isAuthorizedSigner(publicAddress: string) {
+    return await this.ownerContract.authorizedSigners(publicAddress);
+  }
+
+  // FIXED: Removed "function" keyword & used class properties
+  listenForSignatures() {
+    this.logger.log('Listening for RecordSigned events...');
+
+    // Using the existing contract instance
+    this.ownerContract.on('RecordSigned', (recordId, signer, timestamp) => {
+      this.logger.log(`New Signature Detected!`);
+      this.logger.log(`Record ID: ${recordId}`);
+      this.logger.log(`Signed By: ${signer}`);
+
+      // TODO: Call an internal method to update your DB status
+      // e.g., this.handleSignatureEvent(recordId, signer);
+    });
+  }
 }
