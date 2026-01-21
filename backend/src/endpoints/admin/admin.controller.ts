@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query, UseGuards } from "@nestjs/common";
 import { AdminService } from "./admin.service";
 import { SetRequiredSignersDto } from "src/common/dto/set_required_signers.dto";
 import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";

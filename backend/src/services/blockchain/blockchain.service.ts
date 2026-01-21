@@ -52,6 +52,7 @@ export class BlockChainService implements OnModuleInit {
   addRecord(record: Record) {
     const { id: recordId, dataHash, expiration, credentialType } = record;
 
+    console.log(id(credentialType.id));
     return this.ownerContract.addRecord(
       recordId,
       dataHash,
@@ -76,14 +77,12 @@ export class BlockChainService implements OnModuleInit {
       throw new NotFoundException('Record does not exist on the blockchain');
     }
 
-    const isFullySigned = await this.ownerContract.isFullySigned(recordId);
-
     return {
       dataHash: record.dataHash,
       expiration: record.expiration.toString(),
       isRevoked: record.isRevoked,
-      credentialType: record.credentialTypeId, // Note: check your struct property name here too
-      isFullySigned, // Added this as it's useful
+      credentialTypeId: record.credentialTypeId, // Note: check your struct property name here too
+      currentSignatures: record.currentSignatures,
     };
   }
 
@@ -143,6 +142,8 @@ export class BlockChainService implements OnModuleInit {
     record.currentSignatures++;
 
     await this.recordRepository.save(record);
+
+    console.log('Record Signed');
   }
 
   // FIXED: Removed "function" keyword & used class properties

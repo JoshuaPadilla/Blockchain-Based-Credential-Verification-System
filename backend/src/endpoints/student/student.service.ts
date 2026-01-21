@@ -1,9 +1,16 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, UseGuards } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { CreateStudentDto } from "src/common/dto/create_student.dto";
 import { Student } from "src/common/entities/student.entity";
 import { Repository } from "typeorm";
+import { Roles } from "src/common/decorators/roles.decorator";
+import { Role } from "src/common/enums/user_role.enum";
+import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";
+import { RolesGuard } from "src/common/guards/roles.guard";
 
+@Roles(Role.ADMIN)
+@UseGuards(RolesGuard)
+@UseGuards(JwtAuthGuard)
 @Injectable()
 export class StudentService {
   constructor(

@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ethers } from "ethers";
 import { EMPTY_BYTES } from "src/common/constants/empty_bytes.constant";
@@ -79,47 +84,51 @@ export class RecordService {
     return savedRecord;
   }
 
-  // async verify(recordId: string) {
-  //   const onChainRecord: OnChainRecord =
-  //     await this.blockchainService.verify(recordId);
+  async verify(recordId: string) {
+    const onChainRecord: OnChainRecord =
+      await this.blockchainService.verify(recordId);
 
-  //   const offChainRecord = await this.recordRepository.findOne({
-  //     where: { id: recordId },
-  //     relations: ["student"],
-  //   });
+    const offChainRecord = await this.recordRepository.findOne({
+      where: { id: recordId },
+      relations: ["student", "signers"],
+    });
 
-  //   if (!offChainRecord || !onChainRecord) {
-  //     throw new NotFoundException("Record not found!");
-  //   }
+    if (!offChainRecord || !onChainRecord) {
+      throw new NotFoundException("Record not found!");
+    }
 
-  //   const student = await this.studentRepository.findOne({
-  //     where: { id: offChainRecord?.student.id },
-  //     relations: [
-  //       "academicRecords",
-  //       "academicRecords.subjectsTaken",
-  //       "academicRecords.subjectsTaken.subject",
-  //     ],
-  //   });
+    const student = await this.studentRepository.findOne({
+      where: { id: offChainRecord?.student.id },
+      relations: [
+        "academicRecords",
+        "academicRecords.subjectsTaken",
+        "academicRecords.subjectsTaken.subject",
+      ],
+    });
 
-  //   const normalizedCredentialData = CredentialNormalizer.normalize(
-  //     student,
-  //     offChainRecord?.credentialType,
-  //     offChainRecord.cutOffYear,
-  //     offChainRecord.cutOffSemester,
-  //   );
+    const normalizedCredentialData = CredentialNormalizer.normalize(
+      student,
+      offChainRecord.credentialType.name,
+      offChainRecord.cutOffYear,
+      offChainRecord.cutOffSemester,
+    );
 
-  //   const dataHash = ethers.keccak256(
-  //     ethers.toUtf8Bytes(normalizedCredentialData),
-  //   );
+    const dataHash = ethers.keccak256(
+      ethers.toUtf8Bytes(normalizedCredentialData),
+    );
 
-  //   if (
-  //     !onChainRecord ||
-  //     !onChainRecord.dataHash ||
-  //     onChainRecord.dataHash === EMPTY_BYTES
-  //   ) {
-  //     throw new NotFoundException("Record not found on blockchain");
-  //   }
-  // }
+    if (
+      !onChainRecord ||
+      !onChainRecord.dataHash ||
+      onChainRecord.dataHash === EMPTY_BYTES
+    ) {
+      throw new NotFoundException("Record not found on blockchain");
+    }
+
+    if (dataHash !== onChainRecord.dataHash) {
+      throw new UnauthorizedException("Credentials Not Match");
+    }
+  }
 
   async getAllRecords() {
     return this.recordRepository.find({
@@ -128,6 +137,6 @@ export class RecordService {
   }
 
   async deleteRecords() {
-    return this.recordRepository.clear();
+    return this.recordRepository.deleteAll();
   }
 }
