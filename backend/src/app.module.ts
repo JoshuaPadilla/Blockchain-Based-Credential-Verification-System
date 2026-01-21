@@ -20,6 +20,7 @@ import { User } from './common/entities/user.entity';
 import { CredentialTypeEntity } from './common/entities/credential_type.entity';
 import { CredentialTypesModule } from './endpoints/credentials/credentials.module';
 import { UserModule } from './endpoints/user/user.module';
+import { SignerModule } from './endpoints/signer/signer.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { UserModule } from './endpoints/user/user.module';
     AuthModule,
     CredentialTypesModule,
     UserModule,
+    SignerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
