@@ -7,11 +7,11 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { ethers, id } from 'ethers'; // "id" is keccak256 in v6
 import abi from '../../lib/contract.abi.json';
-import { Record } from 'src/entities/record.entity';
-import { OnChainRecord } from 'src/interfaces/onchain_record.interface';
-import { EMPTY_BYTES } from 'src/constants/empty_bytes.constant';
+import { Record } from 'src/common/entities/record.entity';
+import { OnChainRecord } from 'src/common/interfaces/onchain_record.interface';
+import { EMPTY_BYTES } from 'src/common/constants/empty_bytes.constant';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/entities/user.entity';
+import { User } from 'src/common/entities/user.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -93,7 +93,6 @@ export class BlockChainService implements OnModuleInit {
   }
 
   async setAuthorizedSigners(address: string, allowed: boolean) {
-    console.log(address, allowed);
     // FIXED: Function name is 'anvil' in your Solidity code
     await this.ownerContract.setAuthorizedSigner(address, allowed);
   }
@@ -121,10 +120,6 @@ export class BlockChainService implements OnModuleInit {
     signerPublicAddress,
     timestamp: string,
   ) {
-    console.log('Record ID:', recordId);
-    console.log('Signer Address:', signerPublicAddress);
-    console.log('Timestamp:', timestamp);
-
     const record = await this.recordRepository.findOne({
       where: { id: recordId },
       relations: ['signers'],

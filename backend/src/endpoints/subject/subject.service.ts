@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CreateSubjectDto } from 'src/dto/create_subject.dto';
-import { Subject } from 'src/entities/subject.entity';
-import { Repository } from 'typeorm';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { CreateSubjectDto } from "src/common/dto/create_subject.dto";
+import { Subject } from "src/common/entities/subject.entity";
+import { Repository } from "typeorm";
 
 @Injectable()
 export class SubjectService {
@@ -32,7 +32,7 @@ export class SubjectService {
     const subject = await this.subjectRepository.findOneBy({ id });
 
     if (!subject) {
-      throw new NotFoundException('Subject not found');
+      throw new NotFoundException("Subject not found");
     }
 
     return this.subjectRepository.save({

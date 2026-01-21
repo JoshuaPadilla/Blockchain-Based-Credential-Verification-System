@@ -4,9 +4,9 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { CreateCredentialTypeDto } from "src/dto/create_credential_type.dto";
-import { CredentialTypeEntity } from "src/entities/credential_type.entity";
-import { User } from "src/entities/user.entity";
+import { CreateCredentialTypeDto } from "src/common/dto/create_credential_type.dto";
+import { CredentialTypeEntity } from "src/common/entities/credential_type.entity";
+import { User } from "src/common/entities/user.entity";
 import { In, Repository } from "typeorm";
 
 @Injectable()

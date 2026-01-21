@@ -1,4 +1,4 @@
-import { CredentialType } from 'src/enums/credential_type.enum';
+import { CredentialType } from 'src/common/enums/credential_type.enum';
 
 export function getCredentialTypeFromIndex(
   index: number | bigint,

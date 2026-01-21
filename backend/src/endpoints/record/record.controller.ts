@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, Param, Post } from "@nestjs/common";
 import { RecordService } from "./record.service";
 import { BlockChainService } from "src/services/blockchain/blockchain.service";
-import { Record } from "src/interfaces/record.interface";
-import { IssueCredentialDto } from "src/dto/issue_credential.dto";
+import { Record } from "src/common/interfaces/record.interface";
+import { IssueCredentialDto } from "src/common/dto/issue_credential.dto";
 
 @Controller("record")
 export class RecordController {

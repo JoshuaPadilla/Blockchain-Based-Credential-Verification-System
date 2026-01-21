@@ -2,10 +2,10 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Sign } from "crypto";
 import { id } from "node_modules/ethers/lib.esm";
-import { CredentialTypeEntity } from "src/entities/credential_type.entity";
-import { User } from "src/entities/user.entity";
-import { CredentialType } from "src/enums/credential_type.enum";
-import { decrypt } from "src/helpers/encryption.helper";
+import { CredentialTypeEntity } from "src/common/entities/credential_type.entity";
+import { User } from "src/common/entities/user.entity";
+import { CredentialType } from "src/common/enums/credential_type.enum";
+import { decrypt } from "src/common/helpers/encryption.helper";
 import { BlockChainService } from "src/services/blockchain/blockchain.service";
 import { In, Repository } from "typeorm";
 

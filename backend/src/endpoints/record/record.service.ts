@@ -1,16 +1,16 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ethers } from "ethers";
-import { EMPTY_BYTES } from "src/constants/empty_bytes.constant";
-import { IssueCredentialDto } from "src/dto/issue_credential.dto";
-import { CredentialTypeEntity } from "src/entities/credential_type.entity";
-import { Record } from "src/entities/record.entity";
-import { Student } from "src/entities/student.entity";
-import { CredentialType } from "src/enums/credential_type.enum";
-import { Expiration } from "src/enums/expiration.enum";
-import { CredentialNormalizer } from "src/helpers/data_normalizer.class";
-import { getExpiration } from "src/helpers/get_expiration.helper";
-import { OnChainRecord } from "src/interfaces/onchain_record.interface";
+import { EMPTY_BYTES } from "src/common/constants/empty_bytes.constant";
+import { IssueCredentialDto } from "src/common/dto/issue_credential.dto";
+import { CredentialTypeEntity } from "src/common/entities/credential_type.entity";
+import { Record } from "src/common/entities/record.entity";
+import { Student } from "src/common/entities/student.entity";
+import { CredentialType } from "src/common/enums/credential_type.enum";
+import { Expiration } from "src/common/enums/expiration.enum";
+import { CredentialNormalizer } from "src/common/helpers/data_normalizer.class";
+import { getExpiration } from "src/common/helpers/get_expiration.helper";
+import { OnChainRecord } from "src/common/interfaces/onchain_record.interface";
 import { BlockChainService } from "src/services/blockchain/blockchain.service";
 import { Repository } from "typeorm";
 

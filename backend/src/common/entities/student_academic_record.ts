@@ -1,4 +1,4 @@
-import { Semester } from 'src/enums/semester.enum';
+import { Semester } from 'src/common/enums/semester.enum';
 import {
   Column,
   Entity,

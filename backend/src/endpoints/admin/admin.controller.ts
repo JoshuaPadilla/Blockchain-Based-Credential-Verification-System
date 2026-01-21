@@ -1,7 +1,14 @@
-import { Body, Controller, Post, Query } from "@nestjs/common";
+import { Body, Controller, Post, Query, UseGuards } from "@nestjs/common";
 import { AdminService } from "./admin.service";
-import { SetRequiredSignersDto } from "src/dto/set_required_signers.dto";
+import { SetRequiredSignersDto } from "src/common/dto/set_required_signers.dto";
+import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";
+import { RolesGuard } from "src/common/guards/roles.guard";
+import { Roles } from "src/common/decorators/roles.decorator";
+import { Role } from "src/common/enums/user_role.enum";
 
+@Roles(Role.ADMIN)
+@UseGuards(RolesGuard)
+@UseGuards(JwtAuthGuard)
 @Controller("admin")
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}

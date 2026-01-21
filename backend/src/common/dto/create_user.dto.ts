@@ -8,8 +8,8 @@ import {
   MinLength,
   ValidateIf,
 } from 'class-validator';
-import { Role } from 'src/enums/user_role.enum';
-import { SignerPosition } from 'src/enums/signer_position.enum';
+import { Role } from 'src/common/enums/user_role.enum';
+import { SignerPosition } from 'src/common/enums/signer_position.enum';
 
 export class CreateUserDto {
   @IsEmail()

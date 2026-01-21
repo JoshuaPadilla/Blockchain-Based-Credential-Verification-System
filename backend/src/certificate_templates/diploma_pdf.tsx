@@ -6,7 +6,7 @@ import {
   Text,
 } from '@react-pdf/renderer';
 import { StyleSheet } from '@react-pdf/renderer';
-import { getBackgroundImage } from 'src/helpers/get_bg_image.helper';
+import { getBackgroundImage } from 'src/common/helpers/get_bg_image.helper';
 import React from 'react';
 
 export const DiplomaPDF = () => {

@@ -1,6 +1,6 @@
 import { IsBoolean, IsEnum, IsNumber, IsString } from 'class-validator';
-import { CredentialType } from 'src/enums/credential_type.enum';
-import { Semester } from 'src/enums/semester.enum';
+import { CredentialType } from 'src/common/enums/credential_type.enum';
+import { Semester } from 'src/common/enums/semester.enum';
 
 export class IssueCredentialDto {
   @IsString()

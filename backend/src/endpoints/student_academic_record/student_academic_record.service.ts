@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { AddSubjectTakenDto } from "src/dto/add_subject_taken.dto";
-import { CreateStudentAcademicRecordDto } from "src/dto/create_academic.dto";
-import { Student } from "src/entities/student.entity";
-import { StudentAcademicRecord } from "src/entities/student_academic_record";
-import { Subject } from "src/entities/subject.entity";
-import { SubjectTaken } from "src/entities/subjectTaken.entity";
+import { AddSubjectTakenDto } from "src/common/dto/add_subject_taken.dto";
+import { CreateStudentAcademicRecordDto } from "src/common/dto/create_academic.dto";
+import { Student } from "src/common/entities/student.entity";
+import { StudentAcademicRecord } from "src/common/entities/student_academic_record";
+import { Subject } from "src/common/entities/subject.entity";
+import { SubjectTaken } from "src/common/entities/subjectTaken.entity";
 import { In, Repository } from "typeorm";
 
 @Injectable()

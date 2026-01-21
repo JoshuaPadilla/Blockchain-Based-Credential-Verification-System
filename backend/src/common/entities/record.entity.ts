@@ -10,9 +10,9 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { randomUUID } from 'crypto';
-import { CredentialType } from 'src/enums/credential_type.enum';
+import { CredentialType } from 'src/common/enums/credential_type.enum';
 import { Student } from './student.entity';
-import { Semester } from 'src/enums/semester.enum';
+import { Semester } from 'src/common/enums/semester.enum';
 import { CredentialTypeEntity } from './credential_type.entity';
 import { User } from './user.entity';
 

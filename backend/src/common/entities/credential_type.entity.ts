@@ -9,7 +9,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { User } from './user.entity'; // Adjust path to your User entity
-import { CredentialType } from 'src/enums/credential_type.enum';
+import { CredentialType } from 'src/common/enums/credential_type.enum';
 import { Record } from './record.entity';
 
 @Entity()

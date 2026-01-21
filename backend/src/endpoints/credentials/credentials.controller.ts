@@ -7,7 +7,7 @@ import {
   Param,
   Delete,
 } from "@nestjs/common";
-import { CreateCredentialTypeDto } from "src/dto/create_credential_type.dto";
+import { CreateCredentialTypeDto } from "src/common/dto/create_credential_type.dto";
 import { CredentialTypesService } from "./credentials.service";
 
 @Controller("credential-types") // Base route: /credential-types

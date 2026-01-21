@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
-import { SubjectService } from './subject.service';
-import { CreateSubjectDto } from 'src/dto/create_subject.dto';
+import { Body, Controller, Get, Param, Patch, Post } from "@nestjs/common";
+import { SubjectService } from "./subject.service";
+import { CreateSubjectDto } from "src/common/dto/create_subject.dto";
 
-@Controller('subject')
+@Controller("subject")
 export class SubjectController {
   constructor(private readonly subjectService: SubjectService) {}
 
@@ -16,16 +16,16 @@ export class SubjectController {
     return this.subjectService.create(createSubjectDto);
   }
 
-  @Patch(':id')
+  @Patch(":id")
   async update(
-    @Param('id') id: string,
+    @Param("id") id: string,
     @Body() updateSubjectDto: Partial<CreateSubjectDto>,
   ) {
     return this.subjectService.update(id, updateSubjectDto);
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
+  @Get(":id")
+  async findOne(@Param("id") id: string) {
     return this.subjectService.findOne(id);
   }
 }

@@ -1,4 +1,4 @@
-import { Expiration } from 'src/enums/expiration.enum';
+import { Expiration } from 'src/common/enums/expiration.enum';
 
 /**
  * Calculates expiration timestamp based on period.

@@ -6,7 +6,7 @@ import {
   ArrayNotEmpty,
   IsUUID,
 } from 'class-validator';
-import { CredentialType } from 'src/enums/credential_type.enum';
+import { CredentialType } from 'src/common/enums/credential_type.enum';
 
 export class SetRequiredSignersDto {
   @IsArray()

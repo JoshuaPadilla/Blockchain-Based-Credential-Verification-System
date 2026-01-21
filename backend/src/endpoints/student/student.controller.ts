@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
-import { StudentService } from './student.service';
-import { CreateStudentDto } from 'src/dto/create_student.dto';
+import { Body, Controller, Get, Param, Patch, Post } from "@nestjs/common";
+import { StudentService } from "./student.service";
+import { CreateStudentDto } from "src/common/dto/create_student.dto";
 
-@Controller('student')
+@Controller("student")
 export class StudentController {
   constructor(private readonly studentService: StudentService) {}
 
@@ -16,16 +16,16 @@ export class StudentController {
     return this.studentService.create(createStudentDto);
   }
 
-  @Patch(':id')
+  @Patch(":id")
   async update(
-    @Param('id') id: string,
+    @Param("id") id: string,
     @Body() updateStudentDto: Partial<CreateStudentDto>,
   ) {
     return this.studentService.update(id, updateStudentDto);
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
+  @Get(":id")
+  async findOne(@Param("id") id: string) {
     return this.studentService.findOne(id);
   }
 }

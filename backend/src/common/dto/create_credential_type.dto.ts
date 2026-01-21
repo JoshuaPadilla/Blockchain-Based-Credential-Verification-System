@@ -7,7 +7,7 @@ import {
   ArrayNotEmpty,
   IsOptional,
 } from 'class-validator';
-import { CredentialType } from 'src/enums/credential_type.enum';
+import { CredentialType } from 'src/common/enums/credential_type.enum';
 
 export class CreateCredentialTypeDto {
   @IsEnum(CredentialType)

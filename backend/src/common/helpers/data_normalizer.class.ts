@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
-import { Student } from 'src/entities/student.entity';
-import { CredentialType } from 'src/enums/credential_type.enum';
-import { Semester } from 'src/enums/semester.enum';
+import { Student } from 'src/common/entities/student.entity';
+import { CredentialType } from 'src/common/enums/credential_type.enum';
+import { Semester } from 'src/common/enums/semester.enum';
 
 export class CredentialNormalizer {
   /**

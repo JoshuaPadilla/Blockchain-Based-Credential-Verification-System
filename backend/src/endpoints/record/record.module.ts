@@ -4,9 +4,9 @@ import { RecordController } from "./record.controller";
 import { BlockChainModule } from "src/services/blockchain/blockchain.module";
 import { BlockChainService } from "src/services/blockchain/blockchain.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { Record } from "src/entities/record.entity";
-import { Student } from "src/entities/student.entity";
-import { CredentialTypeEntity } from "src/entities/credential_type.entity";
+import { Record } from "src/common/entities/record.entity";
+import { Student } from "src/common/entities/student.entity";
+import { CredentialTypeEntity } from "src/common/entities/credential_type.entity";
 
 @Module({
   imports: [
