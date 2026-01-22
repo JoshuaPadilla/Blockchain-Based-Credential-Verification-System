@@ -7,7 +7,7 @@ contract CredentialVerifier {
 
    event RecordSigned(string recordIdRaw, address indexed signer, uint256 timestamp);
 
-    mapping(address => bool) public authorizedSigners;
+    mapping(bytes32 => mapping(address => bool)) public credentialTypeSigner;
     mapping(string => Record) public records;
     // the required signature count for each credential type id
     mapping(bytes32 => uint8) public requiredSignatureCount;
@@ -79,8 +79,8 @@ contract CredentialVerifier {
             "Record expired"
         );
 
-        require(authorizedSigners[msg.sender], "Not authorized");
-        require(!r.signedBy[msg.sender], "Already signed");
+       require(!credentialTypeSigner[r.credentialTypeId][msg.sender], "Not authorized Signer");
+        require(!r.signedBy[msg.sender], "Already signed!");
 
         
 
@@ -96,19 +96,9 @@ contract CredentialVerifier {
         return r.currentSignatures >= requiredSignatureCount[r.credentialTypeId];
     }
 
-    // set authorized signer
-    function setAuthorizedSigner(address signer, bool allowed) external onlyOwner {
-        authorizedSigners[signer] = allowed;
-    }
-
-    // add signer to credential type who should sign
-    function setRequiredSigners(bytes32 _credentialTypeId, address[] calldata signers) external onlyOwner {
-        require(signers.length > 0, "Empty signer list");
-
-        
-
-        requiredSigners[_credentialTypeId] = signers;
-        requiredSignatureCount[_credentialTypeId] = uint8(signers.length);
+    // set authorized signer for each credential type
+    function setCredentialTypeSigner(bytes32 credentialTypeId, address signer, bool allowed) external onlyOwner {
+        credentialTypeSigner[credentialTypeId][signer] = allowed;
     }
 
     // Check if the signer already signed

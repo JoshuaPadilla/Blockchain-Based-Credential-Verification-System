@@ -88,6 +88,8 @@ export class RecordService {
     const onChainRecord: OnChainRecord =
       await this.blockchainService.verify(recordId);
 
+    console.log(onChainRecord);
+
     const offChainRecord = await this.recordRepository.findOne({
       where: { id: recordId },
       relations: ["student", "signers"],
@@ -128,6 +130,8 @@ export class RecordService {
     if (dataHash !== onChainRecord.dataHash) {
       throw new UnauthorizedException("Credentials Not Match");
     }
+
+    return offChainRecord;
   }
 
   async getAllRecords() {
