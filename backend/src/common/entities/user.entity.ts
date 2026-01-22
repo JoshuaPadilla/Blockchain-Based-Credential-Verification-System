@@ -39,10 +39,10 @@ export class User {
   @Column({ type: 'enum', enum: SignerPosition, nullable: true })
   signerPosition: SignerPosition;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true, unique: true })
   publicAddress: string;
 
-  @Column({ type: 'text', nullable: true, select: false })
+  @Column({ type: 'text', nullable: true, select: false, unique: true })
   privateKey: string;
 
   @CreateDateColumn()

@@ -8,6 +8,7 @@ import {
 import { PreviousEducation } from './previous_education.entity';
 import { StudentAcademicRecord } from './student_academic_record';
 import { Record } from './record.entity';
+import { AcademicDistinction } from '../enums/academic_distinction.enum';
 
 @Entity()
 export class Student {
@@ -40,6 +41,9 @@ export class Student {
 
   @Column()
   course: string;
+
+  @Column({ type: 'enum', enum: AcademicDistinction, nullable: true })
+  academic_distinction: AcademicDistinction;
 
   @Column(() => PreviousEducation, { prefix: 'elementary_' })
   elementary: PreviousEducation;

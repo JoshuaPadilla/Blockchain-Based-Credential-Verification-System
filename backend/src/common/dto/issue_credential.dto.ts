@@ -1,4 +1,10 @@
-import { IsBoolean, IsEnum, IsNumber, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { CredentialType } from 'src/common/enums/credential_type.enum';
 import { Semester } from 'src/common/enums/semester.enum';
 
@@ -9,9 +15,11 @@ export class IssueCredentialDto {
   @IsString()
   credentialTypeId: string;
 
+  @IsOptional()
   @IsEnum(Semester)
   cutOffSemester: Semester;
 
+  @IsOptional()
   @IsString()
   cutOffYear: string;
 }

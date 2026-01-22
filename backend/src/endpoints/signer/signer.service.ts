@@ -23,6 +23,8 @@ export class SignerService {
       throw new NotFoundException("No signer found");
     }
 
+    console.log(signerId);
+
     const signerPrivateKey = await decrypt(signer.privateKey);
     await this.blockchainService.signRecord(recordId, signerPrivateKey);
   }

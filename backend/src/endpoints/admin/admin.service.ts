@@ -120,24 +120,30 @@ export class AdminService {
       throw new NotFoundException("No Signer found");
     }
 
-    const existingSignerIds = credentialType.signers;
-
-    const isSignerAlready = existingSignerIds.find((s) => s.id === signer.id);
-
-    if (isSignerAlready) {
-      throw new BadRequestException("Already A signer");
-    }
-
-    const updateSigners = [...credentialType.signers, signer];
-    credentialType.signers = updateSigners;
-
-    await this.credentialTypeRepository.save(credentialType);
-
     await this.blockchainService.setCredentialTypeSigner(
       credentialType.id,
       signer.publicAddress,
       allowed,
     );
+
+    const isSignerAlready = credentialType.signers.some(
+      (s) => s.id === signer.id,
+    );
+
+    if (allowed) {
+      if (isSignerAlready) {
+        return;
+      }
+
+      // Only add if they aren't there yet
+      credentialType.signers.push(signer);
+    } else {
+      credentialType.signers = credentialType.signers.filter(
+        (s) => s.id !== signer.id,
+      );
+    }
+
+    await this.credentialTypeRepository.save(credentialType);
   }
 
   async revokeRecord(recordId: string) {

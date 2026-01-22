@@ -16,9 +16,15 @@ export class UserService {
     private readonly blockchainService: BlockChainService,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User | undefined> {
+  async create(
+    createUserDto: CreateUserDto,
+  ): Promise<Partial<User> | undefined> {
     const hashedPassword = await hash(createUserDto.password);
     let encryptedPrivateKey;
+
+    if (createUserDto.role === Role.SIGNER) {
+      encryptedPrivateKey = await encrypt(createUserDto.privateKey!);
+    }
 
     const newUser = this.userRepository.create({
       ...createUserDto,
@@ -26,7 +32,10 @@ export class UserService {
       privateKey: encryptedPrivateKey,
     });
 
-    return this.userRepository.save(newUser);
+    const savedUser = await this.userRepository.save(newUser);
+    const { privateKey, password, ...rest } = savedUser;
+
+    return rest;
   }
 
   async deleteAll() {

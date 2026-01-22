@@ -1,6 +1,7 @@
 import {
   Column,
   CreateCollectionOptions,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   JoinTable,
@@ -50,12 +51,15 @@ export class Record {
   credentialType: CredentialTypeEntity;
 
   @ManyToMany(() => User)
-  @JoinTable({ name: 'record_signers' })
-  signers: User[];
+  @JoinTable({ name: 'record_signedBy' })
+  signedBy: User[];
 
   @Column({ type: 'int', default: 0 })
   currentSignatures: number;
 
   @ManyToOne(() => Student, (student) => student.credentialsRecord)
   student: Student;
+
+  @CreateDateColumn()
+  createdAt: Date;
 }

@@ -90,4 +90,24 @@ export class CredentialTypesService {
     }
     return { deleted: true };
   }
+
+  async removeSigners(credentialTypeId: string, signersId: string) {
+    const credential = await this.credentialRepository.findOne({
+      where: { id: credentialTypeId },
+      relations: ["signers"],
+    });
+
+    if (!credential) throw new NotFoundException("No credential found");
+
+    const filteredSigners = credential.signers.filter(
+      (s) => signersId !== s.id,
+    );
+
+    const updatedCredentialType = await this.credentialRepository.save({
+      ...credential,
+      signers: filteredSigners,
+    });
+
+    return updatedCredentialType;
+  }
 }

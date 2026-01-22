@@ -66,7 +66,7 @@ export class BlockChainService implements OnModuleInit {
     } catch (error) {
       console.log(error);
 
-      throw new BadRequestException('Failed to add record');
+      throw new BadRequestException(error.reason || 'Failed to add record');
     }
   }
 
@@ -79,7 +79,7 @@ export class BlockChainService implements OnModuleInit {
     } catch (error) {
       console.log(error);
 
-      throw new BadRequestException('Failed to revoke record');
+      throw new BadRequestException(error.reason || 'Failed to revoke record');
     }
   }
 
@@ -92,7 +92,7 @@ export class BlockChainService implements OnModuleInit {
     } catch (error) {
       console.log(error);
 
-      throw new BadRequestException('Failed to restore record');
+      throw new BadRequestException(error.reason || 'Failed to restore record');
     }
   }
 
@@ -103,7 +103,6 @@ export class BlockChainService implements OnModuleInit {
       if (record.dataHash === EMPTY_BYTES) {
         throw new NotFoundException('Record does not exist on the blockchain');
       }
-      const receipt = await record.wait();
 
       return {
         dataHash: record.dataHash,
@@ -114,7 +113,7 @@ export class BlockChainService implements OnModuleInit {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException('Failed to verify');
+      throw new BadRequestException(error.reason || 'Failed to verify');
     }
   }
 
@@ -129,7 +128,7 @@ export class BlockChainService implements OnModuleInit {
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
-        'Failed to check if authorized credential signer',
+        error.reason || 'Failed to check if authorized credential signer',
       );
     }
   }
@@ -151,22 +150,31 @@ export class BlockChainService implements OnModuleInit {
       return receipt;
     } catch (error) {
       console.log(error);
-      throw new BadRequestException('Failed to add credential signer');
+      throw new BadRequestException(
+        error.reason || 'Failed to add credential signer',
+      );
     }
   }
 
   async signRecord(recordId: string, signerPrivateKey: string) {
-    const signerWallet = new ethers.Wallet(signerPrivateKey, this.provider);
+    try {
+      const signerWallet = new ethers.Wallet(signerPrivateKey, this.provider);
+
+      const contractAsSigner = this.ownerContract.connect(
+        signerWallet,
+      ) as ethers.Contract;
+
+      const tx = await contractAsSigner.signRecord(recordId);
+
+      const receipt = await tx.wait();
+
+      return receipt;
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error.reason || 'failed to sign record');
+    }
 
     // Connect a new instance for this specific signer
-    const contractAsSigner = this.ownerContract.connect(
-      signerWallet,
-    ) as ethers.Contract;
-
-    const tx = await contractAsSigner.signRecord(recordId);
-    const receipt = await tx.wait();
-
-    return receipt.hash;
   }
 
   private async AddSignToRecord(
@@ -176,7 +184,7 @@ export class BlockChainService implements OnModuleInit {
   ) {
     const record = await this.recordRepository.findOne({
       where: { id: recordId },
-      relations: ['signers'],
+      relations: ['signedBy'],
     });
 
     const signer = await this.userRepository.findOneBy({
@@ -191,9 +199,9 @@ export class BlockChainService implements OnModuleInit {
       throw new NotFoundException('No record found!');
     }
 
-    const updatedSigners = [...record.signers, signer];
+    const updatedSigners = [...record.signedBy, signer];
 
-    record.signers = updatedSigners;
+    record.signedBy = updatedSigners;
     record.currentSignatures++;
 
     await this.recordRepository.save(record);

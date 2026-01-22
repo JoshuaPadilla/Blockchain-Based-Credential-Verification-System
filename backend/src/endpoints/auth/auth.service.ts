@@ -28,7 +28,9 @@ export class AuthService {
     private refreshTokenConfig: config.ConfigType<typeof refresh_jwtConfig>,
   ) {}
 
-  async register(createUserDto: CreateUserDto): Promise<User | undefined> {
+  async register(
+    createUserDto: CreateUserDto,
+  ): Promise<Partial<User> | undefined> {
     return await this.userService.create(createUserDto);
   }
 

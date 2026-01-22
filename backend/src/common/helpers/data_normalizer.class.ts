@@ -94,10 +94,28 @@ export class CredentialNormalizer {
   }
 
   private static normalizeDiploma(student: Student): string {
-    return '';
+    const result: string[] = [];
+
+    result.push(student.id);
+    result.push(student.firstName);
+    result.push(student.middleName);
+    result.push(student.lastName);
+    result.push(student.course);
+    if (student.academic_distinction) {
+      result.push(student.academic_distinction);
+    }
+
+    return result.join(' | ');
   }
 
   private static normalizeHonnorableDismissal(student: Student): string {
+    const result: string[] = [];
+
+    result.push(student.id);
+    result.push(student.firstName);
+    result.push(student.middleName);
+    result.push(student.lastName);
+
     return '';
   }
 

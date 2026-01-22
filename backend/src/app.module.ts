@@ -21,6 +21,7 @@ import { CredentialTypeEntity } from './common/entities/credential_type.entity';
 import { CredentialTypesModule } from './endpoints/credentials/credentials.module';
 import { UserModule } from './endpoints/user/user.module';
 import { SignerModule } from './endpoints/signer/signer.module';
+import { VerificationModule } from './endpoints/verification/verification.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { SignerModule } from './endpoints/signer/signer.module';
     CredentialTypesModule,
     UserModule,
     SignerModule,
+    VerificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

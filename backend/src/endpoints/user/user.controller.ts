@@ -20,8 +20,7 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll(@Request() req) {
-    console.log(req.user);
+  findAll() {
     return this.userService.findAll();
   }
 

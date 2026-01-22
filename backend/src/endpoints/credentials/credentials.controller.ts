@@ -48,6 +48,11 @@ export class CredentialTypesController {
     return this.credentialsService.update(id, updateDto);
   }
 
+  @Patch("remove-signers/:id")
+  removeSigners(@Param("id") id: string, @Body() body: { signersId: string }) {
+    return this.credentialsService.removeSigners(id, body.signersId);
+  }
+
   // DELETE /credential-types/:id
   @Delete(":id")
   remove(@Param("id") id: string) {
