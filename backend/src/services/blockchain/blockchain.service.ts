@@ -3,6 +3,7 @@ import {
   NotFoundException,
   OnModuleInit,
   Logger,
+  BadRequestException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ethers, id } from 'ethers'; // "id" is keccak256 in v6
@@ -49,51 +50,109 @@ export class BlockChainService implements OnModuleInit {
     this.listenForSignatures();
   }
 
-  addRecord(record: Record) {
+  async addRecord(record: Record) {
     const { id: recordId, dataHash, expiration, credentialType } = record;
 
-    console.log(id(credentialType.id));
-    return this.ownerContract.addRecord(
-      recordId,
-      dataHash,
-      expiration,
-      id(credentialType.id), // Hashing string to bytes32
-    );
+    try {
+      const tx = await this.ownerContract.addRecord(
+        recordId,
+        dataHash,
+        expiration,
+        id(credentialType.id), // Hashing string to bytes32
+      );
+
+      const receipt = await tx.wait();
+      return receipt;
+    } catch (error) {
+      console.log(error);
+
+      throw new BadRequestException('Failed to add record');
+    }
   }
 
-  revokeRecord(recordId: string) {
-    return this.ownerContract.revokeRecord(recordId);
+  async revokeRecord(recordId: string) {
+    try {
+      const tx = await this.ownerContract.revokeRecord(recordId);
+
+      const receipt = tx.wait();
+      return receipt;
+    } catch (error) {
+      console.log(error);
+
+      throw new BadRequestException('Failed to revoke record');
+    }
   }
 
-  restoreRecord(recordId: string) {
-    return this.ownerContract.restoreRecord(recordId);
+  async restoreRecord(recordId: string) {
+    try {
+      const tx = await this.ownerContract.restoreRecord(recordId);
+
+      const receipt = tx.wait();
+      return receipt;
+    } catch (error) {
+      console.log(error);
+
+      throw new BadRequestException('Failed to restore record');
+    }
   }
 
   async verify(recordId: string) {
-    const record = await this.ownerContract.records(recordId);
+    try {
+      const record = await this.ownerContract.records(recordId);
 
-    // FIXED: Solidity struct property is 'dataHash', not 'hash'
-    if (record.dataHash === EMPTY_BYTES) {
-      throw new NotFoundException('Record does not exist on the blockchain');
+      if (record.dataHash === EMPTY_BYTES) {
+        throw new NotFoundException('Record does not exist on the blockchain');
+      }
+      const receipt = await record.wait();
+
+      return {
+        dataHash: record.dataHash,
+        expiration: record.expiration.toString(),
+        isRevoked: record.isRevoked,
+        credentialTypeId: record.credentialTypeId, // Note: check your struct property name here too
+        currentSignatures: record.currentSignatures,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException('Failed to verify');
     }
-
-    return {
-      dataHash: record.dataHash,
-      expiration: record.expiration.toString(),
-      isRevoked: record.isRevoked,
-      credentialTypeId: record.credentialTypeId, // Note: check your struct property name here too
-      currentSignatures: record.currentSignatures,
-    };
   }
 
-  async setRequiredSigners(credentialType: string, addresses: string[]) {
-    // FIXED: Must hash the string to bytes32 to match Solidity
-    await this.ownerContract.setRequiredSigners(id(credentialType), addresses);
+  async isCredentialSigner(credentialTypeId: string, addresses: string) {
+    try {
+      const tx = await this.ownerContract.credentialTypeSigner(
+        id(credentialTypeId),
+        addresses,
+      );
+
+      return tx;
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(
+        'Failed to check if authorized credential signer',
+      );
+    }
   }
 
-  async setAuthorizedSigners(address: string, allowed: boolean) {
-    // FIXED: Function name is 'anvil' in your Solidity code
-    await this.ownerContract.setAuthorizedSigner(address, allowed);
+  async setCredentialTypeSigner(
+    credentialTypeId: string,
+    address: string,
+    allowed: boolean,
+  ) {
+    try {
+      const tx = await this.ownerContract.setCredentialTypeSigner(
+        id(credentialTypeId),
+        address,
+        allowed,
+      );
+
+      const receipt = tx.wait();
+
+      return receipt;
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException('Failed to add credential signer');
+    }
   }
 
   async signRecord(recordId: string, signerPrivateKey: string) {
@@ -108,10 +167,6 @@ export class BlockChainService implements OnModuleInit {
     const receipt = await tx.wait();
 
     return receipt.hash;
-  }
-
-  async isAuthorizedSigner(publicAddress: string) {
-    return await this.ownerContract.authorizedSigners(publicAddress);
   }
 
   private async AddSignToRecord(

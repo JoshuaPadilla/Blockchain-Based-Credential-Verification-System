@@ -12,7 +12,6 @@ contract CredentialVerifier {
     // the required signature count for each credential type id
     mapping(bytes32 => uint8) public requiredSignatureCount;
     // the required signers for each credential type id
-    mapping(bytes32 => address[]) public requiredSigners;
     struct Record {
         bytes32 dataHash;
         uint256 expiration;
@@ -50,9 +49,6 @@ contract CredentialVerifier {
         newRecord.isRevoked = false;
         newRecord.currentSignatures = 0;
         newRecord.credentialTypeId = _credentialTypeId;
-    
-    // 3. Do NOTHING for the mapping. 
-    // The 'signedBy' mapping is automatically initialized as empty in storage.
     }
 
     function revokeRecord(string calldata _recordId) public onlyOwner {
@@ -79,7 +75,7 @@ contract CredentialVerifier {
             "Record expired"
         );
 
-       require(!credentialTypeSigner[r.credentialTypeId][msg.sender], "Not authorized Signer");
+        require(credentialTypeSigner[r.credentialTypeId][msg.sender], "Not authorized Signer");
         require(!r.signedBy[msg.sender], "Already signed!");
 
         

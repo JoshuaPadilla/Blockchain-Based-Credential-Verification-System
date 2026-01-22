@@ -20,15 +20,6 @@ export class UserService {
     const hashedPassword = await hash(createUserDto.password);
     let encryptedPrivateKey;
 
-    if (createUserDto.role === Role.SIGNER) {
-      encryptedPrivateKey = await encrypt(createUserDto.privateKey!);
-
-      await this.blockchainService.setAuthorizedSigners(
-        createUserDto.publicAddress!,
-        true,
-      );
-    }
-
     const newUser = this.userRepository.create({
       ...createUserDto,
       password: hashedPassword,

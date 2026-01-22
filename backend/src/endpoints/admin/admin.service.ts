@@ -1,7 +1,11 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Sign } from "crypto";
-import { id } from "node_modules/ethers/lib.esm";
+import { id } from "ethers";
 import { CredentialTypeEntity } from "src/common/entities/credential_type.entity";
 import { User } from "src/common/entities/user.entity";
 import { CredentialType } from "src/common/enums/credential_type.enum";
@@ -19,55 +23,55 @@ export class AdminService {
     private credentialTypeRepository: Repository<CredentialTypeEntity>,
   ) {}
 
-  async setRequiredSigners(
-    credentialTypeName: CredentialType,
-    singersIds: string[],
-  ) {
-    const credentialType = await this.credentialTypeRepository.findOne({
-      where: { name: credentialTypeName },
-      relations: ["signers"],
-    });
+  // async setRequiredSigners(
+  //   credentialTypeName: CredentialType,
+  //   singersIds: string[],
+  // ) {
+  //   const credentialType = await this.credentialTypeRepository.findOne({
+  //     where: { name: credentialTypeName },
+  //     relations: ["signers"],
+  //   });
 
-    if (!credentialType) {
-      throw new NotFoundException("Credential Type not found");
-    }
+  //   if (!credentialType) {
+  //     throw new NotFoundException("Credential Type not found");
+  //   }
 
-    // 2. Fetch the NEW signers only
-    const newSignersEntities = await this.userRepository.find({
-      where: { id: In(singersIds) },
-    });
+  //   // 2. Fetch the NEW signers only
+  //   const newSignersEntities = await this.userRepository.find({
+  //     where: { id: In(singersIds) },
+  //   });
 
-    if (newSignersEntities.length === 0) {
-      throw new NotFoundException("Signers IDs not found");
-    }
+  //   if (newSignersEntities.length === 0) {
+  //     throw new NotFoundException("Signers IDs not found");
+  //   }
 
-    // 3. MERGE & REMOVE DUPLICATES
-    // We use a Map or checks to ensure we don't add the same person twice
-    const existingSignerIds = new Set(credentialType.signers.map((s) => s.id));
+  //   // 3. MERGE & REMOVE DUPLICATES
+  //   // We use a Map or checks to ensure we don't add the same person twice
+  //   const existingSignerIds = new Set(credentialType.signers.map((s) => s.id));
 
-    // Filter out any new signers that are ALREADY in the list
-    const uniqueNewSigners = newSignersEntities.filter(
-      (s) => !existingSignerIds.has(s.id),
-    );
+  //   // Filter out any new signers that are ALREADY in the list
+  //   const uniqueNewSigners = newSignersEntities.filter(
+  //     (s) => !existingSignerIds.has(s.id),
+  //   );
 
-    // Combine them for the final list
-    const finalSignerList = [...credentialType.signers, ...uniqueNewSigners];
+  //   // Combine them for the final list
+  //   const finalSignerList = [...credentialType.signers, ...uniqueNewSigners];
 
-    credentialType.signers = finalSignerList;
-    await this.credentialTypeRepository.save(credentialType);
+  //   credentialType.signers = finalSignerList;
+  //   await this.credentialTypeRepository.save(credentialType);
 
-    const signerAddresses = finalSignerList.map((s) => s.publicAddress);
+  //   const signerAddresses = finalSignerList.map((s) => s.publicAddress);
 
-    const credentialTypeHash = id(credentialType!.id);
-    await this.blockchainService.setRequiredSigners(
-      credentialTypeHash,
-      signerAddresses,
-    );
-  }
+  //   const credentialTypeHash = id(credentialType!.id);
+  //   await this.blockchainService.setRequiredSigners(
+  //     credentialTypeHash,
+  //     signerAddresses,
+  //   );
+  // }
 
-  async setAuthorizedSigners(address: string, allowed: boolean) {
-    await this.blockchainService.setAuthorizedSigners(address, allowed);
-  }
+  // async setAuthorizedSigners(address: string, allowed: boolean) {
+  //   await this.blockchainService.setAuthorizedSigners(address, allowed);
+  // }
 
   async signRecord(recordId: string, signerId: string) {
     const signer = await this.userRepository.findOne({
@@ -83,23 +87,64 @@ export class AdminService {
     await this.blockchainService.signRecord(recordId, signerPrivateKey);
   }
 
-  async isAuthorizedSigner(signerPublicAddress: string) {
-    const allowed =
-      await this.blockchainService.isAuthorizedSigner(signerPublicAddress);
+  async isCredentialSigner(credentialTypeId: string, signerId: string) {
+    const signer = await this.userRepository.findOneBy({ id: signerId });
 
-    console.log(this.isAuthorizedSigner);
+    if (!signer) throw new NotFoundException("Signer not found");
+
+    const allowed = await this.blockchainService.isCredentialSigner(
+      credentialTypeId,
+      signer.publicAddress,
+    );
+
+    return { isSigner: allowed };
   }
 
-  async setAuthorizedSigner(signerId: string, allowed: boolean) {
+  async setCredentialTypeSigner(
+    credentialTypeId: string,
+    signerId: string,
+    allowed: boolean,
+  ) {
     const signer = await this.userRepository.findOneBy({ id: signerId });
+
+    const credentialType = await this.credentialTypeRepository.findOne({
+      where: { id: credentialTypeId },
+      relations: ["signers"],
+    });
+
+    if (!credentialType) {
+      throw new NotFoundException("No credential type found");
+    }
 
     if (!signer) {
       throw new NotFoundException("No Signer found");
     }
 
-    await this.blockchainService.setAuthorizedSigners(
+    const existingSignerIds = credentialType.signers;
+
+    const isSignerAlready = existingSignerIds.find((s) => s.id === signer.id);
+
+    if (isSignerAlready) {
+      throw new BadRequestException("Already A signer");
+    }
+
+    const updateSigners = [...credentialType.signers, signer];
+    credentialType.signers = updateSigners;
+
+    await this.credentialTypeRepository.save(credentialType);
+
+    await this.blockchainService.setCredentialTypeSigner(
+      credentialType.id,
       signer.publicAddress,
       allowed,
     );
+  }
+
+  async revokeRecord(recordId: string) {
+    return await this.blockchainService.revokeRecord(recordId);
+  }
+
+  async restoreRecord(recordId: string) {
+    return await this.blockchainService.restoreRecord(recordId);
   }
 }
