@@ -1,15 +1,25 @@
 import React from "react";
 import { TableCell } from "../ui/table";
 import { Loader } from "lucide-react";
+import { PendingBadge } from "./pending_badge";
+import { VerifiedBadge } from "./verified_badge";
+import { RevokedBadge } from "./revoked_badge";
+import { ExpiredBadge } from "./expired_badge";
 
-export const TableCredentialStatus = () => {
+type Props = {
+	expired: boolean;
+	pending: boolean;
+	revoked: boolean;
+};
+
+export const TableCredentialStatus = ({ expired, pending, revoked }: Props) => {
 	return (
-		<TableCell>
-			<div className="flex flex-row gap-2 rounded-full border w-fit px-4 border-amber-500 bg-amber-400/30 items-center justify-end">
-				<Loader size={15} color="oklch(47.3% 0.137 46.201)" />
-				<p className="font-mono font-semibold text-amber-800/70">
-					Pending
-				</p>
+		<TableCell className="w-0 whitespace-nowrap min-w-60">
+			<div className="flex items-center justify-start gap-2 flex-wrap">
+				{expired && <ExpiredBadge />}
+				{pending && <PendingBadge />}
+				{revoked && <RevokedBadge />}
+				{!revoked && !pending && !expired && <VerifiedBadge />}
 			</div>
 		</TableCell>
 	);

@@ -1,6 +1,10 @@
 import React from "react";
 import { TableCell } from "../ui/table";
+import { formatDate } from "@/lib/date_utils";
 
-export const TableDateIssued = () => {
-	return <TableCell className="">Jan 2, 2026</TableCell>;
+type Props = {
+	issuedAt: Date;
+};
+export const TableDateIssued = ({ issuedAt }: Props) => {
+	return <TableCell className="">{formatDate(issuedAt)}</TableCell>;
 };

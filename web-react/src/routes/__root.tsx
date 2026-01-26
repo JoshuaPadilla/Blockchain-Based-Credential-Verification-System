@@ -3,6 +3,8 @@ import { AppBreadcrumb } from "@/components/custom_components/app_breadcrumb";
 import { Header } from "@/components/custom_components/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useAuthStore } from "@/stores/auth_store";
+import type { useInsightsStore } from "@/stores/insights_store";
+import type { useRecordStore } from "@/stores/record_store";
 import {
 	createRootRouteWithContext,
 	Outlet,
@@ -12,6 +14,8 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 interface MyRouterContext {
 	auth: ReturnType<typeof useAuthStore.getState>;
+	insights: ReturnType<typeof useInsightsStore.getState>;
+	records: ReturnType<typeof useRecordStore.getState>;
 }
 
 const RootLayout = () => {

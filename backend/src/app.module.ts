@@ -22,6 +22,7 @@ import { CredentialTypesModule } from './endpoints/credentials/credentials.modul
 import { UserModule } from './endpoints/user/user.module';
 import { SignerModule } from './endpoints/signer/signer.module';
 import { VerificationModule } from './endpoints/verification/verification.module';
+import { InsightsModule } from './endpoints/insights/insights.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { VerificationModule } from './endpoints/verification/verification.module
     UserModule,
     SignerModule,
     VerificationModule,
+    InsightsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

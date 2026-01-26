@@ -7,9 +7,7 @@ type Props = {
 	txHash: string;
 };
 
-export const TableTxHash = () => {
-	const txHash =
-		"0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6";
+export const TableTxHash = ({ txHash }: Props) => {
 	const toDisplay = `${txHash.slice(0, 4)}...${txHash.slice(-4)}`;
 
 	return (

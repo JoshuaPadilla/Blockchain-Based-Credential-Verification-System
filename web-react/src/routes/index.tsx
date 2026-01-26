@@ -2,8 +2,16 @@ import { DashboardItemCard } from "@/components/custom_components/dashboard_item
 import { RecentTransactionTable } from "@/components/custom_components/recent_transaction_table";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/stores/auth_store";
+import { useInsightsStore } from "@/stores/insights_store";
+import { useRecordStore } from "@/stores/record_store";
 import { createFileRoute, redirect, useLocation } from "@tanstack/react-router";
-import { ArrowRight, BadgeCheck, FilePlusCorner } from "lucide-react";
+import {
+	ArrowRight,
+	BadgeCheck,
+	ClipboardClock,
+	ClipboardX,
+	FilePlusCorner,
+} from "lucide-react";
 
 export const Route = createFileRoute("/")({
 	component: HomeComponent,
@@ -14,12 +22,16 @@ export const Route = createFileRoute("/")({
 			throw redirect({ to: "/login" });
 		}
 	},
+	loader: async ({ context }) => {
+		await context.records.getRecords();
+		await context.insights.getDashboardInsights();
+	},
 });
 
 function HomeComponent() {
-	const { userProfile } = useAuthStore();
+	const { dashboardInsights } = useInsightsStore();
+	const { records } = useRecordStore();
 
-	console.log(userProfile);
 	return (
 		<div className="w-full p-8 flex flex-col gap-4">
 			{/* Title */}
@@ -41,20 +53,20 @@ function HomeComponent() {
 			<div className="flex flex-row gap-8">
 				<DashboardItemCard
 					icon={
-						<BadgeCheck className="size-8" fill="current-color" />
+						<BadgeCheck className="size-8 gray" color="#51a2ff" />
 					}
 					title="Total Credential Issued"
-					value="12,450"
+					value={String(dashboardInsights?.totalRecords) || "0"}
 				/>
 				<DashboardItemCard
-					icon={<BadgeCheck className="size-8" />}
-					title="Total Credential Issued"
-					value="12,450"
+					icon={<ClipboardClock className="size-8" color="#ff8904" />}
+					title="Pending Signatures"
+					value={String(dashboardInsights?.pendingRecords) || "0"}
 				/>
 				<DashboardItemCard
-					icon={<BadgeCheck className="size-8" />}
-					title="Total Credential Issued"
-					value="12,450"
+					icon={<ClipboardX className="size-8" color="#99a1af" />}
+					title="Revoke Credentials"
+					value={String(dashboardInsights?.revokedRecords) || "0"}
 				/>
 			</div>
 
@@ -72,7 +84,7 @@ function HomeComponent() {
 				</div>
 
 				<div className="p-2 bg-white rounded-lg mb-4">
-					<RecentTransactionTable />
+					<RecentTransactionTable records={records} />
 				</div>
 
 				<div className="flex flex-col items-center justify-center gap-2">

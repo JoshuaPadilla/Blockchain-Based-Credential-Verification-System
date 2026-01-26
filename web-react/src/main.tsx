@@ -10,12 +10,16 @@ import "@fontsource/jetbrains-mono/400.css";
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
 import { useAuthStore } from "./stores/auth_store";
+import { useInsightsStore } from "./stores/insights_store";
+import { useRecordStore } from "./stores/record_store";
 
 // Create a new router instance
 const router = createRouter({
 	routeTree,
 	context: {
-		auth: useAuthStore.getState(),
+		auth: undefined!,
+		insights: undefined!,
+		records: undefined!,
 	},
 });
 
@@ -26,12 +30,23 @@ declare module "@tanstack/react-router" {
 	}
 }
 
+function App() {
+	const auth = useAuthStore();
+	const insights = useInsightsStore();
+	const records = useRecordStore();
+
+	// 2. Pass the live state into the context prop
+	return (
+		<RouterProvider router={router} context={{ auth, insights, records }} />
+	);
+}
+
 const rootElement = document.getElementById("root")!;
 if (!rootElement.innerHTML) {
 	const root = ReactDOM.createRoot(rootElement);
 	root.render(
 		<StrictMode>
-			<RouterProvider router={router} />
+			<App />
 		</StrictMode>,
 	);
 }

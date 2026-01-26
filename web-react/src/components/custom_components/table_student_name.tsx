@@ -3,11 +3,16 @@ import { TableCell } from "../ui/table";
 import { Avatar, AvatarImage } from "../ui/avatar";
 
 type Props = {
-	profile: string;
-	name: string;
+	firstName: string;
+	middleName: string;
+	lastName: string;
 };
 
-export const TableStudentName = () => {
+export const TableStudentName = ({
+	firstName,
+	middleName,
+	lastName,
+}: Props) => {
 	return (
 		<TableCell className="flex flex-row gap-3 items-center">
 			<Avatar>
@@ -18,8 +23,10 @@ export const TableStudentName = () => {
 			</Avatar>
 
 			<div>
-				<p className="font-mono font-semibold">Joshua Vincent</p>
-				<p className="font-mono font-semibold">Padilla</p>
+				<p className="font-mono font-semibold">
+					{firstName} {middleName.charAt(0)}.
+				</p>
+				<p className="font-mono font-semibold">{lastName}</p>
 			</div>
 		</TableCell>
 	);
