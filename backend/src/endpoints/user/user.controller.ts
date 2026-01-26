@@ -24,6 +24,12 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get("profile")
+  getProfile(@Request() req) {
+    return this.userService.findOne(req.user.id);
+  }
+
   @HttpCode(HttpStatus.OK)
   @Delete()
   deleteAll() {

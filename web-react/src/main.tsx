@@ -9,9 +9,15 @@ import "@fontsource/jetbrains-mono/400.css";
 
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
+import { useAuthStore } from "./stores/auth_store";
 
 // Create a new router instance
-const router = createRouter({ routeTree });
+const router = createRouter({
+	routeTree,
+	context: {
+		auth: useAuthStore.getState(),
+	},
+});
 
 // Register the router instance for type safety
 declare module "@tanstack/react-router" {

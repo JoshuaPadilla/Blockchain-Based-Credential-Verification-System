@@ -18,13 +18,18 @@ export class RefreshJwtStrategy extends PassportStrategy(
     >,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: (req) => {
+        if (req && req.cookies) {
+          return req.cookies['refresh_token']; // Match the name in your login cookie
+        }
+        return null;
+      },
       secretOrKey: refreshJwtConfiguration.secret as any,
       ignoreExpiration: false,
     });
   }
 
   validate(payload: AuthJwtPayload) {
-    return { id: payload.sub };
+    return { id: payload.sub, role: payload.role };
   }
 }

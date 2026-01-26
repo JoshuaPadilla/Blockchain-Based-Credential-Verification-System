@@ -17,6 +17,9 @@ export const Route = createFileRoute("/")({
 });
 
 function HomeComponent() {
+	const { userProfile } = useAuthStore();
+
+	console.log(userProfile);
 	return (
 		<div className="w-full p-8 flex flex-col gap-4">
 			{/* Title */}

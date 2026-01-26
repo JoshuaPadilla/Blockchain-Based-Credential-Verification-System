@@ -3,11 +3,20 @@ import { AppBreadcrumb } from "@/components/custom_components/app_breadcrumb";
 import { Header } from "@/components/custom_components/header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useAuthStore } from "@/stores/auth_store";
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import {
+	createRootRouteWithContext,
+	Outlet,
+	redirect,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
+interface MyRouterContext {
+	auth: ReturnType<typeof useAuthStore.getState>;
+}
+
 const RootLayout = () => {
-	const { user } = useAuthStore();
+	const { user, checkAuth } = useAuthStore();
+
 	return (
 		<SidebarProvider>
 			{user && <AppSidebar />}
@@ -27,4 +36,12 @@ const RootLayout = () => {
 	);
 };
 
-export const Route = createRootRoute({ component: RootLayout });
+export const Route = createRootRouteWithContext<MyRouterContext>()({
+	beforeLoad: async ({ context }) => {
+		// Only check auth if we don't have a user yet
+		if (!context.auth.user) {
+			await context.auth.checkAuth();
+		}
+	},
+	component: RootLayout,
+});

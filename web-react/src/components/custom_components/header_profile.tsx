@@ -9,8 +9,21 @@ import {
 	DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { DropdownMenuContent } from "@radix-ui/react-dropdown-menu";
+import { useAuthStore } from "@/stores/auth_store";
+import { Navigate, useNavigate } from "@tanstack/react-router";
 
 export const HeaderProfile = () => {
+	const { userProfile, logout } = useAuthStore();
+	const navigate = useNavigate();
+
+	const handleLogout = async () => {
+		try {
+			await logout();
+			navigate({ to: "/login" });
+		} catch (error) {
+			console.log("Log out error");
+		}
+	};
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild className="gap-4">
@@ -23,7 +36,7 @@ export const HeaderProfile = () => {
 						/>
 						<AvatarFallback>CN</AvatarFallback>
 					</Avatar>
-					Profile
+					{userProfile?.firstName}
 					<ChevronDown data-icon="inline-end" />
 				</Button>
 			</DropdownMenuTrigger>
@@ -38,7 +51,7 @@ export const HeaderProfile = () => {
 					Settings
 				</DropdownMenuItem>
 				<DropdownMenuSeparator />
-				<DropdownMenuItem variant="destructive">
+				<DropdownMenuItem variant="destructive" onClick={handleLogout}>
 					<LogOutIcon />
 					Log out
 				</DropdownMenuItem>

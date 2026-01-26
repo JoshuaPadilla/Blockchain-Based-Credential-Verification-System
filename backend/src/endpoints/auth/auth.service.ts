@@ -18,6 +18,7 @@ import { JwtService } from "@nestjs/jwt";
 import { AuthJwtPayload } from "src/common/types/jwt_payload";
 import refresh_jwtConfig from "src/configs/refresh_jwt.config";
 import * as config from "@nestjs/config";
+import { stringify } from "querystring";
 
 @Injectable()
 export class AuthService {
@@ -41,10 +42,9 @@ export class AuthService {
     const refreshToken = this.jwtService.sign(payload, this.refreshTokenConfig);
 
     return {
-      id: user.id,
+      user: { id: user.id, role: user.role },
       token,
       refreshToken,
-      role: user.role,
     };
   }
 
@@ -54,6 +54,7 @@ export class AuthService {
 
     return {
       id: user.id,
+      role: user.role,
       token,
     };
   }

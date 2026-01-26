@@ -1,7 +1,13 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	Navigate,
+	redirect,
+	useNavigate,
+} from "@tanstack/react-router";
 import React, { useState } from "react";
 import { Eye, EyeOff, ShieldCheck, Lock } from "lucide-react";
 import { useAuthStore } from "@/stores/auth_store";
+import { Spinner } from "@/components/ui/spinner";
 
 export const Route = createFileRoute("/login")({
 	component: RouteComponent,
@@ -15,9 +21,31 @@ export const Route = createFileRoute("/login")({
 });
 
 function RouteComponent() {
+	const { login, isLoading } = useAuthStore();
+	const navigate = useNavigate();
+
 	const [showPassword, setShowPassword] = useState(false);
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+
+	const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+
+		if (!email || !password) {
+			alert("Please fill in all fields");
+			return;
+		}
+
+		try {
+			await login(email, password);
+
+			// 3. Redirect manually after successful login
+			navigate({ to: "/" });
+		} catch (error) {
+			console.error("Login failed", error);
+			alert("Invalid credentials");
+		}
+	};
 
 	return (
 		<div className="flex min-h-screen w-full font-sans">
@@ -99,10 +127,7 @@ function RouteComponent() {
 						</p>
 					</div>
 
-					<form
-						className="space-y-5"
-						onSubmit={(e) => e.preventDefault()}
-					>
+					<form className="space-y-5" onSubmit={handleLogin}>
 						{/* Email Field */}
 						<div>
 							<label
@@ -182,9 +207,17 @@ function RouteComponent() {
 						{/* Submit Button */}
 						<button
 							type="submit"
+							disabled={isLoading}
 							className="w-full bg-[#0f172a] text-white py-3 px-4 rounded-lg font-semibold hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/10"
 						>
-							Sign in to Dashboard
+							{!isLoading ? (
+								"Sign in to Dashboard"
+							) : (
+								<div className="flex gap-2 items-center justify-center w-full">
+									<Spinner className="" />
+									Signing in
+								</div>
+							)}
 						</button>
 					</form>
 
