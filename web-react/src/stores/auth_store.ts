@@ -5,5 +5,5 @@ type StoreProps = {
 };
 
 export const useAuthStore = create<StoreProps>((set) => ({
-	user: true,
+	user: false,
 }));

@@ -13,12 +13,12 @@ const RootLayout = () => {
 			{user && <AppSidebar />}
 
 			{/* 2. WRAP content in SidebarInset. This pushes content to the right of the sidebar. */}
-			<SidebarInset>
+			<SidebarInset className="bg-accent">
 				{/* 3. Create a sticky header for Trigger + Breadcrumb */}
 				{user && <Header />}
 
 				{/* 4. The main page content goes here */}
-				<div className="flex flex-1 flex-col gap-4 p-4">
+				<div className="flex flex-1 flex-col gap-4">
 					<Outlet />
 				</div>
 			</SidebarInset>
