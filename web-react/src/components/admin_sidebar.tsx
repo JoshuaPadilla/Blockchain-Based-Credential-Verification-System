@@ -13,6 +13,7 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { SideBarHeaderCustom } from "./custom_components/side_bar_header";
 import { Link, useLocation } from "@tanstack/react-router";
@@ -61,11 +62,13 @@ export function AdminSidebar() {
 												to={item.url}
 												activeProps={{
 													className:
-														"bg-sidebar-accent text-sidebar-accent-foreground font-medium",
+														"bg-sidebar-accent text-sidebar-accent-foreground font-semibold m-2",
 												}}
 											>
-												<item.icon />
-												<span>{item.title}</span>
+												<item.icon className="size-6!" />
+												<span className="text-lg font-mono ">
+													{item.title}
+												</span>
 											</Link>
 										</SidebarMenuButton>
 									</SidebarMenuItem>

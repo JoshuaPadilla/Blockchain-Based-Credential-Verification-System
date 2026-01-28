@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { DashboardItemCard } from "@/components/custom_components/dashboard_item_card";
 import { RecentTransactionTable } from "@/components/custom_components/recent_transaction_table";
 import { Button } from "@/components/ui/button";
@@ -12,17 +12,34 @@ import {
 	ClipboardX,
 	FilePlusCorner,
 } from "lucide-react";
+import { useSidebar } from "@/components/ui/sidebar";
 
 export const Route = createFileRoute("/admin/dashboard")({
 	component: RouteComponent,
+	loader: async ({ context }) => {
+		await context.insights.getDashboardInsights();
+		await context.records.getRecords();
+	},
 });
 
 function RouteComponent() {
 	const { dashboardInsights } = useInsightsStore();
 	const { records } = useRecordStore();
+	const { setOpen } = useSidebar();
+
+	const navigate = useNavigate();
+
+	const handleViewAllHistory = () => {
+		navigate({ to: "/admin/credentials" });
+	};
+
+	const handleIssueCredential = () => {
+		setOpen(false);
+		navigate({ to: "/admin/issue_credential" });
+	};
 
 	return (
-		<div className="w-full p-8 flex flex-col gap-4">
+		<div className="w-full flex flex-col gap-4 h-screen p-8">
 			{/* Title */}
 			<div className="flex justify-between items-center">
 				<div>
@@ -32,7 +49,12 @@ function RouteComponent() {
 					</p>
 				</div>
 
-				<Button variant="default" size={"lg"} className="p-6">
+				<Button
+					variant="default"
+					size={"lg"}
+					className="p-6"
+					onClick={handleIssueCredential}
+				>
 					<FilePlusCorner />
 					Issue New Credential
 				</Button>
@@ -66,7 +88,12 @@ function RouteComponent() {
 						Recent Transactions
 					</h3>
 
-					<Button variant="ghost" size="lg" className="text-blue-400">
+					<Button
+						variant="ghost"
+						size="lg"
+						className="text-blue-400"
+						onClick={handleViewAllHistory}
+					>
 						View All History
 						<ArrowRight />
 					</Button>

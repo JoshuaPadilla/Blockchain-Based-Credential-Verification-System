@@ -15,7 +15,7 @@ export const DashboardItemCard = ({
 	children,
 }: Props) => {
 	return (
-		<div className="p-6 flex-1 flex flex-col gap-2 rounded-xl bg-white">
+		<div className="p-6 flex-1 flex flex-col gap-2 rounded-xl bg-white border border-accent shadow">
 			<div className="flex items-center gap-2 ">
 				{Icon}{" "}
 				<p className="text-black/50 font-heading text-xl">{title}</p>

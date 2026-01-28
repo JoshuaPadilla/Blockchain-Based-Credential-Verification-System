@@ -1,6 +1,10 @@
 import { AdminSidebar } from "@/components/admin_sidebar";
 import { AdminHeader } from "@/components/custom_components/admin_header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import {
+	SidebarInset,
+	SidebarProvider,
+	SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/admin")({
@@ -19,8 +23,10 @@ function AdminLayout() {
 		<SidebarProvider>
 			<AdminSidebar />
 			<SidebarInset>
-				<AdminHeader />
-				<div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+				<AdminHeader>
+					<SidebarTrigger />
+				</AdminHeader>
+				<div className="flex flex-1 flex-col gap-4">
 					{/* This Outlet renders child routes like /admin/dashboard */}
 					<Outlet />
 				</div>

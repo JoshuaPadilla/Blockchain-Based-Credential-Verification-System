@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
+import { Route as AdminIssue_credentialRouteImport } from './routes/admin/issue_credential'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
 import { Route as AdminCredentialsRouteImport } from './routes/admin/credentials'
 import { Route as AdminStudentsRouteRouteImport } from './routes/admin/students/route'
@@ -50,6 +51,11 @@ const PostsPostIdRoute = PostsPostIdRouteImport.update({
   path: '/posts/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIssue_credentialRoute = AdminIssue_credentialRouteImport.update({
+  id: '/issue_credential',
+  path: '/issue_credential',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminDashboardRoute = AdminDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/admin/students': typeof AdminStudentsRouteRouteWithChildren
   '/admin/credentials': typeof AdminCredentialsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/issue_credential': typeof AdminIssue_credentialRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/admin/': typeof AdminIndexRoute
   '/posts/': typeof PostsIndexRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/admin/credentials': typeof AdminCredentialsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/issue_credential': typeof AdminIssue_credentialRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/admin': typeof AdminIndexRoute
   '/posts': typeof PostsIndexRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/admin/students': typeof AdminStudentsRouteRouteWithChildren
   '/admin/credentials': typeof AdminCredentialsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
+  '/admin/issue_credential': typeof AdminIssue_credentialRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/admin/': typeof AdminIndexRoute
   '/posts/': typeof PostsIndexRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/admin/students'
     | '/admin/credentials'
     | '/admin/dashboard'
+    | '/admin/issue_credential'
     | '/posts/$postId'
     | '/admin/'
     | '/posts/'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/admin/credentials'
     | '/admin/dashboard'
+    | '/admin/issue_credential'
     | '/posts/$postId'
     | '/admin'
     | '/posts'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/admin/students'
     | '/admin/credentials'
     | '/admin/dashboard'
+    | '/admin/issue_credential'
     | '/posts/$postId'
     | '/admin/'
     | '/posts/'
@@ -195,6 +207,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/issue_credential': {
+      id: '/admin/issue_credential'
+      path: '/issue_credential'
+      fullPath: '/admin/issue_credential'
+      preLoaderRoute: typeof AdminIssue_credentialRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/dashboard': {
       id: '/admin/dashboard'
       path: '/dashboard'
@@ -241,6 +260,7 @@ interface AdminRouteRouteChildren {
   AdminStudentsRouteRoute: typeof AdminStudentsRouteRouteWithChildren
   AdminCredentialsRoute: typeof AdminCredentialsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
+  AdminIssue_credentialRoute: typeof AdminIssue_credentialRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -248,6 +268,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminStudentsRouteRoute: AdminStudentsRouteRouteWithChildren,
   AdminCredentialsRoute: AdminCredentialsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
+  AdminIssue_credentialRoute: AdminIssue_credentialRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
