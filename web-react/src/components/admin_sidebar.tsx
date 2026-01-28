@@ -7,7 +7,6 @@ import {
 import {
 	Sidebar,
 	SidebarContent,
-	SidebarFooter,
 	SidebarGroup,
 	SidebarGroupContent,
 	SidebarHeader,
@@ -22,23 +21,22 @@ import { Link, useLocation } from "@tanstack/react-router";
 const items = [
 	{
 		title: "Dashboard",
-		url: "/",
+		url: "/admin/dashboard",
 		icon: LayoutDashboard,
 	},
 	{
 		title: "Credentials",
-		url: "/credentials",
+		url: "/admin/credentials",
 		icon: Newspaper,
 	},
 	{
 		title: "Students",
-		url: "/students",
+		url: "/admin/students",
 		icon: GraduationCap,
 	},
 ];
 
 export function AdminSidebar() {
-	const location = useLocation();
 	return (
 		<Sidebar>
 			{/* header */}
