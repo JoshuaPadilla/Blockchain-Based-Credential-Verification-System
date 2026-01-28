@@ -50,21 +50,20 @@ export function AdminSidebar() {
 					<SidebarGroupContent className="">
 						<SidebarMenu className="p-1">
 							{items.map((item) => {
-								const isActive =
-									item.url === "/"
-										? location.pathname === "/"
-										: location.pathname.startsWith(
-												item.url,
-											);
 								return (
 									<SidebarMenuItem key={item.title}>
 										{/* 4. Pass isActive to Shadcn Button */}
 										<SidebarMenuButton
 											asChild
-											isActive={isActive}
 											tooltip={item.title}
 										>
-											<Link to={item.url}>
+											<Link
+												to={item.url}
+												activeProps={{
+													className:
+														"bg-sidebar-accent text-sidebar-accent-foreground font-medium",
+												}}
+											>
 												<item.icon />
 												<span>{item.title}</span>
 											</Link>
