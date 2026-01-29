@@ -1,14 +1,9 @@
+import { Award, FileBadge, UserSearch } from "lucide-react";
 import React from "react";
 import { Button } from "../ui/button";
-import { UserSearch } from "lucide-react";
-import { Avatar } from "../ui/avatar";
-import { AvatarImage } from "@radix-ui/react-avatar";
+import { Avatar, AvatarImage } from "../ui/avatar";
 
-type Props = {
-	handleClick: () => void;
-};
-
-export const AddStudentTrigger = ({ handleClick }: Props) => {
+export const SelectCredentialTrigger = () => {
 	return (
 		<div className="flex-1 max-h-fit border border-black/30 rounded-lg bg-white shadow p-4">
 			{/* header */}
@@ -23,7 +18,7 @@ export const AddStudentTrigger = ({ handleClick }: Props) => {
 
 				<Button
 					variant={"ghost"}
-					onClick={handleClick}
+					onClick={() => {}}
 					className="self-center"
 				>
 					<p className="font-bold font-mono text-button-primary">
@@ -32,22 +27,12 @@ export const AddStudentTrigger = ({ handleClick }: Props) => {
 				</Button>
 			</div>
 
-			{/* student card */}
+			<h2 className="font-mono text-base mb-2">Selected Credential:</h2>
+			{/* selected credential card */}
 			<div className="flex gap-2 border border-black/30 p-4 items-center rounded-lg">
-				<Avatar size="lg">
-					<AvatarImage
-						src="https://github.com/shadcn.png"
-						alt="@shadcn"
-						className="grayscale"
-					/>
-				</Avatar>
+				<Award className="size-8" />
 
-				<div>
-					<h1 className="font-mono">22-00377</h1>
-					<p className="font-mono text-sm text-accent-foreground">
-						Joshua Vincent Padilla
-					</p>
-				</div>
+				<h1 className="font-mono">Diploma</h1>
 			</div>
 		</div>
 	);
