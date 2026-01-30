@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { DiplomaPDF } from "./components/diploma/diploma_pdf";
+import { DiplomaPDF } from "./components/pdf_documents/diploma/diploma_pdf";
 import ReactPDF, { PDFViewer } from "@react-pdf/renderer";
 import QRCode from "qrcode";
 

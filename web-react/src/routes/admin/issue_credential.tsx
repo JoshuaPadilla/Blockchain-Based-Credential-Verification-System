@@ -18,8 +18,10 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 ).toString();
 
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useMemo, useState } from "react";
-import { DiplomaPDF } from "@/components/diploma/diploma_pdf";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { DiplomaPDF } from "@/components/pdf_documents/diploma/diploma_pdf";
+import { error } from "console";
+import { usePdfStore } from "@/stores/pdf_store";
 
 // Assuming DiplomaPDF is your component built with @react-pdf/renderer primitives
 
@@ -28,10 +30,10 @@ export const Route = createFileRoute("/admin/issue_credential")({
 });
 
 function RouteComponent() {
+	const { getPreview } = usePdfStore();
 	const [isOpen, setIsOpen] = useState(false);
 
 	const [containerWidth, setContainerWidth] = useState<number>();
-	console.log(containerWidth);
 
 	// 2. Create a callback ref to measure the element whenever it resizes
 	const onRefChange = useCallback((node: HTMLDivElement | null) => {
@@ -52,9 +54,35 @@ function RouteComponent() {
 
 	// 4. Generate the PDF Blob in the background
 	// 'instance' contains the blob, url, and loading state
-	const MyDocument = useMemo(() => <DiplomaPDF qrUrl="sample" />, []);
 
-	const [instance] = usePDF({ document: MyDocument });
+	const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+	const [loading, setLoading] = useState(false);
+
+	useEffect(() => {
+		const loadPdf = async () => {
+			try {
+				setLoading(true);
+
+				// 1. Fetch Blob from Axios
+				const blobData = await getPreview();
+
+				// 2. Create a temporary local URL for the PDF
+				const url = URL.createObjectURL(blobData);
+				setPdfUrl(url);
+			} catch (error) {
+				console.error("Failed to load PDF", error);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		loadPdf();
+
+		// Cleanup: Revoke URL to free memory when component unmounts
+		return () => {
+			if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+		};
+	}, []);
 
 	return (
 		<>
@@ -67,7 +95,7 @@ function RouteComponent() {
 				</h3>
 
 				{/* Main content */}
-				<div className=" grid grid-cols-8 grid-rows-2 gap-2 w-full h-full">
+				<div className="grid grid-cols-8 grid-rows-2 gap-2 w-full h-full">
 					{/* Triggers */}
 					<div className="col-start-1 col-span-2 row-start-1 row-span-2 flex flex-col gap-2">
 						<AddStudentTrigger
@@ -87,12 +115,9 @@ function RouteComponent() {
 
 							{/* 5. Custom Download Button */}
 							{/* We use a standard HTML <a> tag pointing to the generated URL */}
-							{instance.url && (
+							{pdfUrl && (
 								<Button asChild>
-									<a
-										href={instance.url}
-										download="credential.pdf"
-									>
+									<a href={pdfUrl} download="credential.pdf">
 										Download PDF
 									</a>
 								</Button>
@@ -104,23 +129,21 @@ function RouteComponent() {
 						<div className="flex-1 flex justify-center items-center overflow-hidden w-full h-full p-4 gap-4">
 							{/* Document container */}
 							<div
-								className="flex max-w-[70%] w-full items-center justify-center shadow-2xl rounded-xl overflow-clip"
+								className="flex max-w-[70%] w-full items-center justify-center shadow-2xl rounded-md overflow-clip"
 								ref={onRefChange}
 							>
-								{instance.loading ? (
-									<div>Loading Preview...</div>
-								) : (
-									<Document file={instance.url}>
-										<Page
-											pageNumber={1}
-											/* 4. Pass the measured width here */
-											/* We subtract a small amount (e.g. 2px) to prevent sub-pixel overflow scrollbars */
-											width={containerWidth}
-											renderTextLayer={false}
-											renderAnnotationLayer={false}
-										/>
-									</Document>
-								)}
+								{loading && <div>Loading Preview...</div>}
+
+								<Document file={pdfUrl}>
+									<Page
+										pageNumber={1}
+										/* 4. Pass the measured width here */
+										/* We subtract a small amount (e.g. 2px) to prevent sub-pixel overflow scrollbars */
+										width={containerWidth}
+										renderTextLayer={false}
+										renderAnnotationLayer={false}
+									/>
+								</Document>
 							</div>
 
 							{/* buttons and details */}

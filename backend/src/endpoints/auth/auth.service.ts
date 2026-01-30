@@ -50,7 +50,6 @@ export class AuthService {
 
   async refreshToken(user: { id: string; role: Role }) {
     const payload: AuthJwtPayload = { sub: user.id, role: user.role };
-    console.log(payload);
     const token = this.jwtService.sign(payload);
 
     return {
