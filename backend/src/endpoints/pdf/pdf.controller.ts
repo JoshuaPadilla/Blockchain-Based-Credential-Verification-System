@@ -11,12 +11,12 @@ export class PdfController {
   // The endpoint will be: http://localhost:3000/pdf/download?name=Joshua
   @Get("preview")
   async downloadPdf(
-    @Query("student") name: string,
+    @Query("id") studentId: string,
     @Res() res: Response, // We need direct access to the Express response
   ) {
     // const studentName = name || "Student";
     // // 1. Ask the Service to create the stream
-    const pdfStream = await this.pdfService.generateCertificate();
+    const pdfStream = await this.pdfService.generateCertificate(studentId);
     // // 2. Tell the browser "This is a PDF file, please download it"
     res.set({
       "Content-Type": "application/pdf",

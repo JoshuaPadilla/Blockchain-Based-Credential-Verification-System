@@ -1,34 +1,34 @@
-import { Document, Image, Page, Text, View } from "@react-pdf/renderer";
+import { Document, Image, Page, Text, View } from '@react-pdf/renderer';
 
-import { join } from "path";
+import { join } from 'path';
 import {
   getOrdinalDay,
   yearToWords,
-} from "src/common/helpers/number_to_words.helper";
-import { styles } from "./styles";
-import React from "react";
-import { generateQr } from "src/common/helpers/qr_helper";
+} from 'src/common/helpers/number_to_words.helper';
+import { styles } from './styles';
+import React from 'react';
+import { generateQr } from 'src/common/helpers/qr_helper';
 
 interface DiplomaProps {
-  name?: string;
-  course?: string;
-  distinction?: string;
+  name: string;
+  course: string;
+  distinction: string;
   qrCodeUrl: string;
 }
 
 export const Diploma = ({
-  name = "JUAN DELA CRUZ",
-  course = "Bachelor of Science in Office Administration",
-  distinction = "MAGNA CUM LAUDE",
+  name,
+  course,
+  distinction,
   qrCodeUrl,
 }: DiplomaProps) => {
   const logoPath = join(
     process.cwd(),
-    "src/assets/template_assets/school_logo.png",
+    'src/assets/template_assets/school_logo.png',
   );
   const borderPath = join(
     process.cwd(),
-    "src/assets/template_assets/diploma_bg.png",
+    'src/assets/template_assets/diploma_bg.png',
   );
   const today = new Date();
 
