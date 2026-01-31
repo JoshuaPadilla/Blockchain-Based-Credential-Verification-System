@@ -22,8 +22,13 @@ export class RecordController {
   constructor(private readonly recordService: RecordService) {}
 
   @Get()
-  getAllRecords() {
+  findAll() {
     return this.recordService.getAllRecords();
+  }
+
+  @Get(":recordId")
+  findOne(@Param("recordId") recordId: string) {
+    return this.recordService.getRecord(recordId);
   }
 
   @Post()

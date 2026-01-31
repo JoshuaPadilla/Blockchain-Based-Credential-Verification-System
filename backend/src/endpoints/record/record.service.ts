@@ -93,6 +93,13 @@ export class RecordService {
     });
   }
 
+  async getRecord(recordId: string) {
+    return this.recordRepository.findOne({
+      where: { id: recordId },
+      relations: ["student"],
+    });
+  }
+
   async deleteRecords() {
     return this.recordRepository.deleteAll();
   }

@@ -11,6 +11,7 @@ type StoreProps = {
 		cutOffYear?: string,
 		cutOffSemester?: number,
 	) => Promise<Record>;
+	getRecord: (recordId: string) => Promise<Record>;
 };
 
 export const useRecordStore = create<StoreProps>((set) => ({
@@ -33,14 +34,16 @@ export const useRecordStore = create<StoreProps>((set) => ({
 		cutOffYear,
 		cutOffSemester,
 	) => {
-
-
-		
 		const res = await axiosClient.post("record", {
 			studentId: studentId,
 			credentialTypeId: credentialTypeId,
 		});
 
 		if (res.status === 201) return res.data;
+	},
+	getRecord: async (recordId) => {
+		const res = await axiosClient.get(`record/${recordId}`);
+
+		if (res.status === 200) return res.data;
 	},
 }));

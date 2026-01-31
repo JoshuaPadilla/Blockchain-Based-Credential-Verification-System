@@ -22,9 +22,7 @@ export class PdfService {
   ): Promise<NodeJS.ReadableStream> {
     // Render the React component to a stream
 
-    const qrCodeData = await generateQr(
-      "myapp.com/verify/dff2e07f-342d-48a3-bc99-a9a16f015b08",
-    );
+    const qrCodeData = await generateQr("myapp.com/verify/asdsass");
 
     const student = await this.studentRepo.findOneBy({ id: studentId });
 

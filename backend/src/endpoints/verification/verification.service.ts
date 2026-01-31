@@ -32,7 +32,7 @@ export class VerificationService {
       await this.blockchainService.verify(recordId);
 
     const offChainRecord = await this.recordRepository.findOne({
-      where: { id: recordId },
+      where: { credentialRef: recordId },
       relations: ["student", "signedBy"],
     });
 

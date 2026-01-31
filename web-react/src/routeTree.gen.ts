@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
+import { Route as AdminSucess_issueRouteImport } from './routes/admin/sucess_issue'
 import { Route as AdminIssue_credentialRouteImport } from './routes/admin/issue_credential'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
 import { Route as AdminCredentialsRouteImport } from './routes/admin/credentials'
@@ -51,6 +52,11 @@ const PostsPostIdRoute = PostsPostIdRouteImport.update({
   path: '/posts/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminSucess_issueRoute = AdminSucess_issueRouteImport.update({
+  id: '/sucess_issue',
+  path: '/sucess_issue',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminIssue_credentialRoute = AdminIssue_credentialRouteImport.update({
   id: '/issue_credential',
   path: '/issue_credential',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/admin/credentials': typeof AdminCredentialsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/issue_credential': typeof AdminIssue_credentialRoute
+  '/admin/sucess_issue': typeof AdminSucess_issueRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/admin/': typeof AdminIndexRoute
   '/posts/': typeof PostsIndexRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/admin/credentials': typeof AdminCredentialsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/issue_credential': typeof AdminIssue_credentialRoute
+  '/admin/sucess_issue': typeof AdminSucess_issueRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/admin': typeof AdminIndexRoute
   '/posts': typeof PostsIndexRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/admin/credentials': typeof AdminCredentialsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/issue_credential': typeof AdminIssue_credentialRoute
+  '/admin/sucess_issue': typeof AdminSucess_issueRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/admin/': typeof AdminIndexRoute
   '/posts/': typeof PostsIndexRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/admin/credentials'
     | '/admin/dashboard'
     | '/admin/issue_credential'
+    | '/admin/sucess_issue'
     | '/posts/$postId'
     | '/admin/'
     | '/posts/'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/admin/credentials'
     | '/admin/dashboard'
     | '/admin/issue_credential'
+    | '/admin/sucess_issue'
     | '/posts/$postId'
     | '/admin'
     | '/posts'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/admin/credentials'
     | '/admin/dashboard'
     | '/admin/issue_credential'
+    | '/admin/sucess_issue'
     | '/posts/$postId'
     | '/admin/'
     | '/posts/'
@@ -207,6 +219,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/sucess_issue': {
+      id: '/admin/sucess_issue'
+      path: '/sucess_issue'
+      fullPath: '/admin/sucess_issue'
+      preLoaderRoute: typeof AdminSucess_issueRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/issue_credential': {
       id: '/admin/issue_credential'
       path: '/issue_credential'
@@ -261,6 +280,7 @@ interface AdminRouteRouteChildren {
   AdminCredentialsRoute: typeof AdminCredentialsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminIssue_credentialRoute: typeof AdminIssue_credentialRoute
+  AdminSucess_issueRoute: typeof AdminSucess_issueRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -269,6 +289,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminCredentialsRoute: AdminCredentialsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminIssue_credentialRoute: AdminIssue_credentialRoute,
+  AdminSucess_issueRoute: AdminSucess_issueRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 

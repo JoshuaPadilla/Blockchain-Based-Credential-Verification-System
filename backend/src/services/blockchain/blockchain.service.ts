@@ -51,7 +51,12 @@ export class BlockChainService implements OnModuleInit {
   }
 
   async addRecord(record: Record) {
-    const { id: recordId, dataHash, expiration, credentialType } = record;
+    const {
+      credentialRef: recordId,
+      dataHash,
+      expiration,
+      credentialType,
+    } = record;
 
     try {
       const tx = await this.ownerContract.addRecord(
