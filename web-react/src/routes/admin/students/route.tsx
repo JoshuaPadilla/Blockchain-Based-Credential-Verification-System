@@ -1,4 +1,4 @@
-import { StudentSelector } from "@/components/custom_components/combobox";
+import { StudentSelector } from "@/components/custom_components/student_selector";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/admin/students")({

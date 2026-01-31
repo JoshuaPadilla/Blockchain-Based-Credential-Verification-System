@@ -16,10 +16,15 @@ export class PdfService {
     @InjectRepository(Student) private studentRepo: Repository<Student>,
   ) {}
 
-  async generateCertificate(studentId: string): Promise<NodeJS.ReadableStream> {
+  async generateCertificate(
+    studentId: string,
+    credentialType: CredentialType,
+  ): Promise<NodeJS.ReadableStream> {
     // Render the React component to a stream
 
-    const qrCodeData = await generateQr("sample only");
+    const qrCodeData = await generateQr(
+      "0xf58967a7787450c7d122df47ac5a0f5e68c2d847e2356f483e6ca839204ec64d",
+    );
 
     const student = await this.studentRepo.findOneBy({ id: studentId });
 
@@ -27,11 +32,7 @@ export class PdfService {
       throw new NotFoundException("Student not found");
     }
 
-    const diplomaPdf = getPdfToRender(
-      student,
-      CredentialType.DIPLOMA,
-      qrCodeData,
-    );
+    const diplomaPdf = getPdfToRender(student, credentialType, qrCodeData);
 
     if (!diplomaPdf) {
       throw new NotFoundException("credential type not found");

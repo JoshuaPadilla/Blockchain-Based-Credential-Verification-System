@@ -2,6 +2,7 @@ import React from 'react'; // Required for JSX
 import { Student } from '../entities/student.entity';
 import { CredentialType } from '../enums/credential_type.enum';
 import { Diploma } from '../../pdf_templates/diploma/diploma';
+import { NotFoundException } from '@nestjs/common';
 
 // Import your actual components here
 // import { HonorableDismissal } from './HonorableDismissal';
@@ -37,6 +38,8 @@ export const getPdfToRender = (
     // case CredentialType.CAV:
 
     default:
-      throw new Error(`Unsupported credential type: ${credentialName}`);
+      throw new NotFoundException(
+        `Unsupported credential type: ${credentialName}`,
+      );
   }
 };

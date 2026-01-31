@@ -1,17 +1,27 @@
 import axiosClient from "@/api/axios_client";
+import type { CredentialEnumType } from "@/enums/credential_type.enum";
 import { create } from "zustand";
 
 type StoreProps = {
-	getPreview: () => Promise<Blob>;
+	getPreview: (
+		studentId: string,
+		credentialType: CredentialEnumType,
+	) => Promise<Blob | null>;
 };
 
 export const usePdfStore = create<StoreProps>((set) => ({
-	getPreview: async () => {
-		const res = await axiosClient.get("pdf/preview", {
-			params: { id: "3ec3ec32-0860-4ba3-889b-6d9f50886dab" },
-			responseType: "blob",
-		});
+	getPreview: async (studentId, credentialType) => {
+		const res = await axiosClient.get(
+			`pdf/preview?studentId=${studentId}&credentialName=${credentialType}`,
+			{
+				responseType: "blob",
+			},
+		);
 
-		return res.data;
+		if (res.status === 200) {
+			return res.data;
+		}
+
+		return null;
 	},
 }));

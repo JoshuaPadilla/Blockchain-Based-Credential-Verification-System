@@ -1,9 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
-import { Check, Search, User } from "lucide-react";
-import { useDebounce } from "use-debounce";
-import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
 	Command,
@@ -18,10 +15,14 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useQuery } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 import { useStudentStore } from "@/stores/student_store";
 import type { Student } from "@/types/student.type";
+import { useQuery } from "@tanstack/react-query";
+import { Check, User } from "lucide-react";
+import React, { useState } from "react";
+import { useDebounce } from "use-debounce";
+import { Spinner } from "../ui/spinner";
 
 // MOCK DATA: Replace this with your API data
 
@@ -59,9 +60,11 @@ export function StudentSelector({ onSelectStudent }: StudentSelectorProps) {
 		<div className="w-full bg-white rounded-xl border shadow-sm p-4">
 			{/* HEADER: Title + Pick Button */}
 			<div className="flex justify-between items-center mb-4">
-				<div className="flex items-center gap-2 text-muted-foreground font-medium">
-					<User className="w-4 h-4" />
-					<span>Select student</span>
+				<div className="flex items-center gap-2 font-medium">
+					<User className="w-5 h-5" color="#256af4" />
+					<span className="font-mono text-xs text-primary">
+						Select student
+					</span>
 				</div>
 
 				{/* The "Pick" Button that opens the Search */}
@@ -83,7 +86,15 @@ export function StudentSelector({ onSelectStudent }: StudentSelectorProps) {
 								onValueChange={setSearchTerm}
 							/>
 							<CommandList>
-								<CommandEmpty>No student found.</CommandEmpty>
+								<CommandEmpty>
+									{isLoading ? (
+										<div className="flex items-center justify-center">
+											<Spinner className="size-6" />
+										</div>
+									) : (
+										"No student found"
+									)}
+								</CommandEmpty>
 								<CommandGroup>
 									{students.map((student) => {
 										const fullname = `${student.firstName} ${student.middleName} ${student.lastName}`;
@@ -127,7 +138,7 @@ export function StudentSelector({ onSelectStudent }: StudentSelectorProps) {
 
 			{/* DISPLAY CARD: Matches your screenshot design */}
 			{selectedStudent ? (
-				<div className="flex items-center gap-4 border rounded-lg p-3 bg-gray-50/50">
+				<div className="flex items-center gap-4 border-2 border-dashed border-button-primary rounded-lg p-3 bg-gray-50/50">
 					<Avatar className="h-12 w-12 border-2 border-white shadow-sm">
 						<AvatarImage alt={selectedStudent.firstName} />
 						<AvatarFallback className="bg-slate-200 text-slate-600">

@@ -1,10 +1,6 @@
-import { AddStudentTrigger } from "@/components/custom_components/add_student_trigger";
-import { SelectCredentialTrigger } from "@/components/custom_components/select_credential_trigger";
-import { SelectStudentModal } from "@/components/custom_components/select_student_modal";
 import { Button } from "@/components/ui/button";
 
 // 1. Import the Generator Hook
-import { usePDF } from "@react-pdf/renderer";
 
 // 2. Import the Viewer Components (Wojtek Maj)
 import { Document, Page, pdfjs } from "react-pdf";
@@ -17,12 +13,15 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 	import.meta.url,
 ).toString();
 
-import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { DiplomaPDF } from "@/components/pdf_documents/diploma/diploma_pdf";
-import { error } from "console";
+import { CredentialTypeSelector } from "@/components/custom_components/credential_type_selector";
+import { StudentSelector } from "@/components/custom_components/student_selector";
+import { cn } from "@/lib/utils";
 import { usePdfStore } from "@/stores/pdf_store";
-import { StudentSelector } from "@/components/custom_components/combobox";
+import type { CredentialType } from "@/types/credential_type.type";
+import type { Student } from "@/types/student.type";
+import { createFileRoute } from "@tanstack/react-router";
+import { FileStack, Loader } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 // Assuming DiplomaPDF is your component built with @react-pdf/renderer primitives
 
@@ -32,7 +31,6 @@ export const Route = createFileRoute("/admin/issue_credential")({
 
 function RouteComponent() {
 	const { getPreview } = usePdfStore();
-	const [isOpen, setIsOpen] = useState(false);
 
 	const [containerWidth, setContainerWidth] = useState<number>();
 
@@ -59,36 +57,48 @@ function RouteComponent() {
 	const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 
+	const [selectedStudent, setSelectedStudent] = useState<Student | null>(
+		null,
+	);
+	const [selectedCredentialType, setSelectedCredentialType] =
+		useState<CredentialType | null>(null);
+
 	useEffect(() => {
+		setPdfUrl(null);
 		const loadPdf = async () => {
+			if (!selectedStudent || !selectedCredentialType) return;
+
 			try {
 				setLoading(true);
+				const blobData = await getPreview(
+					selectedStudent.id,
+					selectedCredentialType.name,
+				);
 
-				// 1. Fetch Blob from Axios
-				const blobData = await getPreview();
+				if (!blobData) {
+					setPdfUrl(null); // Explicitly ensure it stays null
+					return;
+				}
 
-				// 2. Create a temporary local URL for the PDF
 				const url = URL.createObjectURL(blobData);
 				setPdfUrl(url);
 			} catch (error) {
 				console.error("Failed to load PDF", error);
+				setPdfUrl(null); // Ensure null on error
 			} finally {
 				setLoading(false);
 			}
 		};
 
-		loadPdf();
+		loadPdf(); // Call the function
 
-		// Cleanup: Revoke URL to free memory when component unmounts
 		return () => {
 			if (pdfUrl) URL.revokeObjectURL(pdfUrl);
 		};
-	}, []);
+	}, [selectedStudent, selectedCredentialType]); // Dependencies
 
 	return (
 		<>
-			<SelectStudentModal isOpen={isOpen} setIsOpen={setIsOpen} />
-
 			<div className=" px-16 py-8 flex flex-col flex-1 justify-start gap-4 ">
 				{/* Title */}
 				<h3 className="font-mono font-extrabold text-3xl">
@@ -99,9 +109,11 @@ function RouteComponent() {
 				<div className="grid grid-cols-8 grid-rows-2 gap-2 w-full h-full">
 					{/* Triggers */}
 					<div className="col-start-1 col-span-2 row-start-1 row-span-2 flex flex-col gap-2">
-						<StudentSelector onSelectStudent={() => {}} />
+						<StudentSelector onSelectStudent={setSelectedStudent} />
 
-						<SelectCredentialTrigger />
+						<CredentialTypeSelector
+							onSelectCredential={setSelectedCredentialType}
+						/>
 					</div>
 
 					{/* Preview */}
@@ -128,21 +140,54 @@ function RouteComponent() {
 						<div className="flex-1 flex justify-center items-center overflow-hidden w-full h-full p-4 gap-4">
 							{/* Document container */}
 							<div
-								className="flex max-w-[70%] w-full items-center justify-center shadow-2xl rounded-md overflow-clip"
+								className={`flex max-w-[70%] w-full items-center justify-center shadow-2xl rounded-md overflow-clip ${!pdfUrl && "h-full"}`}
 								ref={onRefChange}
 							>
-								{loading && <div>Loading Preview...</div>}
+								{loading && (
+									<div>
+										<Loader
+											role="status"
+											aria-label="Loading"
+											className={cn(
+												"size-12 animate-spin",
+											)}
+										/>
+									</div>
+								)}
 
-								<Document file={pdfUrl}>
-									<Page
-										pageNumber={1}
-										/* 4. Pass the measured width here */
-										/* We subtract a small amount (e.g. 2px) to prevent sub-pixel overflow scrollbars */
-										width={containerWidth}
-										renderTextLayer={false}
-										renderAnnotationLayer={false}
-									/>
-								</Document>
+								{/* B. PDF STATE vs EMPTY STATE */}
+								{pdfUrl ? (
+									<Document
+										file={pdfUrl}
+										className="flex justify-center"
+									>
+										<Page
+											pageNumber={1}
+											width={
+												containerWidth
+													? containerWidth - 4
+													: undefined
+											} // Subtract small buffer for borders
+											renderTextLayer={false}
+											renderAnnotationLayer={false}
+										/>
+									</Document>
+								) : (
+									// C. YOUR CUSTOM "NO DATA" COMPONENT
+									// This renders when pdfUrl is null and not loading
+									!loading && (
+										<div className="flex flex-col items-center justify-center gap-2 text-muted-foreground opacity-50">
+											<FileStack className="size-12" />{" "}
+											{/* Optional Icon */}
+											<p className="font-mono text-sm text-center px-8">
+												Select a student and credential
+												type
+												<br />
+												to generate a preview.
+											</p>
+										</div>
+									)
+								)}
 							</div>
 
 							{/* buttons and details */}

@@ -3,6 +3,7 @@ import { PdfService } from "./pdf.service";
 import type { Response } from "express";
 import { Font } from "@react-pdf/renderer";
 import path from "path";
+import { CredentialType } from "src/common/enums/credential_type.enum";
 
 @Controller("pdf")
 export class PdfController {
@@ -11,12 +12,16 @@ export class PdfController {
   // The endpoint will be: http://localhost:3000/pdf/download?name=Joshua
   @Get("preview")
   async downloadPdf(
-    @Query("id") studentId: string,
+    @Query("studentId") studentId: string,
+    @Query("credentialName") credentialType: CredentialType,
     @Res() res: Response, // We need direct access to the Express response
   ) {
     // const studentName = name || "Student";
     // // 1. Ask the Service to create the stream
-    const pdfStream = await this.pdfService.generateCertificate(studentId);
+    const pdfStream = await this.pdfService.generateCertificate(
+      studentId,
+      credentialType,
+    );
     // // 2. Tell the browser "This is a PDF file, please download it"
     res.set({
       "Content-Type": "application/pdf",
