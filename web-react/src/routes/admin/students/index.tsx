@@ -1,3 +1,4 @@
+import { StudentSelector } from "@/components/custom_components/combobox";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/admin/students/")({
@@ -5,5 +6,9 @@ export const Route = createFileRoute("/admin/students/")({
 });
 
 function RouteComponent() {
-	return <div>Hello "/admin/students/"!</div>;
+	const handleOnSelect = (id: string) => {
+		console.log(id);
+	};
+
+	return <StudentSelector onSelect={handleOnSelect} />;
 }

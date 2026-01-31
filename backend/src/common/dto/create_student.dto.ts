@@ -20,6 +20,9 @@ class PreviousEducationDto {
 
 export class CreateStudentDto {
   @IsString()
+  student_id: string;
+
+  @IsString()
   firstName: string;
 
   @IsString()

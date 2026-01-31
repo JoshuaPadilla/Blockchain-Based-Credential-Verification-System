@@ -22,6 +22,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { DiplomaPDF } from "@/components/pdf_documents/diploma/diploma_pdf";
 import { error } from "console";
 import { usePdfStore } from "@/stores/pdf_store";
+import { StudentSelector } from "@/components/custom_components/combobox";
 
 // Assuming DiplomaPDF is your component built with @react-pdf/renderer primitives
 
@@ -98,9 +99,7 @@ function RouteComponent() {
 				<div className="grid grid-cols-8 grid-rows-2 gap-2 w-full h-full">
 					{/* Triggers */}
 					<div className="col-start-1 col-span-2 row-start-1 row-span-2 flex flex-col gap-2">
-						<AddStudentTrigger
-							handleClick={() => setIsOpen(true)}
-						/>
+						<StudentSelector onSelectStudent={() => {}} />
 
 						<SelectCredentialTrigger />
 					</div>

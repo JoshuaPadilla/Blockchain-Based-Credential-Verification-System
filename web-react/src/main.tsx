@@ -12,6 +12,7 @@ import { routeTree } from "./routeTree.gen";
 import { useAuthStore } from "./stores/auth_store";
 import { useInsightsStore } from "./stores/insights_store";
 import { useRecordStore } from "./stores/record_store";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Create a new router instance
 const router = createRouter({
@@ -22,6 +23,8 @@ const router = createRouter({
 		records: undefined!,
 	},
 });
+
+const queryClient = new QueryClient();
 
 // Register the router instance for type safety
 declare module "@tanstack/react-router" {
@@ -46,7 +49,9 @@ if (!rootElement.innerHTML) {
 	const root = ReactDOM.createRoot(rootElement);
 	root.render(
 		<StrictMode>
-			<App />
+			<QueryClientProvider client={queryClient}>
+				<App />
+			</QueryClientProvider>
 		</StrictMode>,
 	);
 }

@@ -15,6 +15,9 @@ export class Student {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ nullable: true })
+  student_id: string;
+
   @Column()
   firstName: string;
 

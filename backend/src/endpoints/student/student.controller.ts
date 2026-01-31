@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from "@nestjs/common";
 import { StudentService } from "./student.service";
 import { CreateStudentDto } from "src/common/dto/create_student.dto";
 
@@ -7,8 +15,8 @@ export class StudentController {
   constructor(private readonly studentService: StudentService) {}
 
   @Get()
-  async findAll() {
-    return this.studentService.findAll();
+  async findAll(@Query("q") query?: string) {
+    return this.studentService.findAll(query);
   }
 
   @Post()
