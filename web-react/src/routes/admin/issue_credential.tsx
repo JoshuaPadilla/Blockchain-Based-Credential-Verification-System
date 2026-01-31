@@ -15,13 +15,16 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 
 import { CredentialTypeSelector } from "@/components/custom_components/credential_type_selector";
 import { StudentSelector } from "@/components/custom_components/student_selector";
+import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { usePdfStore } from "@/stores/pdf_store";
+import { useRecordStore } from "@/stores/record_store";
 import type { CredentialType } from "@/types/credential_type.type";
 import type { Student } from "@/types/student.type";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { FileStack, Loader } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 // Assuming DiplomaPDF is your component built with @react-pdf/renderer primitives
 
@@ -30,72 +33,93 @@ export const Route = createFileRoute("/admin/issue_credential")({
 });
 
 function RouteComponent() {
+	const queryClient = useQueryClient();
 	const { getPreview } = usePdfStore();
+	const { createRecord } = useRecordStore();
 
 	const [containerWidth, setContainerWidth] = useState<number>();
-
-	// 2. Create a callback ref to measure the element whenever it resizes
+	const resizeTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 	const onRefChange = useCallback((node: HTMLDivElement | null) => {
 		if (node) {
 			const resizeObserver = new ResizeObserver((entries) => {
-				// Get the width of the container
-				if (entries[0]) {
-					setContainerWidth(entries[0].contentRect.width);
+				// Clear any pending timeout
+				if (resizeTimeoutRef.current) {
+					clearTimeout(resizeTimeoutRef.current);
 				}
+
+				// Debounce the width update
+				resizeTimeoutRef.current = setTimeout(() => {
+					if (entries[0]) {
+						const newWidth = entries[0].contentRect.width;
+						setContainerWidth((prevWidth) => {
+							// Only update if width changed significantly (more than 5px)
+							if (
+								!prevWidth ||
+								Math.abs(prevWidth - newWidth) > 5
+							) {
+								return newWidth;
+							}
+							return prevWidth;
+						});
+					}
+				}, 100); // 100ms debounce
 			});
 
 			resizeObserver.observe(node);
 
-			// Cleanup observer when component unmounts or ref changes
-			return () => resizeObserver.disconnect();
+			return () => {
+				resizeObserver.disconnect();
+				if (resizeTimeoutRef.current) {
+					clearTimeout(resizeTimeoutRef.current);
+				}
+			};
 		}
 	}, []);
 
-	// 4. Generate the PDF Blob in the background
 	// 'instance' contains the blob, url, and loading state
 
-	const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-	const [loading, setLoading] = useState(false);
-
+	const [numPages, setNumPages] = useState<number>();
 	const [selectedStudent, setSelectedStudent] = useState<Student | null>(
 		null,
 	);
 	const [selectedCredentialType, setSelectedCredentialType] =
 		useState<CredentialType | null>(null);
 
-	useEffect(() => {
-		setPdfUrl(null);
-		const loadPdf = async () => {
-			if (!selectedStudent || !selectedCredentialType) return;
+	// pdf query
+	const { data: pdfBlob, isFetching: isPreviewLoading } = useQuery({
+		queryKey: [
+			"pdf-preview",
+			selectedStudent?.id,
+			selectedCredentialType?.id,
+		],
+		queryFn: () =>
+			getPreview(selectedStudent!.id, selectedCredentialType!.name),
+		enabled: !!selectedStudent && !!selectedCredentialType, // Only run if both are selected
+		staleTime: 1000 * 60 * 5, // Cache the preview for 5 mins
+	});
 
-			try {
-				setLoading(true);
-				const blobData = await getPreview(
-					selectedStudent.id,
-					selectedCredentialType.name,
-				);
+	const { mutate, isPending: isCreating } = useMutation({
+		mutationFn: () => {
+			if (!selectedStudent || !selectedCredentialType)
+				throw new Error("Missing selection");
+			return createRecord(selectedStudent.id, selectedCredentialType.id);
+		},
+		onSuccess: (newRecord) => {
+			console.log("Credential Issued successfully!");
+			// Invalidate the 'records' list so other parts of the app refresh
+			queryClient.invalidateQueries({ queryKey: ["records"] });
+			console.log("Record Created:", newRecord);
+		},
+		onError: (error) => {
+			console.error(error);
+		},
+	});
 
-				if (!blobData) {
-					setPdfUrl(null); // Explicitly ensure it stays null
-					return;
-				}
-
-				const url = URL.createObjectURL(blobData);
-				setPdfUrl(url);
-			} catch (error) {
-				console.error("Failed to load PDF", error);
-				setPdfUrl(null); // Ensure null on error
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		loadPdf(); // Call the function
-
-		return () => {
-			if (pdfUrl) URL.revokeObjectURL(pdfUrl);
-		};
-	}, [selectedStudent, selectedCredentialType]); // Dependencies
+	// Create a stable key for the Document component to prevent unnecessary re-renders
+	const documentKey = useMemo(() => {
+		if (!pdfBlob) return null;
+		return `${selectedStudent?.id}-${selectedCredentialType?.id}`;
+	}, [pdfBlob, selectedStudent?.id, selectedCredentialType?.id]);
 
 	return (
 		<>
@@ -126,40 +150,56 @@ function RouteComponent() {
 
 							{/* 5. Custom Download Button */}
 							{/* We use a standard HTML <a> tag pointing to the generated URL */}
-							{pdfUrl && (
+							{pdfBlob && (
 								<Button asChild>
-									<a href={pdfUrl} download="credential.pdf">
+									<a
+										href={URL.createObjectURL(pdfBlob)}
+										download="credential.pdf"
+									>
 										Download PDF
 									</a>
 								</Button>
 							)}
 						</div>
 
-						{/* 6. The "Wojtek Maj" Viewer */}
-						{/* Renders as a Canvas/Image. No iframe scrollbars. */}
+						{/* preview and buttons */}
 						<div className="flex-1 flex justify-center items-center overflow-hidden w-full h-full p-4 gap-4">
 							{/* Document container */}
 							<div
-								className={`flex max-w-[70%] w-full items-center justify-center shadow-2xl rounded-md overflow-clip ${!pdfUrl && "h-full"}`}
+								className={cn(
+									"flex max-w-[70%] w-full items-center justify-center shadow-2xl rounded-md overflow-clip ",
+									!pdfBlob && "h-full",
+									"transition-opacity duration-200",
+								)}
 								ref={onRefChange}
 							>
-								{loading && (
-									<div>
+								{/* Show loader ONLY when loading */}
+								{isPreviewLoading && (
+									<div className="flex items-center justify-center w-full h-full">
 										<Loader
 											role="status"
 											aria-label="Loading"
-											className={cn(
-												"size-12 animate-spin",
-											)}
+											className="size-12 animate-spin"
 										/>
 									</div>
 								)}
 
+								{/* Show PDF ONLY when not loading AND pdfUrl exists */}
+
 								{/* B. PDF STATE vs EMPTY STATE */}
-								{pdfUrl ? (
+								{!isPreviewLoading && pdfBlob && (
 									<Document
-										file={pdfUrl}
+										key={documentKey}
+										file={pdfBlob}
 										className="flex justify-center"
+										onLoadSuccess={({ numPages }) =>
+											setNumPages(numPages)
+										}
+										loading={
+											<div className="flex items-center justify-center w-full h-full">
+												<Loader className="size-12 animate-spin" />
+											</div>
+										}
 									>
 										<Page
 											pageNumber={1}
@@ -167,26 +207,23 @@ function RouteComponent() {
 												containerWidth
 													? containerWidth - 4
 													: undefined
-											} // Subtract small buffer for borders
+											}
 											renderTextLayer={false}
 											renderAnnotationLayer={false}
 										/>
 									</Document>
-								) : (
-									// C. YOUR CUSTOM "NO DATA" COMPONENT
-									// This renders when pdfUrl is null and not loading
-									!loading && (
-										<div className="flex flex-col items-center justify-center gap-2 text-muted-foreground opacity-50">
-											<FileStack className="size-12" />{" "}
-											{/* Optional Icon */}
-											<p className="font-mono text-sm text-center px-8">
-												Select a student and credential
-												type
-												<br />
-												to generate a preview.
-											</p>
-										</div>
-									)
+								)}
+
+								{/* Show empty state ONLY when not loading AND no pdfUrl */}
+								{!isPreviewLoading && !pdfBlob && (
+									<div className="flex flex-col items-center justify-center gap-2 text-muted-foreground opacity-50">
+										<FileStack className="size-12" />
+										<p className="font-mono text-sm text-center px-8">
+											Select a student and credential type
+											<br />
+											to generate a preview.
+										</p>
+									</div>
 								)}
 							</div>
 
@@ -235,8 +272,17 @@ function RouteComponent() {
 									<Button
 										variant={"default"}
 										className="bg-button-primary w-full shadow-2xl"
+										onClick={() => mutate()}
+										disabled={isCreating}
 									>
-										Issue Credential
+										{isCreating ? (
+											<div className="flex gap-2 items-center justify-center">
+												<Spinner data-icon="inline-start" />
+												Submitting
+											</div>
+										) : (
+											"Issue Credential"
+										)}
 									</Button>
 
 									<Button

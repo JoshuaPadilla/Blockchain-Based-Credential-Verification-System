@@ -15,6 +15,7 @@ import { CredentialType } from "src/common/enums/credential_type.enum";
 import { Expiration } from "src/common/enums/expiration.enum";
 import { CredentialNormalizer } from "src/common/helpers/data_normalizer.class";
 import { getExpiration } from "src/common/helpers/get_expiration.helper";
+import { generateShortCode } from "src/common/helpers/url.helper";
 import { OnChainRecord } from "src/common/interfaces/onchain_record.interface";
 import { BlockChainService } from "src/services/blockchain/blockchain.service";
 import { Repository } from "typeorm";
@@ -52,6 +53,7 @@ export class RecordService {
       throw new NotFoundException("Student not found");
     }
 
+    const credentialRef = generateShortCode();
     const normalizeData = CredentialNormalizer.normalize(
       student,
       credentialType!.name,
@@ -70,6 +72,7 @@ export class RecordService {
       student: student,
       cutOffSemester: credentialDto.cutOffSemester,
       cutOffYear: credentialDto.cutOffYear,
+      credentialRef,
     });
 
     const result = await this.blockchainService.addRecord(newRecord);

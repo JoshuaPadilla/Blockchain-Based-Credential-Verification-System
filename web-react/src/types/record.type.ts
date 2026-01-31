@@ -10,5 +10,6 @@ export type Record = {
 	credentialType: CredentialType;
 	currentSignatures: number;
 	student: Student;
+	credentialRef: string;
 	createdAt: Date;
 };

@@ -5,6 +5,12 @@ import { create } from "zustand";
 type StoreProps = {
 	records: Record[];
 	getRecords: () => Promise<void>;
+	createRecord: (
+		studentId: string,
+		credentialTypeId: string,
+		cutOffYear?: string,
+		cutOffSemester?: number,
+	) => Promise<Record>;
 };
 
 export const useRecordStore = create<StoreProps>((set) => ({
@@ -20,5 +26,21 @@ export const useRecordStore = create<StoreProps>((set) => ({
 		} catch (error) {
 			console.log(error);
 		}
+	},
+	createRecord: async (
+		studentId,
+		credentialTypeId,
+		cutOffYear,
+		cutOffSemester,
+	) => {
+
+
+		
+		const res = await axiosClient.post("record", {
+			studentId: studentId,
+			credentialTypeId: credentialTypeId,
+		});
+
+		if (res.status === 201) return res.data;
 	},
 }));

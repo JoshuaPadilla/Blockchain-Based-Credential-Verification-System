@@ -22,6 +22,9 @@ export class Record {
   @PrimaryGeneratedColumn('uuid')
   id: string = randomUUID();
 
+  @Column({ type: 'varchar', length: 8, unique: true, nullable: true })
+  credentialRef: string;
+
   @Column({ type: 'text', nullable: true })
   txHash: string; // The 0x... hash stored in the Smart Contract
 

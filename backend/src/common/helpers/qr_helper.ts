@@ -8,5 +8,6 @@ export const generateQr = (data: string) => {
       dark: '#000000',
       light: '#00000000', // Transparent background
     },
+    errorCorrectionLevel: 'L',
   });
 };
