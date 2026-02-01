@@ -1,10 +1,5 @@
-import React from "react";
-import { TableCell } from "../ui/table";
-import { Loader } from "lucide-react";
-import { PendingBadge } from "./pending_badge";
-import { VerifiedBadge } from "./verified_badge";
-import { RevokedBadge } from "./revoked_badge";
-import { ExpiredBadge } from "./expired_badge";
+import { TableCell } from "@/components/ui/table";
+import { AlertCircle, Ban, CheckCircle2, Clock } from "lucide-react";
 
 type Props = {
 	expired: boolean;
@@ -13,14 +8,43 @@ type Props = {
 };
 
 export const TableCredentialStatus = ({ expired, pending, revoked }: Props) => {
-	return (
-		<TableCell className="w-0 whitespace-nowrap min-w-60">
-			<div className="flex items-center justify-start gap-2 flex-wrap">
-				{expired && <ExpiredBadge />}
-				{pending && <PendingBadge />}
-				{revoked && <RevokedBadge />}
-				{!revoked && !pending && !expired && <VerifiedBadge />}
+	// Priority: Revoked > Expired > Pending > Valid
+
+	let content;
+
+	if (revoked) {
+		content = (
+			<div className="flex items-center gap-1.5 text-red-600">
+				<Ban className="size-4" />
+				<span className="text-xs font-bold uppercase">Revoked</span>
 			</div>
+		);
+	} else if (expired) {
+		content = (
+			<div className="flex items-center gap-1.5 text-orange-600">
+				<Clock className="size-4" />
+				<span className="text-xs font-bold uppercase">Expired</span>
+			</div>
+		);
+	} else if (pending) {
+		content = (
+			<div className="flex items-center gap-1.5 text-amber-600">
+				<AlertCircle className="size-4" />
+				<span className="text-xs font-bold uppercase">Pending</span>
+			</div>
+		);
+	} else {
+		content = (
+			<div className="flex items-center gap-1.5 text-green-600">
+				<CheckCircle2 className="size-4" />
+				<span className="text-xs font-bold uppercase">Verified</span>
+			</div>
+		);
+	}
+
+	return (
+		<TableCell className="pr-6">
+			<div className="flex justify-end">{content}</div>
 		</TableCell>
 	);
 };

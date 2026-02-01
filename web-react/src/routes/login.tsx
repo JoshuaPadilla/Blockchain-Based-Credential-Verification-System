@@ -1,19 +1,19 @@
+import app_logo from "@/assets/img/app_logo.png";
+import { Spinner } from "@/components/ui/spinner";
+import { useAuthStore } from "@/stores/auth_store";
 import {
+	Link,
 	createFileRoute,
-	Navigate,
 	redirect,
 	useNavigate,
 } from "@tanstack/react-router";
+import { ArrowLeft, CheckCircle2, Eye, EyeOff, Lock } from "lucide-react";
 import React, { useState } from "react";
-import { Eye, EyeOff, ShieldCheck, Lock } from "lucide-react";
-import { useAuthStore } from "@/stores/auth_store";
-import { Spinner } from "@/components/ui/spinner";
 
 export const Route = createFileRoute("/login")({
 	component: RouteComponent,
 	beforeLoad: () => {
 		const { user } = useAuthStore.getState();
-
 		if (user) {
 			throw redirect({ to: "/" });
 		}
@@ -27,224 +27,234 @@ function RouteComponent() {
 	const [showPassword, setShowPassword] = useState(false);
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [error, setError] = useState("");
 
 	const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
+		setError("");
 
 		if (!email || !password) {
-			alert("Please fill in all fields");
+			setError("Please fill in all fields");
 			return;
 		}
 
 		try {
 			await login(email, password);
-
-			// 3. Redirect manually after successful login
 			navigate({ to: "/" });
 		} catch (error) {
 			console.error("Login failed", error);
-			alert("Invalid credentials");
+			setError(
+				"Invalid credentials. Please contact your system administrator.",
+			);
 		}
 	};
 
 	return (
-		<div className="flex min-h-screen w-full font-sans">
-			{/* LEFT COLUMN: Branding & Testimonial */}
-			<div className="hidden lg:flex w-1/2 bg-[#0f172a] text-white flex-col justify-between p-12 relative overflow-hidden">
-				{/* Background texture (optional subtle effect) */}
-				<div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-blue-900 via-transparent to-transparent" />
+		<div className="flex min-h-screen w-full font-sans bg-background text-foreground">
+			{/* --- LEFT COLUMN: Brand & Testimonial --- */}
+			<div className="hidden lg:flex w-1/2 relative bg-slate-900 text-white flex-col justify-between p-16 overflow-hidden">
+				{/* Abstract Background Decoration */}
+				<div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-500 rounded-full blur-[120px] opacity-20 -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+				<div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-600 rounded-full blur-[100px] opacity-10 translate-y-1/3 -translate-x-1/3 pointer-events-none" />
 
-				{/* Logo */}
-				<div className="flex items-center gap-2 z-10">
-					<div className="bg-white/10 p-1.5 rounded-md">
-						<ShieldCheck className="w-6 h-6 text-white" />
-					</div>
-					<span className="font-semibold text-xl tracking-tight">
-						CredentialChain
+				{/* Logo Area */}
+				<div className="relative z-10 flex items-center gap-3">
+					<img src={app_logo} className="size-10" />
+
+					<span className="font-heading font-bold text-xl tracking-tight">
+						Cer
+						<span className="text-[var(--button-primary)]">
+							tus
+						</span>
 					</span>
 				</div>
 
-				{/* Main Content */}
-				<div className="max-w-lg z-10">
-					<div className="w-12 h-1 bg-blue-500 mb-8 rounded-full"></div>
-					<h1 className="text-4xl font-bold leading-tight mb-6">
-						Securing the future of academic integrity.
-					</h1>
-					<p className="text-gray-300 text-lg mb-8 leading-relaxed">
-						"CredentialChain gives our faculty the confidence to
-						verify degrees instantly, eliminating fraud and
-						streamlining the admissions process globally."
-					</p>
+				{/* Testimonial Content */}
+				<div className="relative z-10 max-w-xl">
+					<h2 className="font-heading text-4xl font-bold leading-tight mb-8">
+						"The standard for blockchain academic verification."
+					</h2>
 
-					{/* Profile */}
-					<div className="flex items-center gap-4">
-						<img
-							src="/api/placeholder/48/48"
-							alt="Dr. James Alistair"
-							className="w-12 h-12 rounded-full border-2 border-white/20 object-cover"
-						/>
-						<div>
-							<p className="font-semibold text-white">
-								Dr. James Alistair
+					<div className="space-y-6">
+						<div className="flex gap-4 items-start">
+							<div className="mt-1 bg-blue-500/20 p-1 rounded-full">
+								<CheckCircle2 className="w-4 h-4 text-blue-400" />
+							</div>
+							<p className="text-slate-300 text-lg leading-relaxed">
+								Anchoring our degree issuance to the blockchain
+								has completely eliminated credential fraud and
+								reduced verification time by 99%.
 							</p>
-							<p className="text-sm text-gray-400">
-								Dean of Admissions, Oxford Brookes
-							</p>
+						</div>
+
+						{/* Author */}
+						<div className="flex items-center gap-4 pt-4 border-t border-white/10">
+							<div className="size-12 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center font-bold text-slate-400">
+								JA
+							</div>
+							<div>
+								<p className="font-bold text-white">
+									Dr. James Alistair
+								</p>
+								<p className="text-sm text-slate-400">
+									Dean of Admissions, Oxford Brookes
+								</p>
+							</div>
 						</div>
 					</div>
 				</div>
 
 				{/* Footer */}
-				<div className="flex justify-between text-xs text-gray-500 z-10">
-					<p>© 2024 CredentialChain Systems.</p>
+				<div className="relative z-10 text-xs text-slate-500 flex justify-between w-full max-w-xl">
+					<span>© 2026 Certus System</span>
 					<div className="flex gap-4">
-						<a
-							href="#"
-							className="hover:text-white transition-colors"
-						>
-							Privacy
-						</a>
-						<a
-							href="#"
-							className="hover:text-white transition-colors"
-						>
-							Terms
-						</a>
+						<span className="flex items-center gap-1">
+							<Lock className="size-3" /> 256-bit Secure SSL
+						</span>
 					</div>
 				</div>
 			</div>
 
-			{/* RIGHT COLUMN: Login Form */}
-			<div className="w-full lg:w-1/2 bg-white flex flex-col justify-center items-center p-8 lg:p-12">
-				<div className="w-full max-w-md">
-					<div className="mb-8">
-						<h2 className="text-3xl font-bold text-gray-900 mb-2">
-							Log in to your account
-						</h2>
-						<p className="text-gray-500">
-							Secure access for University Administrators and
-							Faculty members.
-						</p>
-					</div>
+			{/* --- RIGHT COLUMN: Login Form --- */}
+			<div className="w-full lg:w-1/2 flex flex-col relative bg-white lg:bg-transparent">
+				{/* Top Navigation */}
+				<div className="absolute top-8 left-8 lg:left-auto lg:right-12">
+					<Link
+						to="/"
+						className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-[var(--button-primary)] transition-colors"
+					>
+						<ArrowLeft className="size-4" /> Back to Website
+					</Link>
+				</div>
 
-					<form className="space-y-5" onSubmit={handleLogin}>
-						{/* Email Field */}
-						<div>
-							<label
-								htmlFor="email"
-								className="block text-sm font-semibold text-gray-700 mb-1.5"
-							>
-								Work Email
-							</label>
-							<input
-								id="email"
-								type="email"
-								placeholder="name@university.edu"
-								value={email}
-								onChange={(e) => setEmail(e.target.value)}
-								className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all text-gray-900 placeholder-gray-400"
-							/>
+				<div className="flex-1 flex flex-col justify-center items-center p-8 sm:p-12 lg:p-24">
+					<div className="w-full max-w-sm space-y-8">
+						{/* Header */}
+						<div className="space-y-2">
+							<h1 className="font-heading text-3xl font-bold tracking-tight text-slate-900">
+								Admin Portal
+							</h1>
+							<p className="text-slate-500">
+								Enter your credentials to access the registry.
+							</p>
 						</div>
 
-						{/* Password Field */}
-						<div>
-							<div className="flex justify-between items-center mb-1.5">
+						{/* Error Alert */}
+						{error && (
+							<div className="p-3 rounded-md bg-red-50 border border-red-100 text-red-600 text-sm font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+								<div className="size-1.5 rounded-full bg-red-500" />
+								{error}
+							</div>
+						)}
+
+						<form className="space-y-6" onSubmit={handleLogin}>
+							{/* Email */}
+							<div className="space-y-2">
 								<label
-									htmlFor="password"
-									className="block text-sm font-semibold text-gray-700"
+									className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+									htmlFor="email"
 								>
-									Password
+									Work Email
 								</label>
-								<a
-									href="#"
-									className="text-sm font-semibold text-blue-600 hover:text-blue-700"
-								>
-									Forgot password?
-								</a>
-							</div>
-							<div className="relative">
 								<input
-									id="password"
-									type={showPassword ? "text" : "password"}
-									placeholder="••••••••"
-									value={password}
-									onChange={(e) =>
-										setPassword(e.target.value)
-									}
-									className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all text-gray-900 placeholder-gray-400 pr-10"
+									id="email"
+									type="email"
+									placeholder="admin@university.edu"
+									value={email}
+									onChange={(e) => setEmail(e.target.value)}
+									className="flex h-11 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--button-primary)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all"
 								/>
-								<button
-									type="button"
-									onClick={() =>
-										setShowPassword(!showPassword)
-									}
-									className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-								>
-									{showPassword ? (
-										<EyeOff size={20} />
-									) : (
-										<Eye size={20} />
-									)}
-								</button>
+							</div>
+
+							{/* Password */}
+							<div className="space-y-2">
+								<div className="flex justify-between items-center">
+									<label
+										className="text-sm font-medium leading-none"
+										htmlFor="password"
+									>
+										Password
+									</label>
+									<a
+										href="#"
+										className="text-xs font-medium text-[var(--button-primary)] hover:underline"
+									>
+										Forgot password?
+									</a>
+								</div>
+								<div className="relative">
+									<input
+										id="password"
+										type={
+											showPassword ? "text" : "password"
+										}
+										value={password}
+										onChange={(e) =>
+											setPassword(e.target.value)
+										}
+										className="flex h-11 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--button-primary)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-10 transition-all"
+									/>
+									<button
+										type="button"
+										onClick={() =>
+											setShowPassword(!showPassword)
+										}
+										className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+									>
+										{showPassword ? (
+											<EyeOff size={16} />
+										) : (
+											<Eye size={16} />
+										)}
+									</button>
+								</div>
+							</div>
+
+							{/* Submit */}
+							<button
+								type="submit"
+								disabled={isLoading}
+								className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-[var(--button-primary)] text-white hover:opacity-90 h-11 px-4 w-full shadow-lg shadow-blue-500/20"
+							>
+								{isLoading ? (
+									<>
+										<Spinner className="mr-2 h-4 w-4" />{" "}
+										Authenticating...
+									</>
+								) : (
+									"Sign In"
+								)}
+							</button>
+						</form>
+
+						<div className="relative">
+							<div className="absolute inset-0 flex items-center">
+								<span className="w-full border-t border-slate-200" />
+							</div>
+							<div className="relative flex justify-center text-xs uppercase">
+								<span className="bg-white lg:bg-[#f6f6f8] px-2 text-slate-400">
+									Protected Area
+								</span>
 							</div>
 						</div>
 
-						{/* Remember Me */}
-						<div className="flex items-center">
-							<input
-								id="remember"
-								type="checkbox"
-								className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-							/>
-							<label
-								htmlFor="remember"
-								className="ml-2 block text-sm text-gray-600"
+						<p className="text-center text-xs text-slate-500">
+							By clicking continue, you agree to our{" "}
+							<a
+								href="#"
+								className="underline hover:text-slate-800"
 							>
-								Remember this device for 30 days
-							</label>
-						</div>
-
-						{/* Submit Button */}
-						<button
-							type="submit"
-							disabled={isLoading}
-							className="w-full bg-[#0f172a] text-white py-3 px-4 rounded-lg font-semibold hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/10"
-						>
-							{!isLoading ? (
-								"Sign in to Dashboard"
-							) : (
-								<div className="flex gap-2 items-center justify-center w-full">
-									<Spinner className="" />
-									Signing in
-								</div>
-							)}
-						</button>
-					</form>
-
-					{/* Secure Divider */}
-					<div className="my-8 relative text-center">
-						<div className="absolute inset-0 flex items-center">
-							<div className="w-full border-t border-gray-200"></div>
-						</div>
-						<div className="relative inline-block bg-white px-4 text-xs text-gray-400 uppercase tracking-wider">
-							Protected Area
-						</div>
-					</div>
-
-					<div className="flex justify-center items-center gap-2 text-gray-400 text-xs mb-12">
-						<Lock size={12} />
-						<span>256-bit Encryption • SSO Enabled</span>
-					</div>
-
-					{/* Bottom Link */}
-					<div className="text-center text-sm text-gray-500">
-						Don't have an account?{" "}
-						<a
-							href="#"
-							className="font-semibold text-blue-600 hover:text-blue-700"
-						>
-							Contact IT Support
-						</a>
+								Terms of Service
+							</a>{" "}
+							and{" "}
+							<a
+								href="#"
+								className="underline hover:text-slate-800"
+							>
+								Privacy Policy
+							</a>
+							.
+						</p>
 					</div>
 				</div>
 			</div>

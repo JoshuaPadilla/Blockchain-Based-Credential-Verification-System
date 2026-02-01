@@ -10,10 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as VerifyRouteRouteImport } from './routes/verify/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsIndexRouteImport } from './routes/posts/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as VerifyCredentialRefRouteImport } from './routes/verify/$credentialRef'
 import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
 import { Route as AdminSucess_issueRouteImport } from './routes/admin/sucess_issue'
 import { Route as AdminIssue_credentialRouteImport } from './routes/admin/issue_credential'
@@ -25,6 +27,11 @@ import { Route as AdminStudentsIndexRouteImport } from './routes/admin/students/
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyRouteRoute = VerifyRouteRouteImport.update({
+  id: '/verify',
+  path: '/verify',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRouteRoute = AdminRouteRouteImport.update({
@@ -46,6 +53,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRouteRoute,
+} as any)
+const VerifyCredentialRefRoute = VerifyCredentialRefRouteImport.update({
+  id: '/$credentialRef',
+  path: '/$credentialRef',
+  getParentRoute: () => VerifyRouteRoute,
 } as any)
 const PostsPostIdRoute = PostsPostIdRouteImport.update({
   id: '/posts/$postId',
@@ -86,6 +98,7 @@ const AdminStudentsIndexRoute = AdminStudentsIndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
+  '/verify': typeof VerifyRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/admin/students': typeof AdminStudentsRouteRouteWithChildren
   '/admin/credentials': typeof AdminCredentialsRoute
@@ -93,18 +106,21 @@ export interface FileRoutesByFullPath {
   '/admin/issue_credential': typeof AdminIssue_credentialRoute
   '/admin/sucess_issue': typeof AdminSucess_issueRoute
   '/posts/$postId': typeof PostsPostIdRoute
+  '/verify/$credentialRef': typeof VerifyCredentialRefRoute
   '/admin/': typeof AdminIndexRoute
   '/posts/': typeof PostsIndexRoute
   '/admin/students/': typeof AdminStudentsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/verify': typeof VerifyRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/admin/credentials': typeof AdminCredentialsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/issue_credential': typeof AdminIssue_credentialRoute
   '/admin/sucess_issue': typeof AdminSucess_issueRoute
   '/posts/$postId': typeof PostsPostIdRoute
+  '/verify/$credentialRef': typeof VerifyCredentialRefRoute
   '/admin': typeof AdminIndexRoute
   '/posts': typeof PostsIndexRoute
   '/admin/students': typeof AdminStudentsIndexRoute
@@ -113,6 +129,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
+  '/verify': typeof VerifyRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/admin/students': typeof AdminStudentsRouteRouteWithChildren
   '/admin/credentials': typeof AdminCredentialsRoute
@@ -120,6 +137,7 @@ export interface FileRoutesById {
   '/admin/issue_credential': typeof AdminIssue_credentialRoute
   '/admin/sucess_issue': typeof AdminSucess_issueRoute
   '/posts/$postId': typeof PostsPostIdRoute
+  '/verify/$credentialRef': typeof VerifyCredentialRefRoute
   '/admin/': typeof AdminIndexRoute
   '/posts/': typeof PostsIndexRoute
   '/admin/students/': typeof AdminStudentsIndexRoute
@@ -129,6 +147,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/verify'
     | '/login'
     | '/admin/students'
     | '/admin/credentials'
@@ -136,18 +155,21 @@ export interface FileRouteTypes {
     | '/admin/issue_credential'
     | '/admin/sucess_issue'
     | '/posts/$postId'
+    | '/verify/$credentialRef'
     | '/admin/'
     | '/posts/'
     | '/admin/students/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/verify'
     | '/login'
     | '/admin/credentials'
     | '/admin/dashboard'
     | '/admin/issue_credential'
     | '/admin/sucess_issue'
     | '/posts/$postId'
+    | '/verify/$credentialRef'
     | '/admin'
     | '/posts'
     | '/admin/students'
@@ -155,6 +177,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/verify'
     | '/login'
     | '/admin/students'
     | '/admin/credentials'
@@ -162,6 +185,7 @@ export interface FileRouteTypes {
     | '/admin/issue_credential'
     | '/admin/sucess_issue'
     | '/posts/$postId'
+    | '/verify/$credentialRef'
     | '/admin/'
     | '/posts/'
     | '/admin/students/'
@@ -170,6 +194,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
+  VerifyRouteRoute: typeof VerifyRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
   PostsPostIdRoute: typeof PostsPostIdRoute
   PostsIndexRoute: typeof PostsIndexRoute
@@ -182,6 +207,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify': {
+      id: '/verify'
+      path: '/verify'
+      fullPath: '/verify'
+      preLoaderRoute: typeof VerifyRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -211,6 +243,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/verify/$credentialRef': {
+      id: '/verify/$credentialRef'
+      path: '/$credentialRef'
+      fullPath: '/verify/$credentialRef'
+      preLoaderRoute: typeof VerifyCredentialRefRouteImport
+      parentRoute: typeof VerifyRouteRoute
     }
     '/posts/$postId': {
       id: '/posts/$postId'
@@ -297,9 +336,22 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
   AdminRouteRouteChildren,
 )
 
+interface VerifyRouteRouteChildren {
+  VerifyCredentialRefRoute: typeof VerifyCredentialRefRoute
+}
+
+const VerifyRouteRouteChildren: VerifyRouteRouteChildren = {
+  VerifyCredentialRefRoute: VerifyCredentialRefRoute,
+}
+
+const VerifyRouteRouteWithChildren = VerifyRouteRoute._addFileChildren(
+  VerifyRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
+  VerifyRouteRoute: VerifyRouteRouteWithChildren,
   LoginRoute: LoginRoute,
   PostsPostIdRoute: PostsPostIdRoute,
   PostsIndexRoute: PostsIndexRoute,

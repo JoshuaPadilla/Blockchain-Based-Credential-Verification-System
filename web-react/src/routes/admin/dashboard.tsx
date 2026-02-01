@@ -1,115 +1,75 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { DashboardItemCard } from "@/components/custom_components/dashboard_item_card";
+import { DashboardStats } from "@/components/custom_components/dashboard_stats";
 import { RecentTransactionTable } from "@/components/custom_components/recent_transaction_table";
 import { Button } from "@/components/ui/button";
-import { useAuthStore } from "@/stores/auth_store";
 import { useInsightsStore } from "@/stores/insights_store";
 import { useRecordStore } from "@/stores/record_store";
-import {
-	ArrowRight,
-	BadgeCheck,
-	ClipboardClock,
-	ClipboardX,
-	FilePlusCorner,
-} from "lucide-react";
-import { useSidebar } from "@/components/ui/sidebar";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ArrowRight, FilePlus2, LayoutDashboard } from "lucide-react";
 
 export const Route = createFileRoute("/admin/dashboard")({
 	component: RouteComponent,
 	loader: async ({ context }) => {
-		await context.insights.getDashboardInsights();
-		await context.records.getRecords();
+		// Parallel data fetching for performance
+		await Promise.all([
+			context.insights.getDashboardInsights(),
+			context.records.getRecords(),
+		]);
 	},
 });
 
 function RouteComponent() {
 	const { dashboardInsights } = useInsightsStore();
 	const { records } = useRecordStore();
-	const { setOpen } = useSidebar();
-
 	const navigate = useNavigate();
 
-	const handleViewAllHistory = () => {
-		navigate({ to: "/admin/credentials" });
-	};
-
-	const handleIssueCredential = () => {
-		setOpen(false);
-		navigate({ to: "/admin/issue_credential" });
-	};
-
 	return (
-		<div className="w-full flex flex-col gap-4 h-screen p-8">
-			{/* Title */}
-			<div className="flex justify-between items-center">
-				<div>
-					<h1 className="font-heading text-3xl">Dashboard</h1>
-					<p className="font-mono text-muted-foreground">
-						Manage credentials off-chain and on-chain
-					</p>
+		<div className="min-h-screen bg-slate-50/50 p-8 font-sans space-y-8 text-slate-900">
+			{/* --- Header Section --- */}
+			<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 pb-6">
+				<div className="flex items-center gap-3">
+					<div className="size-10 bg-white border border-slate-200 rounded-lg flex items-center justify-center shadow-sm">
+						<LayoutDashboard className="size-5 text-[var(--button-primary)]" />
+					</div>
+					<div>
+						<h1 className="font-heading text-2xl font-bold tracking-tight">
+							Overview
+						</h1>
+						<p className="text-sm text-slate-500 font-medium">
+							Real-time registry statistics and issuance
+							management.
+						</p>
+					</div>
 				</div>
 
 				<Button
-					variant="default"
-					size={"lg"}
-					className="p-6"
-					onClick={handleIssueCredential}
+					size="lg"
+					className="bg-[var(--button-primary)] hover:opacity-90 shadow-lg shadow-blue-500/20 text-white font-medium"
+					onClick={() => navigate({ to: "/admin/issue_credential" })}
 				>
-					<FilePlusCorner />
-					Issue New Credential
+					<FilePlus2 className="mr-2 size-4" /> Issue Credential
 				</Button>
 			</div>
 
-			{/* Insights cards */}
-			<div className="flex flex-row gap-8">
-				<DashboardItemCard
-					icon={
-						<BadgeCheck className="size-8 gray" color="#51a2ff" />
-					}
-					title="Total Credential Issued"
-					value={String(dashboardInsights?.totalRecords) || "0"}
-				/>
-				<DashboardItemCard
-					icon={<ClipboardClock className="size-8" color="#ff8904" />}
-					title="Pending Signatures"
-					value={String(dashboardInsights?.pendingRecords) || "0"}
-				/>
-				<DashboardItemCard
-					icon={<ClipboardX className="size-8" color="#99a1af" />}
-					title="Revoke Credentials"
-					value={String(dashboardInsights?.revokedRecords) || "0"}
-				/>
-			</div>
+			{/* --- Stats Row --- */}
+			<DashboardStats insights={dashboardInsights} />
 
-			{/* Table */}
-			<div className="mt-4">
-				<div className="flex justify-between">
-					<h3 className="font-mono font-bold text-lg mb-4">
-						Recent Transactions
+			{/* --- Table Section --- */}
+			<div className="space-y-4">
+				<div className="flex items-center justify-between px-1">
+					<h3 className="font-heading font-bold text-lg text-slate-800">
+						Recent Issuance History
 					</h3>
-
 					<Button
 						variant="ghost"
-						size="lg"
-						className="text-blue-400"
-						onClick={handleViewAllHistory}
+						className="text-[var(--button-primary)] hover:bg-blue-50 hover:text-blue-700 text-sm font-semibold"
+						onClick={() => navigate({ to: "/admin/credentials" })}
 					>
-						View All History
-						<ArrowRight />
+						View Full Registry{" "}
+						<ArrowRight className="ml-2 size-4" />
 					</Button>
 				</div>
 
-				<div className="p-2 bg-white rounded-lg mb-4">
-					<RecentTransactionTable records={records} />
-				</div>
-
-				<div className="flex flex-col items-center justify-center gap-2">
-					<p className="font-mono text-primary/60">
-						Showing 5 of 12,450 records
-					</p>
-
-					<Button variant={"outline"}>Next</Button>
-				</div>
+				<RecentTransactionTable records={records} />
 			</div>
 		</div>
 	);

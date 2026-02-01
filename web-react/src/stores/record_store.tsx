@@ -1,5 +1,6 @@
 import axiosClient from "@/api/axios_client";
 import type { Record } from "@/types/record.type";
+import type { VerificationData } from "@/types/verification_data.type";
 import { create } from "zustand";
 
 type StoreProps = {
@@ -12,6 +13,7 @@ type StoreProps = {
 		cutOffSemester?: number,
 	) => Promise<Record>;
 	getRecord: (recordId: string) => Promise<Record>;
+	verifyRecord: (credentialRef: string) => Promise<VerificationData | null>;
 };
 
 export const useRecordStore = create<StoreProps>((set) => ({
@@ -45,5 +47,15 @@ export const useRecordStore = create<StoreProps>((set) => ({
 		const res = await axiosClient.get(`record/${recordId}`);
 
 		if (res.status === 200) return res.data;
+	},
+	verifyRecord: async (credentialRef) => {
+		console.log(credentialRef);
+		const res = await axiosClient.get(
+			`verification/verify/${credentialRef}`,
+		);
+
+		if (res.status === 200) return res.data;
+
+		return null;
 	},
 }));

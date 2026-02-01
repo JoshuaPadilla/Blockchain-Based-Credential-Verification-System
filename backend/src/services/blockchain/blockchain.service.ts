@@ -214,6 +214,10 @@ export class BlockChainService implements OnModuleInit {
     console.log('Record Signed');
   }
 
+  async getNetwork() {
+    return await this.provider.getNetwork();
+  }
+
   // FIXED: Removed "function" keyword & used class properties
   listenForSignatures() {
     this.logger.log('Listening for RecordSigned events...');

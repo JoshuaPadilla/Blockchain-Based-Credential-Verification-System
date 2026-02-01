@@ -1,25 +1,39 @@
-import React from "react";
-import { TableCell } from "../ui/table";
-import { Copy } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
+import { TableCell } from "@/components/ui/table";
+import { Check, Copy } from "lucide-react";
+import { useState } from "react";
 
 type Props = {
 	txHash: string;
 };
 
 export const TableTxHash = ({ txHash }: Props) => {
-	const toDisplay = `${txHash.slice(0, 4)}...${txHash.slice(-4)}`;
+	const [copied, setCopied] = useState(false);
+	const toDisplay = `${txHash.slice(0, 6)}...${txHash.slice(-4)}`;
+
+	const handleCopy = () => {
+		navigator.clipboard.writeText(txHash);
+		setCopied(true);
+		setTimeout(() => setCopied(false), 2000);
+	};
 
 	return (
 		<TableCell>
-			<div className="flex items-center gap-2">
-				<span className="p-2 bg-slate-200 rounded-sm font-mono text-primary font-light">
+			<div className="flex items-center gap-2 group/hash">
+				<code className="text-xs font-mono text-slate-500 bg-slate-100 px-2 py-1 rounded border border-slate-200">
 					{toDisplay}
-				</span>
-
-				{/* Button now only wraps the icon */}
-				<Button variant="ghost" size="icon" className="h-8 w-8">
-					<Copy strokeWidth={2} size={16} />
+				</code>
+				<Button
+					variant="ghost"
+					size="icon"
+					className="h-6 w-6 text-slate-400 hover:text-slate-700 opacity-0 group-hover/hash:opacity-100 transition-opacity"
+					onClick={handleCopy}
+				>
+					{copied ? (
+						<Check className="size-3" />
+					) : (
+						<Copy className="size-3" />
+					)}
 				</Button>
 			</div>
 		</TableCell>

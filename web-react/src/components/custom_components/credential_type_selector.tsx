@@ -1,5 +1,6 @@
 "use client";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
 	Command,
@@ -14,114 +15,125 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
+import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { useCredentialTypeStore } from "@/stores/credential_type_store";
 import type { CredentialType } from "@/types/credential_type.type";
 import { useQuery } from "@tanstack/react-query";
-import { Check, FileBadge, FileStack, UserRoundPen } from "lucide-react";
+import {
+	Check,
+	ChevronDown,
+	FileBadge,
+	FileStack,
+	ShieldCheck,
+	Users,
+} from "lucide-react";
 import { useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Spinner } from "../ui/spinner";
-
-// MOCK DATA: Replace this with your API data
 
 interface Props {
 	onSelectCredential: (credential: CredentialType) => void;
 }
 
 export function CredentialTypeSelector({ onSelectCredential }: Props) {
-	const [searchQuery, setSearchQuery] = useState("");
-
-	const { fetchCredentialTypes } = useCredentialTypeStore();
-
-	// 3. THE SEARCH: TanStack Query "listens" to the DELAYED state
-	const { data: credentialTypes = [], isLoading } = useQuery({
-		// logic: When 'debouncedSearch' changes, this query fires automatically
-		queryKey: ["fetch_credntial_types"],
-		queryFn: fetchCredentialTypes,
-	});
-
 	const [open, setOpen] = useState(false);
 	const [selectedCredential, setSelectedCredential] =
 		useState<CredentialType | null>(null);
+	const { fetchCredentialTypes } = useCredentialTypeStore();
 
-	const handleSelectCredntial = (credential: CredentialType) => {
+	// Fetch Logic
+	const { data: credentialTypes = [], isLoading } = useQuery({
+		queryKey: ["fetch_credential_types"],
+		queryFn: fetchCredentialTypes,
+	});
+
+	const handleSelectCredential = (credential: CredentialType) => {
 		setSelectedCredential(credential);
 		onSelectCredential(credential);
 		setOpen(false);
 	};
 
-	// Find the full student object based on ID
-
 	return (
-		<div className="w-full bg-white rounded-xl border shadow-sm p-4">
-			{/* HEADER: Title + Pick Button */}
-			<div className="flex justify-between items-center mb-4">
-				<div className="flex items-center gap-2  font-medium">
-					<FileStack className="w-5 h-5" color="#256af4" />
-					<span className="font-mono text-xs text-primary">
-						Select Credential
+		<div className="w-full bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+			{/* --- Header & Trigger --- */}
+			<div className="p-4 border-b border-slate-100 bg-slate-50/50 space-y-3">
+				<div className="flex items-center gap-2">
+					<div className="p-1.5 bg-blue-100 rounded-md text-[var(--button-primary)]">
+						<FileStack className="size-4" />
+					</div>
+					<span className="font-heading font-bold text-sm text-slate-800">
+						Credential Template
 					</span>
 				</div>
 
-				{/* The "Pick" Button that opens the Search */}
 				<Popover open={open} onOpenChange={setOpen}>
 					<PopoverTrigger asChild>
 						<Button
-							variant="ghost"
-							className="text-blue-600 hover:text-blue-700 font-semibold h-auto p-0 hover:bg-transparent"
+							variant="outline"
+							role="combobox"
+							aria-expanded={open}
+							className="w-full justify-between bg-white text-slate-700 hover:bg-slate-50 border-slate-200 h-11"
 						>
-							Pick
+							{selectedCredential ? (
+								<span className="font-semibold text-slate-900 truncate">
+									{selectedCredential.name}
+								</span>
+							) : (
+								<span className="text-slate-400 font-normal">
+									Select a template...
+								</span>
+							)}
+							<ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
 						</Button>
 					</PopoverTrigger>
 
-					<PopoverContent className="w-75 p-0" align="end">
+					<PopoverContent className="w-[300px] p-0" align="start">
 						<Command>
-							<CommandInput
-								placeholder="Search credential name..."
-								value={searchQuery}
-								onValueChange={setSearchQuery}
-							/>
+							<CommandInput placeholder="Search templates..." />
 							<CommandList>
 								<CommandEmpty>
 									{isLoading ? (
-										<div className="flex items-center justify-center">
-											<Spinner className="size-6" />
+										<div className="py-6 flex justify-center">
+											<Spinner className="size-5 text-[var(--button-primary)]" />
 										</div>
 									) : (
-										"No student found"
+										<div className="py-6 text-center text-xs text-slate-500">
+											No templates found.
+										</div>
 									)}
 								</CommandEmpty>
 								<CommandGroup>
-									{credentialTypes.map((credential) => {
-										return (
-											<CommandItem
-												key={credential.id}
-												value={credential.name}
-												onSelect={() => {
-													handleSelectCredntial(
-														credential,
-													);
-												}}
-											>
-												<Check
-													className={cn(
-														"mr-2 h-4 w-4",
-														selectedCredential?.id ===
-															credential.id
-															? "opacity-100"
-															: "opacity-0",
-													)}
-												/>
-												<div className="flex gap-2 p-2">
-													<FileBadge />
-													<span className="text-xs text-muted-foreground">
-														{credential.name}
-													</span>
-												</div>
-											</CommandItem>
-										);
-									})}
+									{credentialTypes.map((credential) => (
+										<CommandItem
+											key={credential.id}
+											value={credential.name}
+											onSelect={() =>
+												handleSelectCredential(
+													credential,
+												)
+											}
+											className="cursor-pointer"
+										>
+											<Check
+												className={cn(
+													"mr-2 h-4 w-4 text-[var(--button-primary)]",
+													selectedCredential?.id ===
+														credential.id
+														? "opacity-100"
+														: "opacity-0",
+												)}
+											/>
+											<div className="flex flex-col">
+												<span className="font-medium text-slate-900">
+													{credential.name}
+												</span>
+												<span className="text-[10px] text-slate-500">
+													Requires{" "}
+													{credential.signers.length}{" "}
+													signatures
+												</span>
+											</div>
+										</CommandItem>
+									))}
 								</CommandGroup>
 							</CommandList>
 						</Command>
@@ -129,63 +141,91 @@ export function CredentialTypeSelector({ onSelectCredential }: Props) {
 				</Popover>
 			</div>
 
-			{/* DISPLAY CARD: Matches your screenshot design */}
-			{selectedCredential ? (
-				<>
-					<div className="flex items-center gap-4 border-2 border-dashed border-button-primary rounded-lg p-3 bg-gray-50/50">
-						<div className="h-12 w-12 border-2 bg-blue-100 flex items-center justify-center rounded-sm shadow-sm">
-							<FileBadge color="#256af4" />
-						</div>
-
-						<div className="flex flex-col">
-							<span className="text-sm font-semibold text-gray-900">
-								{selectedCredential.name.toUpperCase()}
-							</span>
-						</div>
-					</div>
-
-					<div className="flex gap-2 items-center mt-4">
-						<UserRoundPen color="#256af4" className="size-4" />
-						<h3 className="font-mono text-xs">
-							Credential Signers:
-						</h3>
-					</div>
-
-					<div className="flex flex-col p-2 gap-4 bg-background mt-4 rounded-md">
-						{selectedCredential.signers.map((signer) => {
-							return (
-								<div className="flex gap-2 items-center p-2">
-									<Avatar className="size-10 border-2 border-white shadow-sm">
-										<AvatarImage alt={signer.firstName} />
-										<AvatarFallback className="bg-slate-200 text-slate-600">
-											{signer.firstName
-												.charAt(0)
-												.toLocaleUpperCase()}
-										</AvatarFallback>
-									</Avatar>
-
-									<div>
-										<h3 className="font-heading text-sm">
-											{signer.firstName}{" "}
-											{signer.middleName}{" "}
-											{signer.lastName}
-										</h3>
-										<p className="font-mono text-xs text-primary font-medium">
-											COLLEGE{" "}
-											{signer.signerPosition.toUpperCase()}
-										</p>
-									</div>
+			{/* --- Content Area --- */}
+			<div className="p-4 bg-white min-h-[140px]">
+				{selectedCredential ? (
+					<div className="animate-in fade-in zoom-in-95 duration-200">
+						{/* Selected Header */}
+						<div className="flex items-center gap-3 mb-6">
+							<div className="size-10 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center">
+								<FileBadge className="size-5 text-[var(--button-primary)]" />
+							</div>
+							<div>
+								<h3 className="font-heading font-bold text-slate-900 leading-tight">
+									{selectedCredential.name}
+								</h3>
+								<div className="flex items-center gap-1.5 mt-0.5">
+									<span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+										Standard v1.0
+									</span>
 								</div>
-							);
-						})}
+							</div>
+						</div>
+
+						{/* Signers List */}
+						<div className="space-y-3">
+							<div className="flex items-center justify-between">
+								<h4 className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
+									<Users className="size-3.5" /> Required
+									Signers
+								</h4>
+								<span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
+									{selectedCredential.signers.length}
+								</span>
+							</div>
+
+							<div className="bg-slate-50/50 rounded-lg border border-slate-100 divide-y divide-slate-100">
+								{selectedCredential.signers.map(
+									(signer, index) => (
+										<div
+											key={index}
+											className="flex items-center gap-3 p-3"
+										>
+											<Avatar className="size-8 border border-white shadow-sm">
+												<AvatarImage
+													src={`https://api.dicebear.com/7.x/initials/svg?seed=${signer.firstName} ${signer.lastName}`}
+												/>
+												<AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-bold">
+													{signer.firstName[0]}
+												</AvatarFallback>
+											</Avatar>
+											<div className="flex-1 min-w-0">
+												<p className="text-xs font-bold text-slate-900 truncate">
+													{signer.firstName}{" "}
+													{signer.middleName}{" "}
+													{signer.lastName}
+												</p>
+												<div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+													<ShieldCheck className="size-3 text-green-500" />
+													<span className="truncate">
+														{signer.signerPosition.toUpperCase()}
+													</span>
+												</div>
+											</div>
+										</div>
+									),
+								)}
+							</div>
+						</div>
 					</div>
-				</>
-			) : (
-				// Empty State Placeholder
-				<div className="flex items-center justify-center h-18 border border-dashed rounded-lg bg-gray-50 text-muted-foreground text-sm">
-					No credential selected
-				</div>
-			)}
+				) : (
+					// Empty State
+					<div className="h-full flex flex-col items-center justify-center text-center py-6 gap-3 opacity-60">
+						<div className="p-3 bg-slate-50 rounded-full">
+							<FileBadge className="size-6 text-slate-400" />
+						</div>
+						<div className="space-y-1">
+							<p className="text-sm font-semibold text-slate-600">
+								No Template Selected
+							</p>
+							<p className="text-xs text-slate-400 max-w-[200px] mx-auto">
+								Choose a credential type above to view the
+								authorized signers.
+							</p>
+						</div>
+					</div>
+				)}
+			</div>
 		</div>
 	);
 }

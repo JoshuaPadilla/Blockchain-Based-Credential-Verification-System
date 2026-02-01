@@ -1,53 +1,75 @@
-import { useLocation, Link } from "@tanstack/react-router";
-import React from "react";
 import {
 	Breadcrumb,
 	BreadcrumbItem,
 	BreadcrumbLink,
 	BreadcrumbList,
 	BreadcrumbSeparator,
-} from "../ui/breadcrumb";
+} from "@/components/ui/breadcrumb";
+import { Link, useLocation } from "@tanstack/react-router";
+import { Home } from "lucide-react";
+import React from "react";
+
+// Helper to format "issue_credential" -> "Issue Credential"
+const formatPathName = (path: string) => {
+	return path
+		.replace(/_/g, " ") // Replace underscores with spaces
+		.replace(/-/g, " ") // Replace dashes with spaces
+		.replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letter of words
+};
 
 export const AppBreadcrumb = () => {
 	const location = useLocation();
 
-	// 1. Split path and remove empty strings (fixes the empty first item)
+	// Split path and remove empty strings
 	const pathNames = location.pathname.split("/").filter((path) => path);
 
 	return (
-		// 2. Added z-50 to ensure it sits on top of other elements
-		<Breadcrumb>
+		<Breadcrumb className="hidden md:flex">
 			<BreadcrumbList>
-				{/* Always show a Home link first */}
+				{/* Home Root */}
 				<BreadcrumbItem>
 					<BreadcrumbLink asChild>
-						<Link to="/">Home</Link>
+						<Link
+							to="/"
+							className="flex items-center gap-1 text-slate-400 hover:text-slate-900 transition-colors"
+						>
+							<Home className="size-3.5 mb-0.5" />
+						</Link>
 					</BreadcrumbLink>
 				</BreadcrumbItem>
 
-				{pathNames.length > 0 && <BreadcrumbSeparator />}
+				{pathNames.length > 0 && (
+					<BreadcrumbSeparator className="text-slate-300" />
+				)}
 
 				{pathNames.map((link, index) => {
-					// 3. Reconstruct the full path for this segment
+					// Reconstruct path
 					const href = `/${pathNames.slice(0, index + 1).join("/")}`;
 					const isLast = index === pathNames.length - 1;
+					const formattedName = formatPathName(link);
 
 					return (
 						<React.Fragment key={link}>
 							<BreadcrumbItem>
 								{isLast ? (
-									// If it's the last item, just show text (no link)
-									<span className="font-semibold">
-										{link}
+									<span className="font-semibold text-slate-900">
+										{formattedName}
 									</span>
 								) : (
 									<BreadcrumbLink asChild>
-										<Link to={href}>{link}</Link>
+										<Link
+											to={href}
+											className="text-slate-500 hover:text-slate-900 transition-colors"
+										>
+											{formattedName}
+										</Link>
 									</BreadcrumbLink>
 								)}
 							</BreadcrumbItem>
-							{/* Add separator unless it's the last item */}
-							{!isLast && <BreadcrumbSeparator />}
+
+							{!isLast && (
+								<BreadcrumbSeparator className="text-slate-300" />
+							)}
 						</React.Fragment>
 					);
 				})}

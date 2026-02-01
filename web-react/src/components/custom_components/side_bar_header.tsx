@@ -1,9 +1,9 @@
+import app_logo from "@/assets/img/app_logo.png";
 import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { ShieldCheck } from "lucide-react";
 
 export const SideBarHeaderCustom = () => {
 	return (
@@ -14,19 +14,16 @@ export const SideBarHeaderCustom = () => {
 					className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 				>
 					{/* 1. The Logo/Icon (Always Visible) */}
-					<div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-black text-white">
-						<ShieldCheck className="size-5" />
+					<div className="relative z-10 flex items-center gap-3">
+						<img src={app_logo} className="size-8" />
+
+						<span className="font-heading font-bold text-xl tracking-tight">
+							Cer
+							<span className="text-button-primary">tus</span>
+						</span>
 					</div>
 
 					{/* 2. The Text (Automatically hidden when collapsed) */}
-					<div className="grid flex-1 text-left text-sm leading-tight">
-						<span className="truncate font-bold font-heading text-lg">
-							CredentialChain
-						</span>
-						<span className="truncate text-xs font-semibold font-mono">
-							Admin
-						</span>
-					</div>
 				</SidebarMenuButton>
 			</SidebarMenuItem>
 		</SidebarMenu>
