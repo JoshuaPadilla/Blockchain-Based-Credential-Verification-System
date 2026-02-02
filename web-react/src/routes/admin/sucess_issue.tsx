@@ -19,10 +19,7 @@ import { useCallback, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 
 // Worker setup
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-	"pdfjs-dist/build/pdf.worker.min.mjs",
-	import.meta.url,
-).toString();
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 type RouteSearch = {
 	recordId: string;
