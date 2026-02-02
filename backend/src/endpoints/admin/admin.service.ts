@@ -7,6 +7,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Sign } from "crypto";
 import { id } from "ethers";
 import { CredentialTypeEntity } from "src/common/entities/credential_type.entity";
+import { Record } from "src/common/entities/record.entity";
 import { User } from "src/common/entities/user.entity";
 import { CredentialType } from "src/common/enums/credential_type.enum";
 import { decrypt } from "src/common/helpers/encryption.helper";
@@ -21,6 +22,8 @@ export class AdminService {
     private userRepository: Repository<User>,
     @InjectRepository(CredentialTypeEntity)
     private credentialTypeRepository: Repository<CredentialTypeEntity>,
+    @InjectRepository(Record)
+    private recordRepository: Repository<Record>,
   ) {}
 
   // async setRequiredSigners(
@@ -147,10 +150,24 @@ export class AdminService {
   }
 
   async revokeRecord(recordId: string) {
-    return await this.blockchainService.revokeRecord(recordId);
+    const txReceipt = await this.blockchainService.revokeRecord(recordId);
+
+    await this.recordRepository.update(
+      { credentialRef: recordId },
+      { revoked: true },
+    );
+
+    return txReceipt;
   }
 
   async restoreRecord(recordId: string) {
-    return await this.blockchainService.restoreRecord(recordId);
+    const txReceipt = await this.blockchainService.restoreRecord(recordId);
+
+    await this.recordRepository.update(
+      { credentialRef: recordId },
+      { revoked: false },
+    );
+
+    return txReceipt;
   }
 }

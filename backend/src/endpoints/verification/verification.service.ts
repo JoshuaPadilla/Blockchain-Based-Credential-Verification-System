@@ -82,6 +82,7 @@ export class VerificationService {
     let statuses: VerificationStatus[] = [];
     const isTampered = calculatedHash !== onChainRecord.dataHash;
     const isRevoked = onChainRecord.isRevoked;
+
     const isExpired =
       onChainRecord.expiration > 0 &&
       Date.now() > Number(onChainRecord.expiration);
@@ -98,13 +99,13 @@ export class VerificationService {
     if (isExpired) {
       statuses.push(VerificationStatus.EXPIRED);
     }
-    if (!isFullySigned) {
+    if (isFullySigned) {
       statuses.push(VerificationStatus.PENDING);
     }
 
     // 6. Return a Rich Object (Don't just return the record!)
     return {
-      statuses: [], // The UI uses this to pick the Green/Red/Orange card
+      statuses, // The UI uses this to pick the Green/Red/Orange card
       record: statuses.includes(VerificationStatus.TAMPERED)
         ? null
         : offChainRecord,

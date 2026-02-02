@@ -1,7 +1,7 @@
-import type { User } from "@/types/user.type";
-import { create } from "zustand";
 import axiosClient from "@/api/axios_client";
+import type { User } from "@/types/user.type";
 import type { UserProfile } from "@/types/user_profile.type";
+import { create } from "zustand";
 
 type StoreProps = {
 	user: User | null;

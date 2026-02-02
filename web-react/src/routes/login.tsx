@@ -1,5 +1,6 @@
 import app_logo from "@/assets/img/app_logo.png";
 import { Spinner } from "@/components/ui/spinner";
+import { Role } from "@/enums/user_role.enum";
 import { useAuthStore } from "@/stores/auth_store";
 import {
 	Link,
@@ -12,10 +13,13 @@ import React, { useState } from "react";
 
 export const Route = createFileRoute("/login")({
 	component: RouteComponent,
-	beforeLoad: () => {
-		const { user } = useAuthStore.getState();
-		if (user) {
-			throw redirect({ to: "/" });
+	beforeLoad: ({ context }) => {
+		if (context.auth.user?.role === Role.ADMIN) {
+			throw redirect({ to: "/admin" });
+		}
+
+		if (context.auth.user?.role === Role.SIGNER) {
+			throw redirect({ to: "/signer" });
 		}
 	},
 });

@@ -1,23 +1,27 @@
+import app_logo from "@/assets/img/app_logo.png";
 import { Button } from "@/components/ui/button";
 import { usePdfStore } from "@/stores/pdf_store";
 import { useRecordStore } from "@/stores/record_store";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
+	AlertCircle,
 	AlertTriangle,
 	Ban,
-	CheckCircle2,
+	Building2,
+	Check,
 	Clock,
-	Copy,
 	Download,
-	ExternalLink,
-	FileX,
-	Loader,
+	Fingerprint,
+	Link as LinkIcon,
+	Loader2,
 	SearchX,
 	ShieldAlert,
 	ShieldCheck,
+	Users,
+	X,
 } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 
 // --- Worker Setup ---
@@ -26,443 +30,529 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 	import.meta.url,
 ).toString();
 
-// --- Types & Enums ---
-// Mapping your backend enum to frontend logic
-const VERIFICATION_STATUS = {
+// --- Constants & Types ---
+const STATUS = {
 	VALID: "verified",
 	REVOKED: "revoked",
 	EXPIRED: "expired",
 	TAMPERED: "tampered",
 	PENDING: "pending",
-	NOT_FOUND: "not_found",
 } as const;
 
-// --- Helper: UI Configuration based on Status ---
-// This handles the color coding and iconography for every state
-const getStatusConfig = (statuses: string[]) => {
-	// Priority check: Tampered > Revoked > Expired > Pending > Valid
-	if (statuses.includes(VERIFICATION_STATUS.TAMPERED)) {
-		return {
-			theme: "red",
-			icon: ShieldAlert,
-			title: "Integrity Check Failed",
-			description:
-				"This record's data hash does not match the blockchain anchor. It may have been altered.",
-			bg: "bg-red-50",
-			border: "border-red-200",
-			text: "text-red-700",
-			iconColor: "text-red-600",
-			badge: "bg-red-100 text-red-700",
-		};
-	}
-	if (statuses.includes(VERIFICATION_STATUS.REVOKED)) {
-		return {
-			theme: "red",
-			icon: Ban,
-			title: "Credential Revoked",
-			description:
-				"The issuing institution has explicitly revoked this credential.",
-			bg: "bg-red-50",
-			border: "border-red-200",
-			text: "text-red-700",
-			iconColor: "text-red-600",
-			badge: "bg-red-100 text-red-700",
-		};
-	}
-	if (statuses.includes(VERIFICATION_STATUS.EXPIRED)) {
-		return {
-			theme: "orange",
-			icon: Clock,
-			title: "Credential Expired",
-			description:
-				"This credential is no longer valid as of the expiration date.",
-			bg: "bg-orange-50",
-			border: "border-orange-200",
-			text: "text-orange-700",
-			iconColor: "text-orange-600",
-			badge: "bg-orange-100 text-orange-700",
-		};
-	}
-	if (statuses.includes(VERIFICATION_STATUS.PENDING)) {
-		return {
-			theme: "amber",
-			icon: AlertTriangle,
-			title: "Issuance Pending",
-			description:
-				"This record is anchored but waiting for all required signatures.",
-			bg: "bg-amber-50",
-			border: "border-amber-200",
-			text: "text-amber-700",
-			iconColor: "text-amber-600",
-			badge: "bg-amber-100 text-amber-700",
-		};
-	}
+// --- Hooks ---
 
-	// Default: Valid (If statuses array is empty or contains verified)
-	return {
-		theme: "green",
-		icon: ShieldCheck,
-		title: "Officially Verified",
-		description:
-			"The academic record is authentic, active, and has not been altered.",
-		bg: "bg-green-50",
-		border: "border-green-200",
-		text: "text-green-700",
-		iconColor: "text-green-600",
-		badge: "bg-green-100 text-green-700",
-	};
-};
+/**
+ * Handles element resizing for responsive PDF rendering
+ */
+function useElementWidth<T extends HTMLElement>() {
+	const ref = useRef<T>(null);
+	const [width, setWidth] = useState<number>(0);
+
+	useEffect(() => {
+		if (!ref.current) return;
+		const observer = new ResizeObserver((entries) => {
+			if (entries[0]) setWidth(entries[0].contentRect.width);
+		});
+		observer.observe(ref.current);
+		return () => observer.disconnect();
+	}, []);
+
+	return { ref, width };
+}
+
+/**
+ * Centralizes verification logic and status derivation
+ */
+function useVerificationLogic(statuses: string[] = []) {
+	return useMemo(() => {
+		const isTampered = statuses.includes(STATUS.TAMPERED);
+		const isRevoked = statuses.includes(STATUS.REVOKED);
+		const isExpired = statuses.includes(STATUS.EXPIRED);
+		const isPending = statuses.includes(STATUS.PENDING);
+		const isValid = !isTampered && !isRevoked && !isExpired && !isPending;
+
+		// Security Flag: Block access if compromised
+		const isCompromised = isTampered || isRevoked;
+
+		// Theme Config
+		let theme = {
+			color: "green",
+			icon: ShieldCheck,
+			title: "Valid Credential",
+			label: "Verified",
+			bg: "bg-green-50/50",
+			border: "border-green-100",
+			text: "text-green-700",
+		};
+
+		if (isTampered) {
+			theme = {
+				color: "red",
+				icon: ShieldAlert,
+				title: "Invalid Credential",
+				label: "Tampered",
+				bg: "bg-red-50/50",
+				border: "border-red-100",
+				text: "text-red-700",
+			};
+		} else if (isRevoked) {
+			theme = {
+				color: "red",
+				icon: Ban,
+				title: "Invalid Credential",
+				label: "Revoked",
+				bg: "bg-red-50/50",
+				border: "border-red-100",
+				text: "text-red-700",
+			};
+		} else if (isExpired) {
+			theme = {
+				color: "orange",
+				icon: Clock,
+				title: "Credential Expired",
+				label: "Expired",
+				bg: "bg-orange-50/50",
+				border: "border-orange-100",
+				text: "text-orange-700",
+			};
+		} else if (isPending) {
+			theme = {
+				color: "amber",
+				icon: AlertTriangle,
+				title: "Verification Pending",
+				label: "Pending Signatures",
+				bg: "bg-amber-50/50",
+				border: "border-amber-100",
+				text: "text-amber-700",
+			};
+		}
+
+		// Audit Checklist Data
+		const auditSteps = [
+			{
+				id: "crypto",
+				label: "Cryptographic Integrity",
+				subtext: "Digital signature matches public key",
+				passed: !isTampered,
+				icon: Fingerprint,
+			},
+			{
+				id: "blockchain",
+				label: "Blockchain Anchor",
+				subtext: "Hash found on Sepolia chain",
+				passed: true, // Existence of record implies this
+				icon: LinkIcon,
+			},
+			{
+				id: "issuer",
+				label: "Issuer Status",
+				subtext: isRevoked
+					? "Credential has been revoked"
+					: "Credential is active",
+				passed: !isRevoked,
+				icon: Building2,
+			},
+			{
+				id: "consensus",
+				label: "Consensus",
+				subtext: isPending
+					? "Waiting for signatures"
+					: "All signatures collected",
+				passed: !isPending,
+				warning: isPending,
+				icon: Users,
+			},
+		];
+
+		return { theme, isCompromised, auditSteps, isValid };
+	}, [statuses]);
+}
 
 // --- Route Definition ---
 export const Route = createFileRoute("/verify/$credentialRef")({
 	component: VerificationPage,
-	loader: async ({ params }) => {
-		// We access the store directly here to fetch data before render
-		// Note: In a real app, ensure useRecordStore.getState().verifyRecord is available
-		// or import the store hook properly if using inside component.
-		// Assuming 'verifyRecord' is available via a hook or direct import.
-		// For this example, we'll use the store hook inside the component for simplicity,
-		// OR if you want to preload, you need the store instance.
-		// Let's rely on the component using the hook for now to match your pattern.
-		return { credentialRef: params.credentialRef };
-	},
+	loader: async ({ params }) => ({ credentialRef: params.credentialRef }),
 });
 
+// --- Main Page Component ---
 function VerificationPage() {
 	const { credentialRef } = Route.useLoaderData();
 	const { verifyRecord } = useRecordStore();
 	const { getPreview } = usePdfStore();
-	const navigate = useNavigate();
 
-	// 1. Fetch Verification Data
-	const {
-		data: verificationData,
-		isLoading,
-		isError,
-	} = useQuery({
+	// 1. Data Fetching
+	const { data, isLoading, isError } = useQuery({
 		queryKey: ["verify", credentialRef],
 		queryFn: async () => {
-			const data = await verifyRecord(credentialRef);
-			if (!data) throw new Error("Not Found");
-			return data;
+			const result = await verifyRecord(credentialRef);
+			if (!result) throw new Error("Not Found");
+			return result;
 		},
-		retry: false, // Don't retry if 404
+		retry: false,
 	});
 
-	// 2. Fetch PDF Preview (Only if record exists and NOT tampered)
-	const shouldFetchPdf =
-		verificationData?.record &&
-		!verificationData.statuses.includes(VERIFICATION_STATUS.TAMPERED);
+	// 2. Logic Extraction
+	const { theme, isCompromised, auditSteps } = useVerificationLogic(
+		data?.statuses,
+	);
 
+	// 3. PDF Fetching (Dependent)
+	const shouldFetchPdf = !!data?.record && !isCompromised;
 	const { data: pdfBlob, isFetching: isPreviewLoading } = useQuery({
-		queryKey: [
-			"pdf-preview",
-			verificationData?.record?.student?.id,
-			verificationData?.record?.credentialType?.name,
-		],
+		queryKey: ["pdf-preview", data?.record?.id],
 		queryFn: () =>
 			getPreview(
-				verificationData!.record.student.id,
-				verificationData!.record.credentialType.name,
+				data!.record.student.id,
+				data!.record.credentialType.name,
 			),
-		enabled: !!shouldFetchPdf,
+		enabled: shouldFetchPdf,
 		staleTime: 1000 * 60 * 60,
 	});
 
-	// 3. Resize Observer for PDF
-	const [containerWidth, setContainerWidth] = useState<number>();
-	const resizeTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-	const onRefChange = useCallback((node: HTMLDivElement | null) => {
-		if (node) {
-			const resizeObserver = new ResizeObserver((entries) => {
-				if (resizeTimeoutRef.current)
-					clearTimeout(resizeTimeoutRef.current);
-				resizeTimeoutRef.current = setTimeout(() => {
-					if (entries[0])
-						setContainerWidth(entries[0].contentRect.width);
-				}, 100);
-			});
-			resizeObserver.observe(node);
-			return () => resizeObserver.disconnect();
-		}
-	}, []);
+	if (isLoading) return <LoadingScreen />;
+	if (isError || !data) return <ErrorScreen credentialRef={credentialRef} />;
 
-	// --- Loading State ---
-	if (isLoading) {
-		return (
-			<div className="min-h-screen flex items-center justify-center bg-gray-50 text-slate-400">
-				<div className="flex flex-col items-center gap-4">
-					<Loader className="size-10 animate-spin text-indigo-600" />
-					<p className="text-sm font-medium">
-						Verifying Credential on Blockchain...
-					</p>
-				</div>
-			</div>
-		);
-	}
-
-	// --- Not Found State ---
-	if (isError || !verificationData) {
-		return (
-			<div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
-				<div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 text-center max-w-md w-full">
-					<div className="mx-auto size-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-						<SearchX className="size-8 text-slate-400" />
-					</div>
-					<h2 className="text-xl font-bold text-slate-900 mb-2">
-						Credential Not Found
-					</h2>
-					<p className="text-slate-500 text-sm mb-6">
-						We could not locate a credential with the reference ID{" "}
-						<span className="font-mono bg-slate-100 px-1 rounded">
-							{credentialRef}
-						</span>
-						. It may be invalid or does not exist.
-					</p>
-					<Button
-						onClick={() => navigate({ to: "/" })}
-						className="w-full"
-					>
-						Return to Home
-					</Button>
-				</div>
-			</div>
-		);
-	}
-
-	// --- Prepare UI Config ---
-	const config = getStatusConfig(verificationData.statuses);
-	const record = verificationData.record;
-	const isTampered = verificationData.statuses.includes(
-		VERIFICATION_STATUS.TAMPERED,
-	);
+	const { record } = data;
 
 	return (
-		<div className="min-h-screen bg-gray-50/50 flex flex-col items-center py-12 px-4 sm:px-8 gap-8 font-sans text-slate-900">
-			{/* --- Top Header (Dynamic) --- */}
-			<div className="flex flex-col items-center text-center gap-4">
-				<div className={`rounded-full p-4 ${config.bg}`}>
-					<config.icon
-						className={`size-8 ${config.iconColor}`}
-						strokeWidth={3}
-					/>
-				</div>
-				<div className="space-y-2">
-					<h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-						{config.title}
-					</h1>
-					<p
-						className={`max-w-lg mx-auto font-medium ${config.text}`}
-					>
-						{config.description}
-					</p>
-				</div>
-			</div>
+		<div className="min-h-screen bg-[#F8F9FA] font-sans text-slate-900 pb-20">
+			<Navbar />
 
-			{/* --- Main Grid Layout --- */}
-			<div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-7xl">
-				{/* --- Left Column: Verification Details (Cols 1-4) --- */}
-				<div className="lg:col-span-4 space-y-6">
-					<div
-						className={`bg-white rounded-xl shadow-sm border ${config.border} overflow-hidden`}
-					>
-						<div className="p-6 space-y-6">
-							{/* Header */}
-							<div className="flex items-center gap-2 mb-2">
-								<ShieldCheck
-									className={`size-5 ${config.iconColor}`}
-								/>
-								<h3 className="font-bold text-sm tracking-wide text-slate-900 uppercase">
-									Verification Data
-								</h3>
-							</div>
-
-							{/* Status Tags */}
-							<div className="flex flex-wrap gap-2">
-								{verificationData.statuses.length === 0 && (
-									<span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200 uppercase">
-										Verified
-									</span>
-								)}
-								{verificationData.statuses.map((status) => (
-									<span
-										key={status}
-										className={`px-2.5 py-0.5 rounded-full text-xs font-bold border uppercase ${
-											status === "verified"
-												? "bg-green-100 text-green-700 border-green-200"
-												: status === "pending"
-													? "bg-amber-100 text-amber-700 border-amber-200"
-													: "bg-red-100 text-red-700 border-red-200"
-										}`}
-									>
-										{status}
-									</span>
-								))}
-							</div>
-
-							{/* Technical Details (Only show if Record exists) */}
-							{record ? (
-								<>
-									<div className="space-y-1.5">
-										<label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-											Transaction Hash
-										</label>
-										<div className="flex items-center gap-2 bg-slate-50 p-2 rounded border border-slate-100 group">
-											<code className="text-xs text-slate-600 truncate flex-1 font-mono">
-												{record.txHash}
-											</code>
-											<button
-												className="text-slate-400 hover:text-indigo-600 transition-colors"
-												onClick={() =>
-													navigator.clipboard.writeText(
-														record.txHash,
-													)
-												}
-											>
-												<Copy className="size-4" />
-											</button>
-										</div>
-										<a
-											href="#"
-											className="flex items-center gap-1 text-xs text-indigo-600 font-medium hover:underline mt-1"
-										>
-											View on Block Explorer{" "}
-											<ExternalLink className="size-3" />
-										</a>
-									</div>
-
-									<div className="h-px bg-slate-100 w-full" />
-
-									{/* Student Info */}
-									<div className="space-y-3">
-										<p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-											Issued To
-										</p>
-										<div className="flex items-center gap-3">
-											<div className="size-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold border border-slate-200">
-												{record.student?.firstName?.charAt(
-													0,
-												) || "S"}
-											</div>
-											<div className="flex flex-col">
-												<span className="text-sm font-bold text-slate-900">
-													{record.student?.firstName}{" "}
-													{record.student?.middleName}{" "}
-													{record.student?.lastName}
-												</span>
-												<span className="text-xs text-slate-500 font-mono">
-													ID:{" "}
-													{record.student?.student_id}
-												</span>
-											</div>
-										</div>
-									</div>
-								</>
-							) : (
-								// Fallback if Record is null (Tampered)
-								<div className="p-4 bg-red-50 rounded border border-red-100 text-xs text-red-600">
-									<FileX className="size-5 mb-2" />
-									Technical details are hidden because the
-									data integrity check failed.
-								</div>
-							)}
-						</div>
+			{/* Header Section */}
+			<header className="max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-8">
+				<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+					<div className="flex items-center gap-4">
+						<h1 className="text-3xl md:text-4xl font-heading font-extrabold text-slate-900 flex items-center gap-3">
+							{theme.title}
+							<theme.icon className={`size-8 ${theme.text}`} />
+						</h1>
 					</div>
-				</div>
-
-				{/* --- Right Column: Preview (Cols 5-12) --- */}
-				<div className="lg:col-span-8 flex flex-col h-full min-h-[600px] bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-					{/* Preview Header */}
-					<div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-						<h3 className="font-bold text-xs tracking-widest text-slate-500 uppercase">
-							Digital Certificate Preview
-						</h3>
-						{/* Only allow download if not tampered */}
-						{!isTampered && pdfBlob && (
-							<Button
-								variant="ghost"
-								size="sm"
-								className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 h-8 text-xs font-semibold"
-								onClick={() => {
-									const url =
-										window.URL.createObjectURL(pdfBlob);
-									const link = document.createElement("a");
-									link.href = url;
-									link.download = `credential-${credentialRef}.pdf`;
-									link.click();
-								}}
-							>
-								<Download className="size-4 mr-2" /> Download
-								PDF
-							</Button>
-						)}
-					</div>
-
-					{/* Preview Area */}
-					<div className="flex-1 bg-slate-100/50 relative p-8 flex flex-col items-center justify-center overflow-hidden">
+					<div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-200 text-xs font-medium text-slate-500 shadow-sm">
 						<div
-							ref={onRefChange}
-							className="w-full h-full flex items-center justify-center shadow-2xl rounded-sm max-w-[90%] relative bg-white"
-						>
-							{isPreviewLoading && (
-								<div className="flex flex-col items-center gap-2">
-									<Loader className="animate-spin text-slate-400 size-8" />
-									<span className="text-xs text-slate-400">
-										Loading Document...
-									</span>
-								</div>
-							)}
+							className={`size-2 rounded-full ${theme.color === "green" ? "bg-green-500 animate-pulse" : "bg-red-500"}`}
+						/>
+						Live Check Completed
+					</div>
+				</div>
+				<p className="text-slate-500 mt-2 text-sm">
+					Verification completed on {new Date().toLocaleString()}
+				</p>
+			</header>
 
-							{/* Show PDF if exists and clean */}
-							{!isPreviewLoading && pdfBlob && !isTampered && (
-								<Document
-									file={pdfBlob}
-									className="flex justify-center shadow-lg"
-									loading={
-										<Loader className="animate-spin text-slate-400 size-10" />
-									}
-								>
-									<Page
-										pageNumber={1}
-										width={
-											containerWidth
-												? containerWidth
-												: 600
-										}
-										renderTextLayer={false}
-										renderAnnotationLayer={false}
-										className="shadow-xl"
-									/>
-								</Document>
-							)}
+			{/* Main Grid */}
+			<main className="max-w-7xl mx-auto px-4 sm:px-6">
+				<div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+					{/* Left Column: Report */}
+					<div className="lg:col-span-7 space-y-6">
+						<AuditLogCard theme={theme} steps={auditSteps} />
+						<RecordMetadataCard record={record} />
+					</div>
 
-							{/* Error State for Preview */}
-							{!isPreviewLoading && isTampered && (
-								<div className="flex flex-col items-center text-center max-w-sm p-6">
-									<FileX className="size-12 text-red-300 mb-4" />
-									<h3 className="text-slate-900 font-bold">
-										Preview Unavailable
-									</h3>
-									<p className="text-slate-500 text-sm mt-2">
-										The document preview has been disabled
-										because the record integrity check
-										failed.
-									</p>
-								</div>
-							)}
+					{/* Right Column: Preview */}
+					<div className="lg:col-span-5">
+						<div className="sticky top-24 space-y-4">
+							<DocumentViewer
+								pdfBlob={pdfBlob}
+								isLoading={isPreviewLoading}
+								isCompromised={isCompromised}
+								hash={record.dataHash}
+							/>
+							<HelpBox />
 						</div>
 					</div>
 				</div>
-			</div>
-
-			{/* --- Footer --- */}
-			<div className="w-full max-w-7xl flex justify-between text-[10px] text-slate-400 pt-8 border-t border-slate-200/60 mt-auto">
-				<div className="flex items-center gap-1.5">
-					<CheckCircle2 className="size-3 text-slate-400" />
-					Blockchain Verification Protocol • SHA-256 Checksum
-				</div>
-				<div>Secure Credential Verification System</div>
-			</div>
+			</main>
 		</div>
 	);
 }
+
+// --- Sub-Components ---
+
+const Navbar = () => {
+	const navigate = useNavigate();
+	return (
+		<div className="bg-white border-b border-slate-200 px-6 h-16 flex items-center justify-between sticky top-0 z-50">
+			<div className="relative z-10 flex items-center gap-3">
+				<img src={app_logo} className="size-10" alt="Logo" />
+				<span className="font-heading font-bold text-xl tracking-tight">
+					Cer<span className="text-[var(--button-primary)]">tus</span>
+				</span>
+			</div>
+			<Button
+				variant="ghost"
+				size="sm"
+				onClick={() => navigate({ to: "/" })}
+			>
+				Verify Another <SearchX className="ml-2 size-4" />
+			</Button>
+		</div>
+	);
+};
+
+const AuditLogCard = ({ theme, steps }: { theme: any; steps: any[] }) => (
+	<div
+		className={`bg-white rounded-2xl shadow-sm border overflow-hidden ${theme.border}`}
+	>
+		{/* Card Header */}
+		<div
+			className={`px-6 py-4 border-b flex justify-between items-center ${theme.bg} ${theme.border}`}
+		>
+			<span
+				className={`text-xs font-bold uppercase tracking-widest ${theme.text}`}
+			>
+				{theme.label} Status
+			</span>
+			<ShieldCheck className={`size-5 ${theme.text}`} />
+		</div>
+
+		{/* Card Body */}
+		<div className="p-6">
+			<h3 className="font-heading font-bold text-lg text-slate-900">
+				Verification Audit Log
+			</h3>
+			<p className="text-sm text-slate-500 leading-relaxed max-w-xl mb-6 mt-2">
+				This credential has undergone a multi-point integrity check
+				against the University's blockchain registry.
+			</p>
+
+			<div className="space-y-3">
+				{steps.map((check) => (
+					<AuditItem key={check.id} check={check} />
+				))}
+			</div>
+		</div>
+	</div>
+);
+
+const AuditItem = ({ check }: { check: any }) => {
+	const statusColor =
+		check.passed && !check.warning
+			? "bg-green-100 text-green-600 border-green-200"
+			: check.warning
+				? "bg-amber-100 text-amber-600 border-amber-200"
+				: "bg-red-100 text-red-600 border-red-200";
+
+	const borderColor =
+		check.passed && !check.warning
+			? "border-slate-100 bg-slate-50/50"
+			: check.warning
+				? "border-amber-100 bg-amber-50"
+				: "border-red-100 bg-red-50";
+
+	return (
+		<div
+			className={`flex items-start gap-4 p-4 rounded-xl border transition-all ${borderColor}`}
+		>
+			<div className={`mt-0.5 p-1.5 rounded-full border ${statusColor}`}>
+				{check.passed && !check.warning ? (
+					<Check size={14} strokeWidth={3} />
+				) : check.warning ? (
+					<AlertCircle size={14} strokeWidth={3} />
+				) : (
+					<X size={14} strokeWidth={3} />
+				)}
+			</div>
+			<div>
+				<div className="flex items-center gap-2">
+					<h4
+						className={`text-sm font-bold ${check.warning ? "text-amber-900" : !check.passed ? "text-red-900" : "text-slate-900"}`}
+					>
+						{check.label}
+					</h4>
+					<check.icon className="size-3 text-slate-400" />
+				</div>
+				<p className="text-xs text-slate-500 mt-0.5">{check.subtext}</p>
+			</div>
+		</div>
+	);
+};
+
+const RecordMetadataCard = ({ record }: { record: any }) => (
+	<div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+		<div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+			<h3 className="font-bold text-xs uppercase tracking-widest text-slate-500">
+				Record Metadata
+			</h3>
+		</div>
+		<div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+			<MetaField
+				label="Recipient"
+				value={`${record.student.firstName} ${record.student.lastName}`}
+				sub={record.student.student_id}
+				highlight
+			/>
+			<MetaField
+				label="Program"
+				value={record.student.course}
+				sub={`Year Level ${record.student.yearLevel}`}
+			/>
+			<div className="space-y-1">
+				<label className="text-[10px] font-bold text-slate-400 uppercase">
+					Credential Type
+				</label>
+				<div>
+					<span className="inline-flex items-center px-2 py-1 rounded bg-slate-100 text-xs font-mono font-medium text-slate-700">
+						{record.credentialType.name}
+					</span>
+				</div>
+			</div>
+			<MetaField
+				label="Issuance Date"
+				value={new Date(record.createdAt).toLocaleDateString("en-US", {
+					year: "numeric",
+					month: "long",
+					day: "numeric",
+				})}
+			/>
+		</div>
+		<div className="bg-slate-50 p-4 border-t border-slate-100 flex justify-between items-center">
+			<div className="text-xs text-slate-500">
+				Need help with this record?
+			</div>
+			<Button
+				variant="outline"
+				size="sm"
+				className="bg-white text-xs h-8"
+			>
+				Contact Registrar
+			</Button>
+		</div>
+	</div>
+);
+
+const MetaField = ({ label, value, sub, highlight }: any) => (
+	<div className="space-y-1">
+		<label className="text-[10px] font-bold text-slate-400 uppercase">
+			{label}
+		</label>
+		<p
+			className={`font-medium text-slate-900 ${highlight ? "font-heading font-bold text-lg" : "text-sm"}`}
+		>
+			{value}
+		</p>
+		{sub && <p className="text-xs text-slate-500">{sub}</p>}
+	</div>
+);
+
+const DocumentViewer = ({ pdfBlob, isLoading, isCompromised, hash }: any) => {
+	const { ref, width } = useElementWidth<HTMLDivElement>();
+
+	return (
+		<div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+			{/* Preview Area */}
+			<div
+				ref={ref}
+				className="bg-slate-100/50 relative min-h-[500px] flex items-center justify-center"
+			>
+				{isCompromised ? (
+					<div className="text-center p-8 max-w-xs animate-in fade-in zoom-in-95">
+						<div className="size-20 mx-auto bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
+							<Ban className="size-8 text-red-500" />
+						</div>
+						<h3 className="font-bold text-slate-900">
+							Preview Unavailable
+						</h3>
+						<p className="text-xs text-slate-500 mt-2">
+							Document previews and downloads are disabled for
+							invalid or tampered credentials.
+						</p>
+					</div>
+				) : isLoading ? (
+					<div className="flex flex-col items-center gap-3">
+						<Loader2 className="size-8 animate-spin text-slate-400" />
+						<p className="text-xs font-medium text-slate-400">
+							Loading Document...
+						</p>
+					</div>
+				) : pdfBlob ? (
+					<Document
+						file={pdfBlob}
+						loading={null}
+						className="shadow-lg"
+					>
+						<Page
+							pageNumber={1}
+							width={width > 0 ? width : 400}
+							renderTextLayer={false}
+							renderAnnotationLayer={false}
+						/>
+					</Document>
+				) : null}
+			</div>
+
+			{/* Action Area */}
+			<div className="p-6 bg-white border-t border-slate-100">
+				<Button
+					className="w-full h-11 shadow-sm"
+					disabled={isCompromised || !pdfBlob}
+					variant={isCompromised ? "secondary" : "default"}
+				>
+					<Download className="mr-2 size-4" />
+					{isCompromised
+						? "Download Disabled"
+						: "Download Original PDF"}
+				</Button>
+				<div className="mt-4 text-center">
+					<p
+						className="text-[10px] text-slate-400 font-mono truncate px-4 cursor-help"
+						title={hash}
+					>
+						Hash: {hash?.slice(0, 20)}...{hash?.slice(-8)}
+					</p>
+				</div>
+			</div>
+		</div>
+	);
+};
+
+const HelpBox = () => (
+	<div className="rounded-xl border border-slate-200 p-4 bg-white text-center">
+		<p className="text-xs text-slate-500">
+			Need help?{" "}
+			<a href="#" className="text-indigo-600 hover:underline font-medium">
+				Visit our Help Center
+			</a>
+		</p>
+	</div>
+);
+
+// --- Loading / Error States ---
+const LoadingScreen = () => (
+	<div className="min-h-screen flex items-center justify-center bg-[#F8F9FA] text-slate-400">
+		<div className="flex flex-col items-center gap-4">
+			<Loader2 className="size-10 animate-spin text-slate-300" />
+			<p className="text-sm font-medium uppercase tracking-widest">
+				Verifying On-Chain...
+			</p>
+		</div>
+	</div>
+);
+
+const ErrorScreen = ({ credentialRef }: { credentialRef: string }) => {
+	const navigate = useNavigate();
+	return (
+		<div className="min-h-screen flex flex-col items-center justify-center bg-[#F8F9FA] px-4">
+			<div className="bg-white p-12 rounded-2xl shadow-sm border border-slate-200 text-center max-w-lg w-full">
+				<div className="mx-auto size-20 bg-slate-50 rounded-full flex items-center justify-center mb-6">
+					<SearchX className="size-10 text-slate-400" />
+				</div>
+				<h2 className="text-2xl font-bold text-slate-900 mb-3">
+					Credential Not Found
+				</h2>
+				<p className="text-slate-500 mb-8 leading-relaxed">
+					The reference{" "}
+					<span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">
+						{credentialRef}
+					</span>{" "}
+					does not exist in our immutable registry.
+				</p>
+				<Button
+					onClick={() => navigate({ to: "/" })}
+					className="w-full h-12 text-base"
+				>
+					Return to Home
+				</Button>
+			</div>
+		</div>
+	);
+};

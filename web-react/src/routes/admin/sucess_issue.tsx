@@ -305,10 +305,14 @@ function RouteComponent() {
 							</span>
 						</div>
 						<div className="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-full border border-slate-700/50">
-							<code className="text-[10px] text-blue-300 font-mono">
-								localhost/verify/
+							<a
+								href={`http://127.0.0.1:5137/verify/
+								${record.credentialRef}`}
+								className="text-[10px] text-blue-300 font-mono"
+							>
+								http://localhost:5137/verify/
 								{record.credentialRef}
-							</code>
+							</a>
 							<button className="text-slate-400 hover:text-white transition-colors">
 								<Copy className="size-3" />
 							</button>

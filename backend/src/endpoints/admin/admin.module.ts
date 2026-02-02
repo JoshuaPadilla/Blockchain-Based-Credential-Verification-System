@@ -6,11 +6,12 @@ import { BlockChainModule } from "src/services/blockchain/blockchain.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { User } from "src/common/entities/user.entity";
 import { CredentialTypeEntity } from "src/common/entities/credential_type.entity";
+import { Record } from "src/common/entities/record.entity";
 
 @Module({
   imports: [
     BlockChainModule,
-    TypeOrmModule.forFeature([User, CredentialTypeEntity]),
+    TypeOrmModule.forFeature([User, CredentialTypeEntity, Record]),
   ],
   controllers: [AdminController],
   providers: [AdminService],
