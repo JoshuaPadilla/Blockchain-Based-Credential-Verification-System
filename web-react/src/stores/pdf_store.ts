@@ -9,7 +9,7 @@ type StoreProps = {
 	) => Promise<Blob | null>;
 };
 
-export const usePdfStore = create<StoreProps>((set) => ({
+export const usePdfStore = create<StoreProps>(() => ({
 	getPreview: async (studentId, credentialType) => {
 		const res = await axiosClient.get(
 			`pdf/preview?studentId=${studentId}&credentialName=${credentialType}`,

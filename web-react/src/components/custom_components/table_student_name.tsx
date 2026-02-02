@@ -13,6 +13,7 @@ export const TableStudentName = ({
 	lastName,
 }: Props) => {
 	const initials = `${firstName[0]}${lastName[0]}`;
+	console.log(middleName);
 
 	return (
 		<TableCell className="py-4 pl-6">

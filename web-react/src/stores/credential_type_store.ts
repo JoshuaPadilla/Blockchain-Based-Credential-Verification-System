@@ -6,7 +6,7 @@ type StoreProps = {
 	fetchCredentialTypes: () => Promise<CredentialType[]>;
 };
 
-export const useCredentialTypeStore = create<StoreProps>((set) => ({
+export const useCredentialTypeStore = create<StoreProps>(() => ({
 	fetchCredentialTypes: async () => {
 		const res = await axiosClient.get("credential-types");
 

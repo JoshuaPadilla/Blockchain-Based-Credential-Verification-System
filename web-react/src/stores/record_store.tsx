@@ -36,6 +36,7 @@ export const useRecordStore = create<StoreProps>((set) => ({
 		cutOffYear,
 		cutOffSemester,
 	) => {
+		console.log(cutOffYear, cutOffSemester);
 		const res = await axiosClient.post("record", {
 			studentId: studentId,
 			credentialTypeId: credentialTypeId,

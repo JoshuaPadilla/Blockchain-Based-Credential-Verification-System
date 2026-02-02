@@ -1,13 +1,6 @@
 import {
-	LayoutDashboard,
-	GraduationCap,
-	Newspaper,
-	Settings,
-} from "lucide-react";
-import {
 	Sidebar,
 	SidebarContent,
-	SidebarFooter,
 	SidebarGroup,
 	SidebarGroupContent,
 	SidebarHeader,
@@ -15,8 +8,9 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { SideBarHeaderCustom } from "./custom_components/side_bar_header";
 import { Link, useLocation } from "@tanstack/react-router";
+import { GraduationCap, LayoutDashboard, Newspaper } from "lucide-react";
+import { SideBarHeaderCustom } from "./custom_components/side_bar_header";
 
 // Menu items.
 const items = [

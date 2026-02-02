@@ -1,7 +1,5 @@
-import { Award, FileBadge, UserSearch } from "lucide-react";
-import React from "react";
+import { Award, UserSearch } from "lucide-react";
 import { Button } from "../ui/button";
-import { Avatar, AvatarImage } from "../ui/avatar";
 
 export const SelectCredentialTrigger = () => {
 	return (

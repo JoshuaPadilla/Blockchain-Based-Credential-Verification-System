@@ -1,6 +1,5 @@
-import React from "react";
+import { BadgeCheck } from "lucide-react";
 import { Badge } from "../ui/badge";
-import { BadgeCheck, Loader } from "lucide-react";
 
 export const VerifiedBadge = () => {
 	return (

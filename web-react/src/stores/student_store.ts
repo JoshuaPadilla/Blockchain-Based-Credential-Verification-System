@@ -6,7 +6,7 @@ type StoreProps = {
 	fetchStudent: (query: string) => Promise<Student[]>;
 };
 
-export const useStudentStore = create<StoreProps>((set) => ({
+export const useStudentStore = create<StoreProps>(() => ({
 	fetchStudent: async (query) => {
 		const res = await axiosClient.get(`student?q=${query}`);
 

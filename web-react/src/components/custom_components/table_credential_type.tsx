@@ -1,6 +1,5 @@
-import React from "react";
-import { TableCell } from "../ui/table";
 import type { CredentialEnumType } from "@/enums/credential_type.enum";
+import { TableCell } from "../ui/table";
 
 type Props = {
 	credential_type: CredentialEnumType;

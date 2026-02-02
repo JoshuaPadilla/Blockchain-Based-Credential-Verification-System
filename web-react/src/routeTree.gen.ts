@@ -15,10 +15,8 @@ import { Route as SignerRouteRouteImport } from './routes/signer/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SignerIndexRouteImport } from './routes/signer/index'
-import { Route as PostsIndexRouteImport } from './routes/posts/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as VerifyCredentialRefRouteImport } from './routes/verify/$credentialRef'
-import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
 import { Route as AdminSucess_issueRouteImport } from './routes/admin/sucess_issue'
 import { Route as AdminIssue_credentialRouteImport } from './routes/admin/issue_credential'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
@@ -56,11 +54,6 @@ const SignerIndexRoute = SignerIndexRouteImport.update({
   path: '/',
   getParentRoute: () => SignerRouteRoute,
 } as any)
-const PostsIndexRoute = PostsIndexRouteImport.update({
-  id: '/posts/',
-  path: '/posts/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -70,11 +63,6 @@ const VerifyCredentialRefRoute = VerifyCredentialRefRouteImport.update({
   id: '/$credentialRef',
   path: '/$credentialRef',
   getParentRoute: () => VerifyRouteRoute,
-} as any)
-const PostsPostIdRoute = PostsPostIdRouteImport.update({
-  id: '/posts/$postId',
-  path: '/posts/$postId',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSucess_issueRoute = AdminSucess_issueRouteImport.update({
   id: '/sucess_issue',
@@ -118,10 +106,8 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/issue_credential': typeof AdminIssue_credentialRoute
   '/admin/sucess_issue': typeof AdminSucess_issueRoute
-  '/posts/$postId': typeof PostsPostIdRoute
   '/verify/$credentialRef': typeof VerifyCredentialRefRoute
   '/admin/': typeof AdminIndexRoute
-  '/posts/': typeof PostsIndexRoute
   '/signer/': typeof SignerIndexRoute
   '/admin/students/': typeof AdminStudentsIndexRoute
 }
@@ -133,10 +119,8 @@ export interface FileRoutesByTo {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/issue_credential': typeof AdminIssue_credentialRoute
   '/admin/sucess_issue': typeof AdminSucess_issueRoute
-  '/posts/$postId': typeof PostsPostIdRoute
   '/verify/$credentialRef': typeof VerifyCredentialRefRoute
   '/admin': typeof AdminIndexRoute
-  '/posts': typeof PostsIndexRoute
   '/signer': typeof SignerIndexRoute
   '/admin/students': typeof AdminStudentsIndexRoute
 }
@@ -152,10 +136,8 @@ export interface FileRoutesById {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/issue_credential': typeof AdminIssue_credentialRoute
   '/admin/sucess_issue': typeof AdminSucess_issueRoute
-  '/posts/$postId': typeof PostsPostIdRoute
   '/verify/$credentialRef': typeof VerifyCredentialRefRoute
   '/admin/': typeof AdminIndexRoute
-  '/posts/': typeof PostsIndexRoute
   '/signer/': typeof SignerIndexRoute
   '/admin/students/': typeof AdminStudentsIndexRoute
 }
@@ -172,10 +154,8 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/issue_credential'
     | '/admin/sucess_issue'
-    | '/posts/$postId'
     | '/verify/$credentialRef'
     | '/admin/'
-    | '/posts/'
     | '/signer/'
     | '/admin/students/'
   fileRoutesByTo: FileRoutesByTo
@@ -187,10 +167,8 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/issue_credential'
     | '/admin/sucess_issue'
-    | '/posts/$postId'
     | '/verify/$credentialRef'
     | '/admin'
-    | '/posts'
     | '/signer'
     | '/admin/students'
   id:
@@ -205,10 +183,8 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/issue_credential'
     | '/admin/sucess_issue'
-    | '/posts/$postId'
     | '/verify/$credentialRef'
     | '/admin/'
-    | '/posts/'
     | '/signer/'
     | '/admin/students/'
   fileRoutesById: FileRoutesById
@@ -219,8 +195,6 @@ export interface RootRouteChildren {
   SignerRouteRoute: typeof SignerRouteRouteWithChildren
   VerifyRouteRoute: typeof VerifyRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
-  PostsPostIdRoute: typeof PostsPostIdRoute
-  PostsIndexRoute: typeof PostsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -267,13 +241,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignerIndexRouteImport
       parentRoute: typeof SignerRouteRoute
     }
-    '/posts/': {
-      id: '/posts/'
-      path: '/posts'
-      fullPath: '/posts/'
-      preLoaderRoute: typeof PostsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin/': {
       id: '/admin/'
       path: '/'
@@ -287,13 +254,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/verify/$credentialRef'
       preLoaderRoute: typeof VerifyCredentialRefRouteImport
       parentRoute: typeof VerifyRouteRoute
-    }
-    '/posts/$postId': {
-      id: '/posts/$postId'
-      path: '/posts/$postId'
-      fullPath: '/posts/$postId'
-      preLoaderRoute: typeof PostsPostIdRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/admin/sucess_issue': {
       id: '/admin/sucess_issue'
@@ -403,8 +363,6 @@ const rootRouteChildren: RootRouteChildren = {
   SignerRouteRoute: SignerRouteRouteWithChildren,
   VerifyRouteRoute: VerifyRouteRouteWithChildren,
   LoginRoute: LoginRoute,
-  PostsPostIdRoute: PostsPostIdRoute,
-  PostsIndexRoute: PostsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

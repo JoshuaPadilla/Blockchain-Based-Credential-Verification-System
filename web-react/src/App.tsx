@@ -1,8 +1,6 @@
+import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import "./App.css";
-import { DiplomaPDF } from "./components/pdf_documents/diploma/diploma_pdf";
-import ReactPDF, { PDFViewer } from "@react-pdf/renderer";
-import QRCode from "qrcode";
 
 function App() {
 	const [qrUrl, setQrUrl] = useState("");

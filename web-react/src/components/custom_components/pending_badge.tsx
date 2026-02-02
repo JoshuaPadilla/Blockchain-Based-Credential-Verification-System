@@ -1,6 +1,5 @@
-import React from "react";
-import { Badge } from "../ui/badge";
 import { Loader } from "lucide-react";
+import { Badge } from "../ui/badge";
 
 export const PendingBadge = () => {
 	return (

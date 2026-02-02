@@ -46,7 +46,7 @@ function RouteComponent() {
 	// --- State ---
 	const [containerWidth, setContainerWidth] = useState<number>();
 	const resizeTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-	const [numPages, setNumPages] = useState<number>();
+	const [, setNumPages] = useState<number>();
 	const [selectedStudent, setSelectedStudent] = useState<Student | null>(
 		null,
 	);
