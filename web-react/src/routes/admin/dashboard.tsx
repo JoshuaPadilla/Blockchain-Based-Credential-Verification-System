@@ -11,14 +11,14 @@ export const Route = createFileRoute("/admin/dashboard")({
 	loader: async ({ context }) => {
 		// Parallel data fetching for performance
 		await Promise.all([
-			context.insights.getDashboardInsights(),
+			context.insights.getAdminDashboardInsights(),
 			context.records.getRecords(),
 		]);
 	},
 });
 
 function RouteComponent() {
-	const { dashboardInsights } = useInsightsStore();
+	const { adminDashboardInsights } = useInsightsStore();
 	const { records } = useRecordStore();
 	const navigate = useNavigate();
 
@@ -51,7 +51,7 @@ function RouteComponent() {
 			</div>
 
 			{/* --- Stats Row --- */}
-			<DashboardStats insights={dashboardInsights} />
+			<DashboardStats insights={adminDashboardInsights} />
 
 			{/* --- Table Section --- */}
 			<div className="space-y-4">

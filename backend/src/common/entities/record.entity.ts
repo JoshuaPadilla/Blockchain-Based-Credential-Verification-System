@@ -7,6 +7,7 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -16,11 +17,12 @@ import { Student } from './student.entity';
 import { Semester } from 'src/common/enums/semester.enum';
 import { CredentialTypeEntity } from './credential_type.entity';
 import { User } from './user.entity';
+import { RecordSignature } from './record_signature.entity';
 
 @Entity()
 export class Record {
   @PrimaryGeneratedColumn('uuid')
-  id: string = randomUUID();
+  id: string;
 
   @Column({ type: 'varchar', length: 8, unique: true, nullable: true })
   credentialRef: string;
@@ -53,15 +55,17 @@ export class Record {
   @JoinColumn({ name: 'credential_type_id' }) // Explicitly names the DB column
   credentialType: CredentialTypeEntity;
 
-  @ManyToMany(() => User)
-  @JoinTable({ name: 'record_signedBy' })
-  signedBy: User[];
-
   @Column({ type: 'int', default: 0 })
   currentSignatures: number;
 
   @ManyToOne(() => Student, (student) => student.credentialsRecord)
   student: Student;
+
+  @OneToMany(() => RecordSignature, (signature) => signature.record, {
+    cascade: true,
+    eager: true, // Loads signatures + txHashes automatically
+  })
+  signatures: RecordSignature[];
 
   @CreateDateColumn()
   createdAt: Date;

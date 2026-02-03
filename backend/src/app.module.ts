@@ -23,6 +23,7 @@ import { UserModule } from './endpoints/user/user.module';
 import { SignerModule } from './endpoints/signer/signer.module';
 import { VerificationModule } from './endpoints/verification/verification.module';
 import { InsightsModule } from './endpoints/insights/insights.module';
+import { RecordSignature } from './common/entities/record_signature.entity';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { InsightsModule } from './endpoints/insights/insights.module';
         SubjectTaken,
         User,
         CredentialTypeEntity,
+        RecordSignature,
       ],
     }),
     RecordModule,

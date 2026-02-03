@@ -4,7 +4,7 @@ import type { VerificationData } from "@/types/verification_data.type";
 import { create } from "zustand";
 
 type StoreProps = {
-	records: Record[];
+	adminRecords: Record[];
 	getRecords: () => Promise<void>;
 	createRecord: (
 		studentId: string,
@@ -12,19 +12,22 @@ type StoreProps = {
 		cutOffYear?: string,
 		cutOffSemester?: number,
 	) => Promise<Record>;
-	getRecord: (recordId: string) => Promise<Record>;
+	getAdminRecord: (recordId: string) => Promise<Record>;
 	verifyRecord: (credentialRef: string) => Promise<VerificationData | null>;
+	signerPendingRecords: Record[];
+	getSignerPendingRecords: (signerId: string) => Promise<void>;
 };
 
 export const useRecordStore = create<StoreProps>((set) => ({
-	records: [],
+	adminRecords: [],
+	signerPendingRecords: [],
 	getRecords: async () => {
 		try {
 			const res = await axiosClient.get("record");
 
 			console.log(res.statusText);
 			if (res.status === 200) {
-				set({ records: res.data });
+				set({ adminRecords: res.data });
 			}
 		} catch (error) {
 			console.log(error);
@@ -44,10 +47,14 @@ export const useRecordStore = create<StoreProps>((set) => ({
 
 		if (res.status === 201) return res.data;
 	},
-	getRecord: async (recordId) => {
-		const res = await axiosClient.get(`record/${recordId}`);
+	getAdminRecord: async (recordId) => {
+		try {
+			const res = await axiosClient.get(`record/${recordId}`);
 
-		if (res.status === 200) return res.data;
+			if (res.status === 200) return res.data;
+		} catch (error) {
+			console.log(error);
+		}
 	},
 	verifyRecord: async (credentialRef) => {
 		console.log(credentialRef);
@@ -58,5 +65,18 @@ export const useRecordStore = create<StoreProps>((set) => ({
 		if (res.status === 200) return res.data;
 
 		return null;
+	},
+	getSignerPendingRecords: async (signerId: string) => {
+		try {
+			const res = await axiosClient.get(
+				`record/signer-pending-records/${signerId}`,
+			);
+
+			if (res.status === 200) {
+				set({ signerPendingRecords: res.data });
+			}
+		} catch (error) {
+			console.log(error);
+		}
 	},
 }));

@@ -1,20 +1,41 @@
 import axiosClient from "@/api/axios_client";
 import type { DashboardInsights } from "@/types/dashboard_insights.type";
+import type { SignerDashboardInsights } from "@/types/signer_dashboard_insights";
 import { create } from "zustand";
 
 type StoreProps = {
-	dashboardInsights: DashboardInsights | null;
-	getDashboardInsights: () => Promise<void>;
+	adminDashboardInsights: DashboardInsights | null;
+	signerDashboardInsights: SignerDashboardInsights | null;
+
+	getAdminDashboardInsights: () => Promise<void>;
+	getSingerDashboardInsights: (signerId: string) => Promise<void>;
 };
 
 export const useInsightsStore = create<StoreProps>((set) => ({
-	dashboardInsights: null,
-	getDashboardInsights: async () => {
+	adminDashboardInsights: null,
+	signerDashboardInsights: null,
+
+	getAdminDashboardInsights: async () => {
 		try {
-			const res = await axiosClient.get("insights/dashboard-insights");
+			const res = await axiosClient.get(
+				"insights/admin-dashboard-insights",
+			);
 
 			if (res.status === 200) {
-				set({ dashboardInsights: res.data });
+				set({ adminDashboardInsights: res.data });
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	},
+	getSingerDashboardInsights: async (signerId) => {
+		try {
+			const res = await axiosClient.get(
+				`insights/signer-dashboard-insights/${signerId}`,
+			);
+
+			if (res.status === 200) {
+				set({ signerDashboardInsights: res.data });
 			}
 		} catch (error) {
 			console.log(error);

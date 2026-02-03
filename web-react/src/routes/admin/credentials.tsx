@@ -31,7 +31,7 @@ export const Route = createFileRoute("/admin/credentials")({
 });
 
 function CredentialsPage() {
-	const { records } = useRecordStore();
+	const { adminRecords } = useRecordStore();
 
 	// --- Filter States ---
 	const [searchTerm, setSearchTerm] = useState("");
@@ -39,11 +39,9 @@ function CredentialsPage() {
 	const [statusFilter, setStatusFilter] = useState<string>("ALL");
 	const [date, setDate] = useState<DateRange | undefined>(undefined);
 
-	console.log("Date:", date);
-
 	// --- Filtering Logic ---
 	const filteredRecords = useMemo(() => {
-		return records.filter((record) => {
+		return adminRecords.filter((record) => {
 			// 1. Text Search (Student Name, ID, or Credential Ref)
 			const searchLower = searchTerm.toLowerCase();
 			const matchesSearch =
@@ -82,7 +80,7 @@ function CredentialsPage() {
 
 			return matchesSearch && matchesType && matchesStatus && matchesDate;
 		});
-	}, [records, searchTerm, typeFilter, statusFilter, date]);
+	}, [adminRecords, searchTerm, typeFilter, statusFilter, date]);
 
 	// --- Handlers ---
 	const clearFilters = () => {
@@ -119,7 +117,7 @@ function CredentialsPage() {
 				</div>
 			</div>
 
-			{/* --- Toolbar --- */}
+			{/* --- Search and Filter --- */}
 			<div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center">
 				{/* Left Side: Text Search */}
 				<div className="relative w-full xl:w-96">

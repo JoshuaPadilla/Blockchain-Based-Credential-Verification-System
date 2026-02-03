@@ -10,7 +10,9 @@ import {
   UpdateDateColumn,
   Entity,
   ManyToMany,
+  OneToMany,
 } from 'typeorm';
+import { RecordSignature } from './record_signature.entity';
 
 // distinct from STI: No @Entity decorator here!
 @Entity()
@@ -44,6 +46,9 @@ export class User {
 
   @Column({ type: 'text', nullable: true, select: false, unique: true })
   privateKey: string;
+
+  @OneToMany(() => RecordSignature, (signature) => signature.signer)
+  recordSignatures: RecordSignature[];
 
   @CreateDateColumn()
   createdAt: Date;

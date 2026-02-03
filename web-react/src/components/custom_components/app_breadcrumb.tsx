@@ -12,16 +12,35 @@ import React from "react";
 // Helper to format "issue_credential" -> "Issue Credential"
 const formatPathName = (path: string) => {
 	return path
-		.replace(/_/g, " ") // Replace underscores with spaces
-		.replace(/-/g, " ") // Replace dashes with spaces
-		.replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize first letter of words
+		.replace(/_/g, " ")
+		.replace(/-/g, " ")
+		.replace(/\b\w/g, (char) => char.toUpperCase());
 };
+
+// Define paths you want to hide
+const HIDDEN_SEGMENTS = ["admin", "signer"];
 
 export const AppBreadcrumb = () => {
 	const location = useLocation();
 
-	// Split path and remove empty strings
-	const pathNames = location.pathname.split("/").filter((path) => path);
+	// 1. Get raw segments
+	const rawSegments = location.pathname.split("/").filter((path) => path);
+
+	// 2. Generate the data with correct HREF first, THEN filter
+	const breadcrumbItems = rawSegments
+		.map((segment, index) => {
+			// Create the href using the full path history (including hidden ones)
+			const href = `/${rawSegments.slice(0, index + 1).join("/")}`;
+
+			return {
+				segment,
+				formattedName: formatPathName(segment),
+				href,
+				isVisible: !HIDDEN_SEGMENTS.includes(segment),
+			};
+		})
+		// 3. Filter out the items we don't want to see
+		.filter((item) => item.isVisible);
 
 	return (
 		<Breadcrumb className="hidden md:flex">
@@ -38,30 +57,27 @@ export const AppBreadcrumb = () => {
 					</BreadcrumbLink>
 				</BreadcrumbItem>
 
-				{pathNames.length > 0 && (
+				{breadcrumbItems.length > 0 && (
 					<BreadcrumbSeparator className="text-slate-300" />
 				)}
 
-				{pathNames.map((link, index) => {
-					// Reconstruct path
-					const href = `/${pathNames.slice(0, index + 1).join("/")}`;
-					const isLast = index === pathNames.length - 1;
-					const formattedName = formatPathName(link);
+				{breadcrumbItems.map((item, index) => {
+					const isLast = index === breadcrumbItems.length - 1;
 
 					return (
-						<React.Fragment key={link}>
+						<React.Fragment key={item.href}>
 							<BreadcrumbItem>
 								{isLast ? (
-									<span className="font-semibold text-slate-900">
-										{formattedName}
+									<span className="font-semibold text-button-primary">
+										{item.formattedName}
 									</span>
 								) : (
 									<BreadcrumbLink asChild>
 										<Link
-											to={href}
+											to={item.href}
 											className="text-slate-500 hover:text-slate-900 transition-colors"
 										>
-											{formattedName}
+											{item.formattedName}
 										</Link>
 									</BreadcrumbLink>
 								)}

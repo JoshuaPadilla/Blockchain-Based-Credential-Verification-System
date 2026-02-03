@@ -17,6 +17,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SignerIndexRouteImport } from './routes/signer/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as VerifyCredentialRefRouteImport } from './routes/verify/$credentialRef'
+import { Route as SignerQueueRouteImport } from './routes/signer/queue'
+import { Route as SignerHistoryRouteImport } from './routes/signer/history'
+import { Route as SignerDashboardRouteImport } from './routes/signer/dashboard'
 import { Route as AdminSucess_issueRouteImport } from './routes/admin/sucess_issue'
 import { Route as AdminIssue_credentialRouteImport } from './routes/admin/issue_credential'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
@@ -64,6 +67,21 @@ const VerifyCredentialRefRoute = VerifyCredentialRefRouteImport.update({
   path: '/$credentialRef',
   getParentRoute: () => VerifyRouteRoute,
 } as any)
+const SignerQueueRoute = SignerQueueRouteImport.update({
+  id: '/queue',
+  path: '/queue',
+  getParentRoute: () => SignerRouteRoute,
+} as any)
+const SignerHistoryRoute = SignerHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => SignerRouteRoute,
+} as any)
+const SignerDashboardRoute = SignerDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => SignerRouteRoute,
+} as any)
 const AdminSucess_issueRoute = AdminSucess_issueRouteImport.update({
   id: '/sucess_issue',
   path: '/sucess_issue',
@@ -106,6 +124,9 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/issue_credential': typeof AdminIssue_credentialRoute
   '/admin/sucess_issue': typeof AdminSucess_issueRoute
+  '/signer/dashboard': typeof SignerDashboardRoute
+  '/signer/history': typeof SignerHistoryRoute
+  '/signer/queue': typeof SignerQueueRoute
   '/verify/$credentialRef': typeof VerifyCredentialRefRoute
   '/admin/': typeof AdminIndexRoute
   '/signer/': typeof SignerIndexRoute
@@ -119,6 +140,9 @@ export interface FileRoutesByTo {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/issue_credential': typeof AdminIssue_credentialRoute
   '/admin/sucess_issue': typeof AdminSucess_issueRoute
+  '/signer/dashboard': typeof SignerDashboardRoute
+  '/signer/history': typeof SignerHistoryRoute
+  '/signer/queue': typeof SignerQueueRoute
   '/verify/$credentialRef': typeof VerifyCredentialRefRoute
   '/admin': typeof AdminIndexRoute
   '/signer': typeof SignerIndexRoute
@@ -136,6 +160,9 @@ export interface FileRoutesById {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/issue_credential': typeof AdminIssue_credentialRoute
   '/admin/sucess_issue': typeof AdminSucess_issueRoute
+  '/signer/dashboard': typeof SignerDashboardRoute
+  '/signer/history': typeof SignerHistoryRoute
+  '/signer/queue': typeof SignerQueueRoute
   '/verify/$credentialRef': typeof VerifyCredentialRefRoute
   '/admin/': typeof AdminIndexRoute
   '/signer/': typeof SignerIndexRoute
@@ -154,6 +181,9 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/issue_credential'
     | '/admin/sucess_issue'
+    | '/signer/dashboard'
+    | '/signer/history'
+    | '/signer/queue'
     | '/verify/$credentialRef'
     | '/admin/'
     | '/signer/'
@@ -167,6 +197,9 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/issue_credential'
     | '/admin/sucess_issue'
+    | '/signer/dashboard'
+    | '/signer/history'
+    | '/signer/queue'
     | '/verify/$credentialRef'
     | '/admin'
     | '/signer'
@@ -183,6 +216,9 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/issue_credential'
     | '/admin/sucess_issue'
+    | '/signer/dashboard'
+    | '/signer/history'
+    | '/signer/queue'
     | '/verify/$credentialRef'
     | '/admin/'
     | '/signer/'
@@ -254,6 +290,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/verify/$credentialRef'
       preLoaderRoute: typeof VerifyCredentialRefRouteImport
       parentRoute: typeof VerifyRouteRoute
+    }
+    '/signer/queue': {
+      id: '/signer/queue'
+      path: '/queue'
+      fullPath: '/signer/queue'
+      preLoaderRoute: typeof SignerQueueRouteImport
+      parentRoute: typeof SignerRouteRoute
+    }
+    '/signer/history': {
+      id: '/signer/history'
+      path: '/history'
+      fullPath: '/signer/history'
+      preLoaderRoute: typeof SignerHistoryRouteImport
+      parentRoute: typeof SignerRouteRoute
+    }
+    '/signer/dashboard': {
+      id: '/signer/dashboard'
+      path: '/dashboard'
+      fullPath: '/signer/dashboard'
+      preLoaderRoute: typeof SignerDashboardRouteImport
+      parentRoute: typeof SignerRouteRoute
     }
     '/admin/sucess_issue': {
       id: '/admin/sucess_issue'
@@ -334,10 +391,16 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
 )
 
 interface SignerRouteRouteChildren {
+  SignerDashboardRoute: typeof SignerDashboardRoute
+  SignerHistoryRoute: typeof SignerHistoryRoute
+  SignerQueueRoute: typeof SignerQueueRoute
   SignerIndexRoute: typeof SignerIndexRoute
 }
 
 const SignerRouteRouteChildren: SignerRouteRouteChildren = {
+  SignerDashboardRoute: SignerDashboardRoute,
+  SignerHistoryRoute: SignerHistoryRoute,
+  SignerQueueRoute: SignerQueueRoute,
   SignerIndexRoute: SignerIndexRoute,
 }
 

@@ -66,8 +66,7 @@ export class BlockChainService implements OnModuleInit {
         id(credentialType.id), // Hashing string to bytes32
       );
 
-      const receipt = await tx.wait();
-      return receipt;
+      return tx;
     } catch (error) {
       console.log(error);
 
@@ -150,9 +149,7 @@ export class BlockChainService implements OnModuleInit {
         allowed,
       );
 
-      const receipt = tx.wait();
-
-      return receipt;
+      return tx;
     } catch (error) {
       console.log(error);
       throw new BadRequestException(
@@ -169,11 +166,16 @@ export class BlockChainService implements OnModuleInit {
         signerWallet,
       ) as ethers.Contract;
 
+      // 1. SUBMISSION (The `tx`)
+      // This happens fast (milliseconds)
       const tx = await contractAsSigner.signRecord(recordId);
 
-      const receipt = await tx.wait();
+      // IMPORTANT: Save this hash to DB immediately!
+      // If your server crashes 1 second later, you still have the tracking number.
+      console.log('Transaction Sent! Hash:', tx.hash);
+      // TODO: db.update({ status: 'SUBMITTED', txHash: tx.hash })
 
-      return receipt;
+      return tx;
     } catch (error) {
       console.log(error);
       throw new BadRequestException(error.reason || 'failed to sign record');
@@ -182,37 +184,37 @@ export class BlockChainService implements OnModuleInit {
     // Connect a new instance for this specific signer
   }
 
-  private async AddSignToRecord(
-    recordId: string,
-    signerPublicAddress,
-    timestamp: string,
-  ) {
-    const record = await this.recordRepository.findOne({
-      where: { id: recordId },
-      relations: ['signedBy'],
-    });
+  // private async AddSignToRecord(
+  //   recordId: string,
+  //   signerPublicAddress,
+  //   timestamp: string,
+  // ) {
+  //   const record = await this.recordRepository.findOne({
+  //     where: { id: recordId },
+  //     relations: ['signedBy'],
+  //   });
 
-    const signer = await this.userRepository.findOneBy({
-      publicAddress: signerPublicAddress,
-    });
+  //   const signer = await this.userRepository.findOneBy({
+  //     publicAddress: signerPublicAddress,
+  //   });
 
-    if (!signer) {
-      throw new NotFoundException('Signer not found');
-    }
+  //   if (!signer) {
+  //     throw new NotFoundException('Signer not found');
+  //   }
 
-    if (!record) {
-      throw new NotFoundException('No record found!');
-    }
+  //   if (!record) {
+  //     throw new NotFoundException('No record found!');
+  //   }
 
-    const updatedSigners = [...record.signedBy, signer];
+  //   const updatedSigners = [...record.signedBy, signer];
 
-    record.signedBy = updatedSigners;
-    record.currentSignatures++;
+  //   record.signedBy = updatedSigners;
+  //   record.currentSignatures++;
 
-    await this.recordRepository.save(record);
+  //   await this.recordRepository.save(record);
 
-    console.log('Record Signed');
-  }
+  //   console.log('Record Signed');
+  // }
 
   async getNetwork() {
     return await this.provider.getNetwork();
@@ -224,7 +226,7 @@ export class BlockChainService implements OnModuleInit {
 
     // Using the existing contract instance
     this.ownerContract.on('RecordSigned', (recordId, signer, timestamp) => {
-      this.AddSignToRecord(recordId, signer, timestamp);
+      // this.AddSignToRecord(recordId, signer, timestamp);
       // TODO: Call an internal method to update your DB status
       // e.g., this.handleSignatureEvent(recordId, signer);
     });
