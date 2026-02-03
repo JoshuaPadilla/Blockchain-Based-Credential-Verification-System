@@ -64,26 +64,8 @@ contract CredentialVerifier {
 
     }
 
-    // sign record
     function signRecord(string calldata recordId) external {
-        Record storage r = records[recordId];
-
-        require(r.dataHash != bytes32(0), "Record does not exist");
-        require(!r.isRevoked, "Record revoked");
-        require(
-            r.expiration == 0 || block.timestamp <= r.expiration,
-            "Record expired"
-        );
-
-        require(credentialTypeSigner[r.credentialTypeId][msg.sender], "Not authorized Signer");
-        require(!r.signedBy[msg.sender], "Already signed!");
-
-        
-
-        r.signedBy[msg.sender] = true;
-        r.currentSignatures++;
-
-        emit RecordSigned(recordId, msg.sender, block.timestamp);
+        _signRecordLogic(recordId, msg.sender);
     }
 
     // check record if it is fully signed
@@ -100,5 +82,35 @@ contract CredentialVerifier {
     // Check if the signer already signed
     function hasSigned(string calldata recordId, address signer) external view returns (bool) {
         return records[recordId].signedBy[signer];
+    }
+
+    function batchSignRecords(string[] calldata recordIds) external {
+        // Optional: Limit batch size to prevent "Out of Gas" errors
+        require(recordIds.length <= 50, "Batch too large (max 50)");
+
+        for (uint i = 0; i < recordIds.length; i++) {
+            _signRecordLogic(recordIds[i], msg.sender);
+        }
+    }
+
+    // 1. Extract logic to internal function
+    function _signRecordLogic(string calldata recordId, address signer) internal {
+        Record storage r = records[recordId];
+
+        require(r.dataHash != bytes32(0), "Record does not exist");
+        require(!r.isRevoked, "Record revoked");
+        require(
+            r.expiration == 0 || block.timestamp <= r.expiration,
+            "Record expired"
+        );
+
+        // Optimization: Check mapping directly
+        require(credentialTypeSigner[r.credentialTypeId][signer], "Not authorized Signer");
+        require(!r.signedBy[signer], "Already signed!");
+
+        r.signedBy[signer] = true;
+        r.currentSignatures++;
+
+        emit RecordSigned(recordId, signer, block.timestamp);
     }
 }

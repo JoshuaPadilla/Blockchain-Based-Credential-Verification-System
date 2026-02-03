@@ -32,7 +32,9 @@ export class RecordSignature {
   signedAt: Date;
 
   // Relation to the Record being signed
-  @ManyToOne(() => Record, (record) => record.signatures)
+  @ManyToOne(() => Record, (record) => record.signatures, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'record_id' })
   record: Record;
 
