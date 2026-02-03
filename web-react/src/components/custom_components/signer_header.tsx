@@ -19,11 +19,11 @@ const data = {
 			label: "Management",
 			items: [
 				{
-					title: "Credentials",
+					title: "Queue",
 					url: "/signer/queue",
 				},
 				{
-					title: "Students",
+					title: "History",
 					url: "/signer/history",
 				},
 			],

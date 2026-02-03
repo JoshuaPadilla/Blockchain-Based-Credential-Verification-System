@@ -34,10 +34,12 @@ export class InsightsService {
 
     const pendingRecords = await this.recordRepository
       .createQueryBuilder("record")
-      // 1. Join config to check permission and limits
+      .innerJoinAndSelect("record.student", "student")
+
+      // 1. Join config to check permission
       .innerJoinAndSelect("record.credentialType", "type")
 
-      // 2. Filter: User MUST be in the allowed signers list for this type
+      // 2. Filter: User MUST be in the allowed signers list
       .innerJoin(
         "type.signers",
         "allowedSigner",
@@ -51,14 +53,18 @@ export class InsightsService {
       // 4. Filter: Record MUST NOT be revoked
       .andWhere("record.revoked IS NOT TRUE")
 
-      // 5. Anti-Join: Check if user has ALREADY signed this specific record
+      // 5. Anti-Join: Check against the new RecordSignature table
+      // logic: Join "signatures" where signer is ME.
       .leftJoin(
-        "record.signedBy",
-        "alreadySigned",
-        "alreadySigned.id = :userId",
+        "record.signatures",
+        "mySignature",
+        "mySignature.signer.id = :userId",
         { userId },
       )
-      .andWhere("alreadySigned.id IS NULL") // Keep only records where the join failed (user hasn't signed)
+      // 6. Keep only records where the join FAILED (meaning I haven't signed yet)
+      // We explicitly exclude PENDING/SUBMITTED/CONFIRMED.
+      // If you want to allow retrying FAILED txs, see the "Pro Tip" below.
+      .andWhere("mySignature.id IS NULL")
 
       .getCount();
 

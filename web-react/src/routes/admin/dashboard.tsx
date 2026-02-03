@@ -19,7 +19,7 @@ export const Route = createFileRoute("/admin/dashboard")({
 
 function RouteComponent() {
 	const { adminDashboardInsights } = useInsightsStore();
-	const { records } = useRecordStore();
+	const { adminRecords } = useRecordStore();
 	const navigate = useNavigate();
 
 	return (
@@ -69,7 +69,7 @@ function RouteComponent() {
 					</Button>
 				</div>
 
-				<RecentTransactionTable records={records} />
+				<RecentTransactionTable records={adminRecords} />
 			</div>
 		</div>
 	);
