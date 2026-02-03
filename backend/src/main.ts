@@ -10,7 +10,7 @@ import cookieParser from 'cookie-parser'; // Import this
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
-
+  app.setGlobalPrefix('api');
   app.enableCors({
     origin: [
       'http://localhost:5173',
@@ -30,6 +30,7 @@ async function bootstrap() {
       disableErrorMessages: false,
     }),
   );
+
   await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 }
 

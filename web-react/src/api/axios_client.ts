@@ -4,7 +4,7 @@ const baseUrl = import.meta.env.VITE_API_URL;
 
 // Set config defaults when creating the instance
 const axiosClient = axios.create({
-	baseURL: baseUrl,
+	baseURL: `${baseUrl}/api/`,
 	timeout: 5000,
 	withCredentials: true,
 	headers: {
