@@ -117,7 +117,6 @@ function SignerQueuePage() {
 
 			if (selectedIds.length === 1) {
 				const signature = await signRecord(selectedIds[0]);
-
 				console.log("Signature:", signature);
 			} else {
 				const signature = await new Promise((resolve) =>
@@ -132,9 +131,6 @@ function SignerQueuePage() {
 			setIsSheetOpen(false);
 			setSelectedIds([]);
 		}
-		// Simulate API Call
-
-		// Add toast notification here if needed
 	};
 
 	const currentBatchDate = new Date().toLocaleDateString("en-US", {
@@ -143,13 +139,12 @@ function SignerQueuePage() {
 	});
 
 	return (
-		<div className="min-h-screen bg-background font-sans text-foreground p-6 pb-32">
-			{/* ... [Header and Toolbar sections remain exactly the same] ... */}
+		<div className="min-h-screen bg-background font-sans text-foreground p-4 sm:p-6 pb-32">
 			{/* Header Section */}
-			<div className="max-w-5xl mx-auto space-y-8">
+			<div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
 				<div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
 					<div>
-						<h1 className="text-3xl font-heading font-bold tracking-tight text-foreground">
+						<h1 className="text-2xl sm:text-3xl font-heading font-bold tracking-tight text-foreground">
 							Pending Credentials
 						</h1>
 						<p className="text-muted-foreground mt-2 text-sm max-w-lg">
@@ -157,7 +152,7 @@ function SignerQueuePage() {
 							credentials in bulk.
 						</p>
 					</div>
-					<div className="flex flex-col items-end">
+					<div className="flex flex-col items-start md:items-end w-full md:w-auto">
 						<span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
 							Academic Session
 						</span>
@@ -171,8 +166,9 @@ function SignerQueuePage() {
 				</div>
 
 				{/* Toolbar */}
-				<div className="bg-card p-2 rounded-xl border border-border shadow-sm flex flex-col md:flex-row gap-2 items-center sticky top-4 z-20">
-					<div className="flex items-center gap-3 px-4 py-2 border-r border-border min-w-fit">
+				<div className="bg-card p-2 rounded-xl border border-border shadow-sm flex flex-col md:flex-row gap-2 items-stretch md:items-center sticky top-4 z-20">
+					{/* Checkbox Section */}
+					<div className="flex items-center gap-3 px-4 py-2 border-b md:border-b-0 md:border-r border-border min-w-fit">
 						<Checkbox
 							id="select-all"
 							checked={
@@ -189,12 +185,14 @@ function SignerQueuePage() {
 							Select All
 						</label>
 					</div>
-					<div className="flex items-center gap-2 flex-1 w-full px-2">
+
+					{/* Filters Section */}
+					<div className="flex flex-col sm:flex-row items-center gap-2 flex-1 w-full px-2 pt-2 md:pt-0">
 						<Select
 							value={filterType}
 							onValueChange={setFilterType}
 						>
-							<SelectTrigger className="w-[180px] border-input bg-background focus:ring-button-primary h-10">
+							<SelectTrigger className="w-full sm:w-[180px] border-input bg-background focus:ring-button-primary h-10">
 								<SelectValue placeholder="Credential Type" />
 							</SelectTrigger>
 							<SelectContent>
@@ -210,15 +208,16 @@ function SignerQueuePage() {
 								)}
 							</SelectContent>
 						</Select>
-					</div>
-					<div className="relative w-full md:w-80">
-						<Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-						<Input
-							placeholder="Search Student Name or ID..."
-							className="pl-9 border-input bg-background focus-visible:ring-button-primary h-10"
-							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
-						/>
+
+						<div className="relative w-full md:w-80">
+							<Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+							<Input
+								placeholder="Search Student Name or ID..."
+								className="pl-9 border-input bg-background focus-visible:ring-button-primary h-10 w-full"
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+							/>
+						</div>
 					</div>
 				</div>
 
@@ -249,40 +248,40 @@ function SignerQueuePage() {
 			{/* --- Floating Action Bar --- */}
 			<div
 				className={cn(
-					"fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-3xl px-4 transition-all duration-300 ease-in-out z-30",
+					"fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] md:w-full max-w-3xl transition-all duration-300 ease-in-out z-30",
 					selectedIds.length > 0
 						? "translate-y-0 opacity-100"
 						: "translate-y-20 opacity-0 pointer-events-none",
 				)}
 			>
-				<div className="bg-primary text-primary-foreground p-4 rounded-2xl shadow-2xl flex items-center justify-between ring-1 ring-white/10">
-					<div className="flex items-center gap-4">
-						<div className="bg-background/20 p-2.5 rounded-xl">
+				<div className="bg-primary text-primary-foreground p-3 sm:p-4 rounded-2xl shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 ring-1 ring-white/10">
+					<div className="flex items-center gap-4 w-full sm:w-auto">
+						<div className="bg-background/20 p-2.5 rounded-xl hidden xs:block">
 							<SlidersHorizontal className="size-5 text-button-primary" />
 						</div>
-						<div>
+						<div className="flex-1 sm:flex-initial">
 							<p className="font-bold text-sm">
 								{selectedIds.length} Students Selected
 							</p>
-							<p className="text-xs text-primary-foreground/70">
+							<p className="text-xs text-primary-foreground/70 hidden sm:block">
 								Ready for cryptographic signature
 							</p>
 						</div>
 					</div>
 
-					<div className="flex items-center gap-3">
+					<div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
 						<Button
 							variant="ghost"
-							className="text-primary-foreground/70 hover:text-primary-foreground hover:bg-white/10"
+							className="flex-1 sm:flex-initial text-primary-foreground/70 hover:text-primary-foreground hover:bg-white/10"
 							onClick={() => setSelectedIds([])}
 						>
 							Cancel
 						</Button>
 						<Button
-							className="bg-button-primary hover:bg-button-primary/90 text-white font-semibold shadow-lg shadow-button-primary/20"
-							onClick={handleOpenSigningSheet} // Changed to open sheet
+							className="flex-1 sm:flex-initial bg-button-primary hover:bg-button-primary/90 text-white font-semibold shadow-lg shadow-button-primary/20 whitespace-nowrap"
+							onClick={handleOpenSigningSheet}
 						>
-							<Feather className="mr-2 size-4" /> Sign Selected (
+							<Feather className="mr-2 size-4" /> Sign (
 							{selectedIds.length})
 						</Button>
 					</div>
@@ -291,7 +290,7 @@ function SignerQueuePage() {
 
 			{/* --- Signing Confirmation Sheet --- */}
 			<Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-				<SheetContent className="sm:max-w-md flex flex-col h-full">
+				<SheetContent className="w-full sm:max-w-md flex flex-col h-full sm:h-auto">
 					<SheetHeader className="space-y-4">
 						<SheetTitle className="flex items-center gap-2 text-xl">
 							<ShieldCheck className="size-6 text-button-primary" />
@@ -308,7 +307,7 @@ function SignerQueuePage() {
 					</SheetHeader>
 
 					{/* Scrollable List of Selected Items */}
-					<div className="flex-1 overflow-y-auto my-6 pr-2 -mr-2">
+					<div className="flex-1 overflow-y-auto my-6 pr-2 -mr-2 max-h-[60vh]">
 						<div className="space-y-3">
 							{selectedRecords.map((record) => (
 								<div
@@ -339,7 +338,7 @@ function SignerQueuePage() {
 										className="size-6 text-muted-foreground hover:text-destructive"
 										onClick={() =>
 											toggleSelection(record.id)
-										} // Allow removing from list
+										}
 									>
 										<X className="size-3" />
 									</Button>
@@ -348,7 +347,7 @@ function SignerQueuePage() {
 						</div>
 					</div>
 
-					<SheetFooter className="flex-col gap-3 sm:flex-col">
+					<SheetFooter className="flex-col gap-3 sm:flex-col mt-auto">
 						<div className="bg-yellow-50 border border-yellow-100 rounded-lg p-3 flex gap-3 mb-2">
 							<CheckCircle2 className="size-5 text-yellow-600 shrink-0" />
 							<p className="text-xs text-yellow-800 leading-snug">
@@ -384,7 +383,6 @@ function SignerQueuePage() {
 	);
 }
 
-// ... [QueueItem component remains exactly the same as previous response] ...
 const QueueItem = ({
 	record,
 	isSelected,
@@ -397,7 +395,7 @@ const QueueItem = ({
 	return (
 		<div
 			className={cn(
-				"group relative bg-card p-4 rounded-xl border transition-all duration-300 flex items-center gap-5 cursor-pointer hover:shadow-lg overflow-hidden",
+				"group relative bg-card p-3 sm:p-4 rounded-xl border transition-all duration-300 flex items-center gap-3 sm:gap-5 cursor-pointer hover:shadow-lg overflow-hidden",
 				isSelected
 					? "border-button-primary/50 shadow-md ring-1 ring-button-primary/20 bg-button-primary/[0.02]"
 					: "border-border hover:border-button-primary/30",
@@ -410,7 +408,7 @@ const QueueItem = ({
 					isSelected ? "bg-button-primary" : "bg-transparent",
 				)}
 			/>
-			<div className="flex items-center justify-center pl-2">
+			<div className="flex items-center justify-center pl-0 sm:pl-2">
 				<Checkbox
 					checked={isSelected}
 					className={cn(
@@ -419,7 +417,7 @@ const QueueItem = ({
 					)}
 				/>
 			</div>
-			<Avatar className="size-12 border border-border bg-background shadow-sm">
+			<Avatar className="size-10 sm:size-12 border border-border bg-background shadow-sm shrink-0">
 				<AvatarImage
 					src={`https://api.dicebear.com/7.x/initials/svg?seed=${record.student.firstName}`}
 				/>
@@ -429,19 +427,19 @@ const QueueItem = ({
 			</Avatar>
 			<div className="flex-1 min-w-0">
 				<div className="flex flex-col gap-0.5">
-					<h3 className="font-heading font-bold text-foreground text-lg leading-none tracking-tight">
+					<h3 className="font-heading font-bold text-foreground text-base sm:text-lg leading-none tracking-tight truncate">
 						{record.student.firstName} {record.student.middleName}{" "}
 						{record.student.lastName}
 					</h3>
-					<div className="flex items-center gap-2 text-xs text-muted-foreground">
-						<span className="font-mono bg-secondary px-1.5 py-0.5 rounded text-secondary-foreground">
+					<div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+						<span className="font-mono bg-secondary px-1.5 py-0.5 rounded text-secondary-foreground whitespace-nowrap">
 							{record.student.student_id}
 						</span>
 						<span className="hidden sm:inline-block text-border">
 							•
 						</span>
 						<span
-							className="truncate font-medium"
+							className="truncate font-medium block max-w-[150px] sm:max-w-none"
 							title={record.student.course}
 						>
 							{record.student.course}
@@ -449,7 +447,7 @@ const QueueItem = ({
 					</div>
 				</div>
 			</div>
-			<div className="flex items-center gap-4">
+			<div className="flex items-center gap-2 sm:gap-4 shrink-0">
 				<Badge
 					variant="outline"
 					className="bg-secondary/50 text-secondary-foreground border-border hover:bg-secondary transition-colors px-3 py-1 font-medium whitespace-nowrap hidden sm:inline-flex"
@@ -459,12 +457,12 @@ const QueueItem = ({
 				<Button
 					variant="ghost"
 					size="icon"
-					className="size-9 text-muted-foreground hover:text-button-primary hover:bg-button-primary/10 rounded-full transition-colors"
+					className="size-8 sm:size-9 text-muted-foreground hover:text-button-primary hover:bg-button-primary/10 rounded-full transition-colors"
 					onClick={(e) => {
 						e.stopPropagation();
 					}}
 				>
-					<Eye className="size-5" />
+					<Eye className="size-4 sm:size-5" />
 				</Button>
 			</div>
 		</div>
