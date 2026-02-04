@@ -25,7 +25,7 @@ export class InsightsService {
   }
 
   async getSignerDashboardInsights(userId: string) {
-    const totalRecords = await this.recordRepository
+    const totalSignedRecords = await this.recordRepository
       .createQueryBuilder("record")
       .innerJoin("record.credentialType", "type")
       .innerJoin("type.signers", "signer")
@@ -68,6 +68,6 @@ export class InsightsService {
 
       .getCount();
 
-    return { totalRecords, pendingRecords };
+    return { totalSignedRecords, pendingRecords };
   }
 }

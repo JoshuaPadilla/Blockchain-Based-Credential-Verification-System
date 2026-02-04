@@ -26,7 +26,16 @@ export class RecordSignature {
   status: SignatureStatus;
 
   @Column({ type: 'text', nullable: true })
-  txHash: string | null; // The specific hash for THIS signer's action
+  txHash: string | null; // The specific hash for THIS signer's acti
+
+  @Column({ type: 'integer', nullable: true })
+  gasUsed: number | null;
+
+  @Column({ type: 'integer', nullable: true })
+  totalGasUsed: number | null;
+
+  @Column({ type: 'integer', nullable: true })
+  blockNumber: number | null;
 
   @CreateDateColumn()
   signedAt: Date;

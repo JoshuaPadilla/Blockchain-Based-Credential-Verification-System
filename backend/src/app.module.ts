@@ -24,6 +24,7 @@ import { SignerModule } from './endpoints/signer/signer.module';
 import { VerificationModule } from './endpoints/verification/verification.module';
 import { InsightsModule } from './endpoints/insights/insights.module';
 import { RecordSignature } from './common/entities/record_signature.entity';
+import { RecordSignatureModule } from './endpoints/record_signature/record_signature.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { RecordSignature } from './common/entities/record_signature.entity';
     SignerModule,
     VerificationModule,
     InsightsModule,
+    RecordSignatureModule,
   ],
   controllers: [AppController],
   providers: [AppService],

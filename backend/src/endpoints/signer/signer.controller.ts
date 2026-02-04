@@ -22,17 +22,8 @@ export class SignerController {
   constructor(private readonly signerService: SignerService) {}
 
   @HttpCode(HttpStatus.OK)
-  @Post("sign/:recordId")
-  signRecord(@Param("recordId") recordId: string, @Request() req) {
-    console.log(recordId);
-    return this.signerService.signRecord(recordId, req.user.id);
-  }
-
-  @HttpCode(HttpStatus.OK)
   @Post("batch-sign")
   batchSign(@Body() body: { recordIds: string[] }, @Request() req) {
-    // console.log(body.recordIds);
-    console.log(req.user.role);
     return this.signerService.batchSignRecords(body.recordIds, req.user.id);
   }
 }

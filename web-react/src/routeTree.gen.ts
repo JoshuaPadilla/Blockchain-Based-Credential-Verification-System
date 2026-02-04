@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SignerIndexRouteImport } from './routes/signer/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as VerifyCredentialRefRouteImport } from './routes/verify/$credentialRef'
+import { Route as SignerSigningSummaryRouteImport } from './routes/signer/signing-summary'
 import { Route as SignerQueueRouteImport } from './routes/signer/queue'
 import { Route as SignerHistoryRouteImport } from './routes/signer/history'
 import { Route as SignerDashboardRouteImport } from './routes/signer/dashboard'
@@ -66,6 +67,11 @@ const VerifyCredentialRefRoute = VerifyCredentialRefRouteImport.update({
   id: '/$credentialRef',
   path: '/$credentialRef',
   getParentRoute: () => VerifyRouteRoute,
+} as any)
+const SignerSigningSummaryRoute = SignerSigningSummaryRouteImport.update({
+  id: '/signing-summary',
+  path: '/signing-summary',
+  getParentRoute: () => SignerRouteRoute,
 } as any)
 const SignerQueueRoute = SignerQueueRouteImport.update({
   id: '/queue',
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/signer/dashboard': typeof SignerDashboardRoute
   '/signer/history': typeof SignerHistoryRoute
   '/signer/queue': typeof SignerQueueRoute
+  '/signer/signing-summary': typeof SignerSigningSummaryRoute
   '/verify/$credentialRef': typeof VerifyCredentialRefRoute
   '/admin/': typeof AdminIndexRoute
   '/signer/': typeof SignerIndexRoute
@@ -143,6 +150,7 @@ export interface FileRoutesByTo {
   '/signer/dashboard': typeof SignerDashboardRoute
   '/signer/history': typeof SignerHistoryRoute
   '/signer/queue': typeof SignerQueueRoute
+  '/signer/signing-summary': typeof SignerSigningSummaryRoute
   '/verify/$credentialRef': typeof VerifyCredentialRefRoute
   '/admin': typeof AdminIndexRoute
   '/signer': typeof SignerIndexRoute
@@ -163,6 +171,7 @@ export interface FileRoutesById {
   '/signer/dashboard': typeof SignerDashboardRoute
   '/signer/history': typeof SignerHistoryRoute
   '/signer/queue': typeof SignerQueueRoute
+  '/signer/signing-summary': typeof SignerSigningSummaryRoute
   '/verify/$credentialRef': typeof VerifyCredentialRefRoute
   '/admin/': typeof AdminIndexRoute
   '/signer/': typeof SignerIndexRoute
@@ -184,6 +193,7 @@ export interface FileRouteTypes {
     | '/signer/dashboard'
     | '/signer/history'
     | '/signer/queue'
+    | '/signer/signing-summary'
     | '/verify/$credentialRef'
     | '/admin/'
     | '/signer/'
@@ -200,6 +210,7 @@ export interface FileRouteTypes {
     | '/signer/dashboard'
     | '/signer/history'
     | '/signer/queue'
+    | '/signer/signing-summary'
     | '/verify/$credentialRef'
     | '/admin'
     | '/signer'
@@ -219,6 +230,7 @@ export interface FileRouteTypes {
     | '/signer/dashboard'
     | '/signer/history'
     | '/signer/queue'
+    | '/signer/signing-summary'
     | '/verify/$credentialRef'
     | '/admin/'
     | '/signer/'
@@ -290,6 +302,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/verify/$credentialRef'
       preLoaderRoute: typeof VerifyCredentialRefRouteImport
       parentRoute: typeof VerifyRouteRoute
+    }
+    '/signer/signing-summary': {
+      id: '/signer/signing-summary'
+      path: '/signing-summary'
+      fullPath: '/signer/signing-summary'
+      preLoaderRoute: typeof SignerSigningSummaryRouteImport
+      parentRoute: typeof SignerRouteRoute
     }
     '/signer/queue': {
       id: '/signer/queue'
@@ -394,6 +413,7 @@ interface SignerRouteRouteChildren {
   SignerDashboardRoute: typeof SignerDashboardRoute
   SignerHistoryRoute: typeof SignerHistoryRoute
   SignerQueueRoute: typeof SignerQueueRoute
+  SignerSigningSummaryRoute: typeof SignerSigningSummaryRoute
   SignerIndexRoute: typeof SignerIndexRoute
 }
 
@@ -401,6 +421,7 @@ const SignerRouteRouteChildren: SignerRouteRouteChildren = {
   SignerDashboardRoute: SignerDashboardRoute,
   SignerHistoryRoute: SignerHistoryRoute,
   SignerQueueRoute: SignerQueueRoute,
+  SignerSigningSummaryRoute: SignerSigningSummaryRoute,
   SignerIndexRoute: SignerIndexRoute,
 }
 

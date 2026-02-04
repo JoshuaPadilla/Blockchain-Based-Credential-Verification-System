@@ -61,7 +61,7 @@ function RouteComponent() {
 							</p>
 							<p className="text-2xl font-bold text-slate-900">
 								{/* Fallback to 12 if data isn't ready, matching the image */}
-								{signerDashboardInsights?.pendingRecords ?? 12}
+								{signerDashboardInsights?.pendingRecords ?? 0}
 							</p>
 						</div>
 					</div>

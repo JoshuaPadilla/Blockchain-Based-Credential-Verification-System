@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 import { useRecordStore } from "@/stores/record_store";
 import { useSignersStore } from "@/stores/signer_store";
 import type { Record } from "@/types/record.type";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import {
 	CalendarDays,
 	CheckCircle2,
@@ -52,8 +52,9 @@ export const Route = createFileRoute("/signer/queue")({
 });
 
 function SignerQueuePage() {
+	const router = useRouter();
 	const { signerPendingRecords } = useRecordStore();
-	const { signRecord } = useSignersStore();
+	const { signRecords } = useSignersStore();
 
 	// --- State ---
 	const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -115,21 +116,14 @@ function SignerQueuePage() {
 		try {
 			setIsSigning(true);
 
-			if (selectedIds.length === 1) {
-				const signature = await signRecord(selectedIds[0]);
-				console.log("Signature:", signature);
-			} else {
-				const signature = await new Promise((resolve) =>
-					setTimeout(resolve, 2000),
-				);
-				console.log("Signed records:", selectedIds);
-			}
+			await signRecords(selectedIds);
 		} catch (e) {
 			console.log(e);
 		} finally {
 			setIsSigning(false);
 			setIsSheetOpen(false);
 			setSelectedIds([]);
+			router.navigate({ to: "/signer/signing-summary" });
 		}
 	};
 

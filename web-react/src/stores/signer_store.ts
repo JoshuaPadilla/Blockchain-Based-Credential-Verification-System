@@ -1,19 +1,29 @@
 import axiosClient from "@/api/axios_client";
-import type { RecordSignature } from "@/types/record_signature";
+import { SigningResultStatus } from "@/enums/signing_result_status";
+import type { SigningResponse } from "@/types/signing_response";
+
 import { create } from "zustand";
 
 type StoreProps = {
-	signRecord: (recordId: string) => Promise<RecordSignature>;
+	signingResultData: SigningResponse | null;
+	signRecords: (recordIds: string[]) => Promise<void>;
 };
 
 export const useSignersStore = create<StoreProps>((set) => ({
-	signRecord: async (recordId) => {
-		const res = await axiosClient.post(`signer/sign/${recordId}`);
+	signingResultData: null,
+	signRecords: async (recordIds) => {
+		const res = await axiosClient.post(`signer/batch-sign`, {
+			recordIds,
+		});
 
 		if (res.status !== 200) {
-			return res.data;
+			throw new Error("failed to sign records");
 		}
 
-		return res.data as RecordSignature;
+		if (res.data.status === SigningResultStatus.SUCCESS) {
+			set({ signingResultData: res.data });
+		} else {
+			throw new Error(res.data.message || "signing failed");
+		}
 	},
 }));
