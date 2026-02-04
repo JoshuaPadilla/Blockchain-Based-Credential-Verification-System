@@ -10,18 +10,31 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import {
+	Sheet,
+	SheetContent,
+	SheetDescription,
+	SheetFooter,
+	SheetHeader,
+	SheetTitle,
+} from "@/components/ui/sheet";
 import { CredentialTypeEnum } from "@/enums/credential_type.enum";
 import { cn } from "@/lib/utils";
 import { useRecordStore } from "@/stores/record_store";
+import { useSignersStore } from "@/stores/signer_store";
 import type { Record } from "@/types/record.type";
 import { createFileRoute } from "@tanstack/react-router";
 import {
 	CalendarDays,
+	CheckCircle2,
 	Eye,
 	Feather,
 	Filter,
+	Loader2,
 	Search,
+	ShieldCheck,
 	SlidersHorizontal,
+	X,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -40,11 +53,16 @@ export const Route = createFileRoute("/signer/queue")({
 
 function SignerQueuePage() {
 	const { signerPendingRecords } = useRecordStore();
+	const { signRecord } = useSignersStore();
 
 	// --- State ---
 	const [selectedIds, setSelectedIds] = useState<string[]>([]);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [filterType, setFilterType] = useState<string>("ALL");
+
+	// Control the Sheet visibility
+	const [isSheetOpen, setIsSheetOpen] = useState(false);
+	const [isSigning, setIsSigning] = useState(false);
 
 	// --- Derived Data ---
 	const filteredRecords = signerPendingRecords.filter((record) => {
@@ -65,6 +83,11 @@ function SignerQueuePage() {
 		return matchesSearch && matchesType;
 	});
 
+	// Get the actual record objects for the selected IDs to display in the sheet
+	const selectedRecords = signerPendingRecords.filter((r) =>
+		selectedIds.includes(r.id),
+	);
+
 	// --- Handlers ---
 	const toggleSelectAll = (checked: boolean) => {
 		if (checked) {
@@ -82,11 +105,36 @@ function SignerQueuePage() {
 		);
 	};
 
-	const handleSignSelected = () => {
-		console.log("Signing records:", selectedIds);
-		alert(
-			`Initiating cryptographic signature for ${selectedIds.length} records...`,
-		);
+	const handleOpenSigningSheet = () => {
+		if (selectedIds.length > 0) {
+			setIsSheetOpen(true);
+		}
+	};
+
+	const handleConfirmSign = async () => {
+		try {
+			setIsSigning(true);
+
+			if (selectedIds.length === 1) {
+				const signature = await signRecord(selectedIds[0]);
+
+				console.log("Signature:", signature);
+			} else {
+				const signature = await new Promise((resolve) =>
+					setTimeout(resolve, 2000),
+				);
+				console.log("Signed records:", selectedIds);
+			}
+		} catch (e) {
+			console.log(e);
+		} finally {
+			setIsSigning(false);
+			setIsSheetOpen(false);
+			setSelectedIds([]);
+		}
+		// Simulate API Call
+
+		// Add toast notification here if needed
 	};
 
 	const currentBatchDate = new Date().toLocaleDateString("en-US", {
@@ -96,7 +144,8 @@ function SignerQueuePage() {
 
 	return (
 		<div className="min-h-screen bg-background font-sans text-foreground p-6 pb-32">
-			{/* --- Header Section --- */}
+			{/* ... [Header and Toolbar sections remain exactly the same] ... */}
+			{/* Header Section */}
 			<div className="max-w-5xl mx-auto space-y-8">
 				<div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
 					<div>
@@ -105,8 +154,7 @@ function SignerQueuePage() {
 						</h1>
 						<p className="text-muted-foreground mt-2 text-sm max-w-lg">
 							Review and cryptographically sign student
-							credentials in bulk. Ensure all data is correct
-							before anchoring to the blockchain.
+							credentials in bulk.
 						</p>
 					</div>
 					<div className="flex flex-col items-end">
@@ -122,9 +170,8 @@ function SignerQueuePage() {
 					</div>
 				</div>
 
-				{/* --- Toolbar --- */}
+				{/* Toolbar */}
 				<div className="bg-card p-2 rounded-xl border border-border shadow-sm flex flex-col md:flex-row gap-2 items-center sticky top-4 z-20">
-					{/* Select All Checkbox Wrapper */}
 					<div className="flex items-center gap-3 px-4 py-2 border-r border-border min-w-fit">
 						<Checkbox
 							id="select-all"
@@ -142,8 +189,6 @@ function SignerQueuePage() {
 							Select All
 						</label>
 					</div>
-
-					{/* Filters */}
 					<div className="flex items-center gap-2 flex-1 w-full px-2">
 						<Select
 							value={filterType}
@@ -166,8 +211,6 @@ function SignerQueuePage() {
 							</SelectContent>
 						</Select>
 					</div>
-
-					{/* Search */}
 					<div className="relative w-full md:w-80">
 						<Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
 						<Input
@@ -179,7 +222,7 @@ function SignerQueuePage() {
 					</div>
 				</div>
 
-				{/* --- List Grid --- */}
+				{/* List Grid */}
 				<div className="space-y-3">
 					{filteredRecords.length === 0 ? (
 						<div className="text-center py-20 bg-card rounded-xl border border-dashed border-border">
@@ -203,7 +246,7 @@ function SignerQueuePage() {
 				</div>
 			</div>
 
-			{/* --- Floating Action Bar (Bottom) --- */}
+			{/* --- Floating Action Bar --- */}
 			<div
 				className={cn(
 					"fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-3xl px-4 transition-all duration-300 ease-in-out z-30",
@@ -237,7 +280,7 @@ function SignerQueuePage() {
 						</Button>
 						<Button
 							className="bg-button-primary hover:bg-button-primary/90 text-white font-semibold shadow-lg shadow-button-primary/20"
-							onClick={handleSignSelected}
+							onClick={handleOpenSigningSheet} // Changed to open sheet
 						>
 							<Feather className="mr-2 size-4" /> Sign Selected (
 							{selectedIds.length})
@@ -245,11 +288,103 @@ function SignerQueuePage() {
 					</div>
 				</div>
 			</div>
+
+			{/* --- Signing Confirmation Sheet --- */}
+			<Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+				<SheetContent className="sm:max-w-md flex flex-col h-full">
+					<SheetHeader className="space-y-4">
+						<SheetTitle className="flex items-center gap-2 text-xl">
+							<ShieldCheck className="size-6 text-button-primary" />
+							Confirm Signature
+						</SheetTitle>
+						<SheetDescription>
+							You are about to cryptographically sign{" "}
+							<strong>
+								{selectedRecords.length} credentials
+							</strong>
+							. This action is immutable and will be recorded on
+							the blockchain.
+						</SheetDescription>
+					</SheetHeader>
+
+					{/* Scrollable List of Selected Items */}
+					<div className="flex-1 overflow-y-auto my-6 pr-2 -mr-2">
+						<div className="space-y-3">
+							{selectedRecords.map((record) => (
+								<div
+									key={record.id}
+									className="flex items-start gap-3 p-3 bg-secondary/30 rounded-lg border border-border"
+								>
+									<Avatar className="size-10 border border-border bg-background">
+										<AvatarImage
+											src={`https://api.dicebear.com/7.x/initials/svg?seed=${record.student.firstName}`}
+										/>
+										<AvatarFallback className="text-xs">
+											{record.student.firstName[0]}
+										</AvatarFallback>
+									</Avatar>
+									<div className="flex-1 min-w-0">
+										<p className="text-sm font-semibold text-foreground truncate">
+											{record.student.firstName}{" "}
+											{record.student.lastName}
+										</p>
+										<p className="text-xs text-muted-foreground truncate font-mono">
+											{record.credentialType.name} •{" "}
+											{record.student.student_id}
+										</p>
+									</div>
+									<Button
+										variant="ghost"
+										size="icon"
+										className="size-6 text-muted-foreground hover:text-destructive"
+										onClick={() =>
+											toggleSelection(record.id)
+										} // Allow removing from list
+									>
+										<X className="size-3" />
+									</Button>
+								</div>
+							))}
+						</div>
+					</div>
+
+					<SheetFooter className="flex-col gap-3 sm:flex-col">
+						<div className="bg-yellow-50 border border-yellow-100 rounded-lg p-3 flex gap-3 mb-2">
+							<CheckCircle2 className="size-5 text-yellow-600 shrink-0" />
+							<p className="text-xs text-yellow-800 leading-snug">
+								By clicking Confirm, you certify that you have
+								verified the integrity of these records.
+							</p>
+						</div>
+						<Button
+							className="w-full h-11 bg-button-primary hover:bg-button-primary/90"
+							onClick={handleConfirmSign}
+							disabled={isSigning || selectedRecords.length === 0}
+						>
+							{isSigning ? (
+								<>
+									<Loader2 className="mr-2 size-4 animate-spin" />{" "}
+									Signing...
+								</>
+							) : (
+								"Confirm & Sign"
+							)}
+						</Button>
+						<Button
+							variant="outline"
+							className="w-full"
+							onClick={() => setIsSheetOpen(false)}
+						>
+							Cancel
+						</Button>
+					</SheetFooter>
+				</SheetContent>
+			</Sheet>
 		</div>
 	);
 }
 
-// --- Enhanced Individual Card Component ---
+// ... [QueueItem component remains exactly the same as previous response] ...
 const QueueItem = ({
 	record,
 	isSelected,
@@ -269,15 +404,12 @@ const QueueItem = ({
 			)}
 			onClick={onToggle}
 		>
-			{/* Active Indicator Bar (Left) */}
 			<div
 				className={cn(
 					"absolute left-0 top-0 bottom-0 w-1 transition-all duration-300",
 					isSelected ? "bg-button-primary" : "bg-transparent",
 				)}
 			/>
-
-			{/* Checkbox Section */}
 			<div className="flex items-center justify-center pl-2">
 				<Checkbox
 					checked={isSelected}
@@ -287,8 +419,6 @@ const QueueItem = ({
 					)}
 				/>
 			</div>
-
-			{/* Avatar */}
 			<Avatar className="size-12 border border-border bg-background shadow-sm">
 				<AvatarImage
 					src={`https://api.dicebear.com/7.x/initials/svg?seed=${record.student.firstName}`}
@@ -297,8 +427,6 @@ const QueueItem = ({
 					{record.student.firstName[0]}
 				</AvatarFallback>
 			</Avatar>
-
-			{/* Student Details */}
 			<div className="flex-1 min-w-0">
 				<div className="flex flex-col gap-0.5">
 					<h3 className="font-heading font-bold text-foreground text-lg leading-none tracking-tight">
@@ -321,8 +449,6 @@ const QueueItem = ({
 					</div>
 				</div>
 			</div>
-
-			{/* Badge & Actions (Right Side) */}
 			<div className="flex items-center gap-4">
 				<Badge
 					variant="outline"
@@ -330,14 +456,12 @@ const QueueItem = ({
 				>
 					{record.credentialType.name}
 				</Badge>
-
 				<Button
 					variant="ghost"
 					size="icon"
 					className="size-9 text-muted-foreground hover:text-button-primary hover:bg-button-primary/10 rounded-full transition-colors"
 					onClick={(e) => {
 						e.stopPropagation();
-						// Add view details logic here
 					}}
 				>
 					<Eye className="size-5" />

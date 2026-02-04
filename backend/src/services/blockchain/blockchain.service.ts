@@ -47,7 +47,6 @@ export class BlockChainService implements OnModuleInit {
     );
 
     // Start listening immediately upon initialization
-    this.listenForSignatures();
   }
 
   async addRecord(record: Record) {
@@ -183,52 +182,33 @@ export class BlockChainService implements OnModuleInit {
 
     // Connect a new instance for this specific signer
   }
+  async batchSignRecords(recordIds: string[], signerPrivateKey: string) {
+    try {
+      const signerWallet = new ethers.Wallet(signerPrivateKey, this.provider);
 
-  // private async AddSignToRecord(
-  //   recordId: string,
-  //   signerPublicAddress,
-  //   timestamp: string,
-  // ) {
-  //   const record = await this.recordRepository.findOne({
-  //     where: { id: recordId },
-  //     relations: ['signedBy'],
-  //   });
+      const contractAsSigner = this.ownerContract.connect(
+        signerWallet,
+      ) as ethers.Contract;
 
-  //   const signer = await this.userRepository.findOneBy({
-  //     publicAddress: signerPublicAddress,
-  //   });
+      // 1. SUBMISSION (The `tx`)
+      // This happens fast (milliseconds)
+      const tx = await contractAsSigner.batchSignRecords(recordIds);
 
-  //   if (!signer) {
-  //     throw new NotFoundException('Signer not found');
-  //   }
+      // IMPORTANT: Save this hash to DB immediately!
+      // If your server crashes 1 second later, you still have the tracking number.
+      console.log('Transaction Sent! Hash:', tx.hash);
+      // TODO: db.update({ status: 'SUBMITTED', txHash: tx.hash })
 
-  //   if (!record) {
-  //     throw new NotFoundException('No record found!');
-  //   }
+      return tx;
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error.reason || 'failed to sign record');
+    }
 
-  //   const updatedSigners = [...record.signedBy, signer];
-
-  //   record.signedBy = updatedSigners;
-  //   record.currentSignatures++;
-
-  //   await this.recordRepository.save(record);
-
-  //   console.log('Record Signed');
-  // }
+    // Connect a new instance for this specific signer
+  }
 
   async getNetwork() {
     return await this.provider.getNetwork();
-  }
-
-  // FIXED: Removed "function" keyword & used class properties
-  listenForSignatures() {
-    this.logger.log('Listening for RecordSigned events...');
-
-    // Using the existing contract instance
-    this.ownerContract.on('RecordSigned', (recordId, signer, timestamp) => {
-      // this.AddSignToRecord(recordId, signer, timestamp);
-      // TODO: Call an internal method to update your DB status
-      // e.g., this.handleSignatureEvent(recordId, signer);
-    });
   }
 }
