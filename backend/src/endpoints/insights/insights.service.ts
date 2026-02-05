@@ -1,6 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Record } from "src/common/entities/record.entity";
+import { RecordSignature } from "src/common/entities/record_signature.entity";
+import { SignatureStatus } from "src/common/enums/signature_status.enum";
 import { Repository } from "typeorm";
 
 @Injectable()
@@ -8,6 +10,8 @@ export class InsightsService {
   constructor(
     @InjectRepository(Record)
     private recordRepository: Repository<Record>,
+    @InjectRepository(RecordSignature)
+    private recordSignatureRepository: Repository<RecordSignature>,
   ) {}
 
   async getAdminDashboardInsights() {
@@ -69,5 +73,56 @@ export class InsightsService {
       .getCount();
 
     return { totalSignedRecords, pendingRecords };
+  }
+
+  async getSignerHistoryInsights(userId: string) {
+    // ----------------------------------------------
+    // STEP 1: Get the recent history list (e.g., last 10)
+    // ----------------------------------------------
+    const recentHistory = await this.recordSignatureRepository.find({
+      where: { signer: { id: userId } }, // Filter by this user
+      order: { signedAt: "DESC" }, // Newest first
+      take: 10, // Limit to 10 items
+      relations: ["record", "record.student"], // Include Record details
+    });
+
+    // ----------------------------------------------
+    // STEP 2: Get the "Total Signed" count
+    // ----------------------------------------------
+    const totalSigned = await this.recordSignatureRepository.count({
+      where: { signer: { id: userId } },
+    });
+
+    // ----------------------------------------------
+    // STEP 3: Get "Last Signed" Date
+    // ----------------------------------------------
+    // If we have history, the first one is the newest (because of 'DESC' order)
+    const lastSignedDate =
+      recentHistory.length > 0 ? recentHistory[0].signedAt : null;
+
+    // ----------------------------------------------
+    // STEP 4: Get "Success Rate"
+    // ----------------------------------------------
+    // Count how many were actually CONFIRMED/SUCCESSFUL
+    const successCount = await this.recordSignatureRepository.count({
+      where: {
+        signer: { id: userId },
+        status: SignatureStatus.CONFIRMED, // 👈 Make sure this matches your Enum
+      },
+    });
+
+    // Calculate percentage (avoid dividing by zero)
+    const successRate =
+      totalSigned === 0 ? 0 : (successCount / totalSigned) * 100;
+
+    // ----------------------------------------------
+    // STEP 5: Return the result
+    // ----------------------------------------------
+    return {
+      totalSigned,
+      lastSignedDate,
+      successRate,
+      recordSignatures: recentHistory,
+    };
   }
 }

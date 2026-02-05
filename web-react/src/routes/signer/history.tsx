@@ -1,4 +1,3 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,9 +9,18 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import type { RecordSignature } from "@/types/record_signature";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import { useInsightsStore } from "@/stores/insights_store";
 import { createFileRoute } from "@tanstack/react-router";
+import { format } from "date-fns";
 import {
 	ArrowRight,
 	Calendar as CalendarIcon,
@@ -22,356 +30,412 @@ import {
 	Clock,
 	Download,
 	FileSignature,
+	Filter,
+	MoreHorizontal,
 	Search,
+	ShieldCheck,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export const Route = createFileRoute("/signer/history")({
 	component: SignerHistoryPage,
+	loader: async ({ context }) => {
+		await context.insights.getSignerHistoryInsights();
+	},
 });
 
-// --- Mock Data Generator (Simulating your DB) ---
-// In a real app, you would fetch this using your stores/hooks
-const MOCK_HISTORY_DATA: RecordSignature[] = Array.from({ length: 8 }).map(
-	(_, i) => ({
-		id: `882${i + 1}`,
-		txHash: `0x${Math.random().toString(16).slice(2, 10)}...${Math.random().toString(16).slice(2, 6)}`,
-		signedAt: new Date(Date.now() - i * 86400000), // Decrementing days
-		signer: { id: "u1", email: "signer@univ.edu", role: "SIGNER" }, // Partial User
-		record: {
-			id: `rec_${i}`,
-			student: {
-				firstName: [
-					"Alice",
-					"Mark",
-					"Sarah",
-					"Emily",
-					"James",
-					"Robert",
-					"Linda",
-					"Michael",
-				][i],
-				lastName: [
-					"Johnson",
-					"Chen",
-					"Smith",
-					"Rose",
-					"T.",
-					"Wilson",
-					"Davis",
-					"Brown",
-				][i],
-				student_id: `2023-${1000 + i}`,
-			},
-		} as any, // Partial Record type for UI demo
-	}),
-);
-
 function SignerHistoryPage() {
+	const { signerHistoryInsights } = useInsightsStore();
 	const [searchQuery, setSearchQuery] = useState("");
-	// In a real app, use the actual data from your store
-	const historyData = MOCK_HISTORY_DATA;
+
+	const { totalSigned, lastSignedDate, successRate, recordSignatures } =
+		signerHistoryInsights || {
+			totalSigned: 0,
+			lastSignedDate: null,
+			successRate: 0,
+			recordSignatures: [],
+		};
+
+	const filteredRecords = useMemo(() => {
+		if (!searchQuery) return recordSignatures;
+		const lowerQuery = searchQuery.toLowerCase();
+		return recordSignatures.filter(
+			(sig) =>
+				sig.record.student.firstName
+					.toLowerCase()
+					.includes(lowerQuery) ||
+				sig.record.student.lastName
+					.toLowerCase()
+					.includes(lowerQuery) ||
+				sig.record.student.student_id
+					.toLowerCase()
+					.includes(lowerQuery) ||
+				sig.txHash.toLowerCase().includes(lowerQuery),
+		);
+	}, [recordSignatures, searchQuery]);
 
 	return (
-		<div className="min-h-screen bg-background font-sans text-foreground p-4 sm:p-8 space-y-8 pb-32">
-			{/* --- Header & Stats Section --- */}
-			<div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
-				<div className="space-y-2 max-w-2xl">
-					<h1 className="text-3xl font-heading font-bold tracking-tight">
+		<div className="min-h-screen bg-muted/5 p-4 md:p-8 space-y-8">
+			{/* --- Top Section: Header & Stats --- */}
+			<div className="flex flex-col xl:flex-row justify-between items-start gap-8 max-w-7xl mx-auto">
+				{/* Title Area */}
+				<div className="space-y-4 max-w-2xl py-2">
+					<div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground">
+						<ShieldCheck className="mr-1 size-3 text-purple-600" />
+						Secure Audit Log
+					</div>
+					<h1 className="text-4xl font-extrabold tracking-tight text-foreground lg:text-5xl">
 						Signature Audit Trail
 					</h1>
-					<p className="text-muted-foreground text-base">
+					<p className="text-muted-foreground text-lg leading-relaxed">
 						Review and verify all academic credentials you have
-						cryptographically signed on-chain.
+						cryptographically signed on-chain. Track timestamps,
+						transaction hashes, and student details.
 					</p>
 				</div>
 
-				{/* Stats Cards */}
-				<div className="flex flex-wrap sm:flex-nowrap gap-4 w-full lg:w-auto">
-					<StatCard
-						label="Total Signed"
-						value="1,245"
-						icon={FileSignature}
-					/>
-					<StatCard label="Last Signed" value="Oct 24" icon={Clock} />
-					<StatCard
-						label="Success Rate"
-						value="99.9%"
-						icon={CheckCircle2}
-						iconColor="text-green-500"
-					/>
+				{/* Stats Grid - "Bento" Style */}
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full xl:w-[500px] shrink-0">
+					<Card className="shadow-sm border-border/60 bg-card hover:border-purple-200 transition-colors">
+						<CardContent className="p-5 flex flex-col justify-between h-full gap-2">
+							<div className="flex justify-between items-start">
+								<span className="text-sm font-medium text-muted-foreground">
+									Total Signed
+								</span>
+								<div className="bg-primary/10 p-2 rounded-lg">
+									<FileSignature className="size-4 text-primary" />
+								</div>
+							</div>
+							<div>
+								<div className="text-3xl font-bold tracking-tight">
+									{totalSigned.toLocaleString()}
+								</div>
+								<p className="text-xs text-muted-foreground mt-1">
+									Credentials Issued
+								</p>
+							</div>
+						</CardContent>
+					</Card>
+
+					<Card className="shadow-sm border-border/60 bg-card hover:border-blue-200 transition-colors">
+						<CardContent className="p-5 flex flex-col justify-between h-full gap-2">
+							<div className="flex justify-between items-start">
+								<span className="text-sm font-medium text-muted-foreground">
+									Last Activity
+								</span>
+								<div className="bg-blue-50 p-2 rounded-lg">
+									<Clock className="size-4 text-blue-600" />
+								</div>
+							</div>
+							<div>
+								<div className="text-3xl font-bold tracking-tight">
+									{lastSignedDate
+										? format(
+												new Date(lastSignedDate),
+												"MMM dd",
+											)
+										: "—"}
+								</div>
+								<p className="text-xs text-muted-foreground mt-1">
+									{lastSignedDate
+										? format(
+												new Date(lastSignedDate),
+												"yyyy",
+											)
+										: "No Data"}
+								</p>
+							</div>
+						</CardContent>
+					</Card>
+
+					<Card className="col-span-1 sm:col-span-2 shadow-sm border-border/60 bg-card hover:border-green-200 transition-colors">
+						<CardContent className="p-5 flex items-center justify-between">
+							<div className="flex flex-col gap-1">
+								<span className="text-sm font-medium text-muted-foreground">
+									Success Rate
+								</span>
+								<div className="text-3xl font-bold tracking-tight text-green-600">
+									{successRate}%
+								</div>
+								<span className="text-xs text-muted-foreground">
+									Tx Finality Reached
+								</span>
+							</div>
+							<div className="h-16 w-16 rounded-full bg-green-50 flex items-center justify-center border-4 border-green-100">
+								<CheckCircle2 className="size-8 text-green-600" />
+							</div>
+						</CardContent>
+					</Card>
 				</div>
 			</div>
 
-			<Separator />
+			{/* --- Main Content Area --- */}
+			<div className="max-w-7xl mx-auto space-y-4">
+				{/* Toolbar & Filter Card */}
+				<div className="bg-card border rounded-xl p-4 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+					<div className="relative w-full md:max-w-md group">
+						<Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-purple-600 transition-colors" />
+						<Input
+							placeholder="Search Student, ID, or Hash..."
+							className="pl-10 h-11 bg-muted/20 border-transparent focus:bg-background focus:border-input transition-all"
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+						/>
+					</div>
 
-			{/* --- Filter Bar --- */}
-			<div className="bg-card p-2 rounded-xl border border-border shadow-sm flex flex-col md:flex-row gap-3">
-				{/* Search */}
-				<div className="relative flex-1">
-					<Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-					<Input
-						placeholder="Search by Student Name or Record ID"
-						className="pl-9 bg-background border-none shadow-none focus-visible:ring-1 focus-visible:ring-primary/20 h-10"
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-					/>
-				</div>
+					<div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+						<Button
+							variant="outline"
+							className="h-10 border-dashed text-muted-foreground hover:text-foreground"
+						>
+							<Filter className="mr-2 size-4" />
+							Filters
+						</Button>
 
-				{/* Actions Group */}
-				<div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 px-2 md:px-0">
-					<Button
-						variant="outline"
-						className="h-10 gap-2 text-muted-foreground border-border bg-background"
-					>
-						<CalendarIcon className="size-4" />
-						Date Range
-					</Button>
+						<div className="h-6 w-px bg-border hidden md:block mx-1" />
 
-					<div className="w-[140px]">
 						<Select defaultValue="all">
-							<SelectTrigger className="h-10 border-border bg-background text-muted-foreground">
+							<SelectTrigger className="w-[160px] h-10 border-0 bg-muted/30 hover:bg-muted/50 focus:ring-0">
 								<SelectValue placeholder="Network" />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="all">
 									All Networks
 								</SelectItem>
-								<SelectItem value="eth">Ethereum</SelectItem>
-								<SelectItem value="poly">Polygon</SelectItem>
+								<SelectItem value="polygon">Polygon</SelectItem>
+								<SelectItem value="ethereum">
+									Ethereum
+								</SelectItem>
 							</SelectContent>
 						</Select>
-					</div>
 
-					<Button className="h-10 gap-2 bg-primary/10 text-primary hover:bg-primary/20 shadow-none border border-primary/20">
-						<Download className="size-4" />
-						Export
-					</Button>
-				</div>
-			</div>
+						<Button variant="outline" className="gap-2 h-10">
+							<CalendarIcon className="size-4 text-muted-foreground" />
+							<span>Date</span>
+						</Button>
 
-			{/* --- Data Table --- */}
-			<div className="border border-border rounded-xl overflow-hidden bg-card shadow-sm">
-				{/* Table Header */}
-				<div className="grid grid-cols-12 gap-4 bg-muted/30 p-4 text-xs font-bold text-muted-foreground uppercase tracking-wider border-b border-border items-center">
-					<div className="col-span-2 sm:col-span-1">Record ID</div>
-					<div className="col-span-4 sm:col-span-3 pl-2">
-						Student Name
-					</div>
-					<div className="col-span-3 hidden md:block">
-						Date Signed
-					</div>
-					<div className="col-span-2 hidden lg:block">Network</div>
-					<div className="col-span-3 hidden xl:block">Tx Hash</div>
-					<div className="col-span-6 sm:col-span-8 md:col-span-3 lg:col-span-3 xl:col-span-2 text-right pr-4">
-						Actions
+						<Button className="gap-2 h-10 bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-200">
+							<Download className="size-4" />
+							<span className="hidden sm:inline">Export CSV</span>
+						</Button>
 					</div>
 				</div>
 
-				{/* Rows */}
-				<div className="divide-y divide-border">
-					{historyData.map((item, index) => {
-						// Determine mock network logic for visual variety based on index
-						const network =
-							index % 3 === 0
-								? "Polygon"
-								: index % 3 === 1
-									? "Ethereum"
-									: "Testnet";
-						const badgeVariant =
-							network === "Polygon"
-								? "purple"
-								: network === "Ethereum"
-									? "green"
-									: "blue";
-
-						return (
-							<div
-								key={item.id}
-								className="grid grid-cols-12 gap-4 p-4 items-center hover:bg-muted/20 transition-colors group"
-							>
-								{/* ID */}
-								<div className="col-span-2 sm:col-span-1 font-mono text-sm font-medium text-foreground">
-									#{item.id}
-								</div>
-
-								{/* Student */}
-								<div className="col-span-4 sm:col-span-3 flex items-center gap-3 pl-2">
-									<Avatar className="size-8 border border-border hidden sm:block">
-										<AvatarImage
-											src={`https://api.dicebear.com/7.x/initials/svg?seed=${item.record.student.firstName}`}
-										/>
-										<AvatarFallback>
-											{item.record.student.firstName[0]}
-										</AvatarFallback>
-									</Avatar>
-									<span className="font-bold text-sm text-foreground truncate">
-										{item.record.student.firstName}{" "}
-										{item.record.student.lastName}
-									</span>
-								</div>
-
-								{/* Date */}
-								<div className="col-span-3 hidden md:flex flex-col">
-									<div className="flex items-center gap-2">
-										<div className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
-										<span className="text-sm font-medium text-foreground">
-											{item.signedAt.toLocaleDateString(
-												"en-US",
-												{
-													month: "short",
-													day: "numeric",
-													year: "numeric",
-												},
-											)}
-										</span>
-									</div>
-									<span className="text-xs text-muted-foreground pl-3.5">
-										{item.signedAt.toLocaleTimeString(
-											"en-US",
-											{
-												hour: "2-digit",
-												minute: "2-digit",
-											},
-										)}
-									</span>
-								</div>
-
-								{/* Network */}
-								<div className="col-span-2 hidden lg:flex">
-									<NetworkBadge network={network} />
-								</div>
-
-								{/* Hash */}
-								<div className="col-span-3 hidden xl:flex font-mono text-xs text-muted-foreground">
-									{item.txHash}
-								</div>
-
-								{/* Actions */}
-								<div className="col-span-6 sm:col-span-8 md:col-span-3 lg:col-span-3 xl:col-span-2 flex justify-end">
-									<Button
-										variant="ghost"
-										size="sm"
-										className="text-button-primary hover:text-button-primary hover:bg-button-primary/10 gap-1 text-xs font-semibold h-8"
+				{/* Table Card */}
+				<div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+					<Table>
+						<TableHeader className="bg-muted/30">
+							<TableRow className="hover:bg-transparent border-b border-border/60">
+								<TableHead className="w-[100px] text-xs font-bold uppercase tracking-wider text-muted-foreground h-12 pl-6">
+									ID
+								</TableHead>
+								<TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+									Student Details
+								</TableHead>
+								<TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+									Timestamp
+								</TableHead>
+								<TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+									Network
+								</TableHead>
+								<TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+									Tx Hash
+								</TableHead>
+								<TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground text-right pr-6">
+									Actions
+								</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{filteredRecords.length === 0 ? (
+								<TableRow>
+									<TableCell
+										colSpan={6}
+										className="h-64 text-center"
 									>
-										View Cert{" "}
-										<ArrowRight className="size-3" />
-									</Button>
-								</div>
-							</div>
-						);
-					})}
-				</div>
+										<div className="flex flex-col items-center justify-center gap-2">
+											<div className="bg-muted/50 p-4 rounded-full">
+												<Search className="size-8 text-muted-foreground" />
+											</div>
+											<p className="font-medium text-lg text-foreground">
+												No signatures found
+											</p>
+											<p className="text-muted-foreground text-sm">
+												Try adjusting your search or
+												filters.
+											</p>
+											<Button
+												variant="link"
+												onClick={() =>
+													setSearchQuery("")
+												}
+												className="text-purple-600"
+											>
+												Clear Search
+											</Button>
+										</div>
+									</TableCell>
+								</TableRow>
+							) : (
+								filteredRecords.map((item, index) => {
+									const badgeVariant =
+										index % 3 === 0
+											? "bg-purple-50 text-purple-700 border-purple-200"
+											: index % 3 === 1
+												? "bg-emerald-50 text-emerald-700 border-emerald-200"
+												: "bg-blue-50 text-blue-700 border-blue-200";
 
-				{/* Footer / Pagination */}
-				<div className="p-4 border-t border-border bg-muted/10 flex flex-col sm:flex-row justify-between items-center gap-4">
-					<span className="text-xs text-muted-foreground font-medium">
-						Showing <span className="text-foreground">1</span> to{" "}
-						<span className="text-foreground">5</span> of{" "}
-						<span className="text-foreground">1,245</span> Entries
-					</span>
+									return (
+										<TableRow
+											key={item.id}
+											className="group border-b border-border/40 hover:bg-muted/30 transition-colors"
+										>
+											<TableCell className="pl-6 font-medium text-muted-foreground text-sm py-4">
+												#
+												{item.record.id.slice(0, 4) ||
+													"8821"}
+											</TableCell>
 
-					<div className="flex items-center gap-1">
-						<Button
-							variant="outline"
-							size="icon"
-							className="size-8 border-border"
-							disabled
-						>
-							<ChevronLeft className="size-4" />
-						</Button>
-						<Button
-							variant="secondary"
-							size="sm"
-							className="h-8 w-8 p-0 font-bold bg-muted-foreground/20 text-foreground"
-						>
-							1
-						</Button>
-						<Button
-							variant="ghost"
-							size="sm"
-							className="h-8 w-8 p-0 text-muted-foreground"
-						>
-							2
-						</Button>
-						<Button
-							variant="ghost"
-							size="sm"
-							className="h-8 w-8 p-0 text-muted-foreground"
-						>
-							3
-						</Button>
-						<span className="text-muted-foreground text-xs px-1">
-							...
+											<TableCell>
+												<div className="flex flex-col">
+													<span className="font-semibold text-sm text-foreground">
+														{
+															item.record.student
+																.firstName
+														}{" "}
+														{
+															item.record.student
+																.lastName
+														}
+													</span>
+													<span className="text-xs text-muted-foreground">
+														{item.record.student
+															.student_id ||
+															"ST-2024-001"}
+													</span>
+												</div>
+											</TableCell>
+
+											<TableCell>
+												<div className="flex items-center gap-2 text-sm">
+													<span className="text-foreground/80">
+														{format(
+															new Date(
+																item.signedAt,
+															),
+															"MMM dd, yyyy",
+														)}
+													</span>
+													<span className="text-xs text-muted-foreground border-l pl-2">
+														{format(
+															new Date(
+																item.signedAt,
+															),
+															"hh:mm a",
+														)}
+													</span>
+												</div>
+											</TableCell>
+
+											<TableCell>
+												<Badge
+													variant="outline"
+													className={cn(
+														"rounded-md font-medium px-2.5 py-0.5",
+														badgeVariant,
+													)}
+												>
+													{item.record.credentialType
+														?.name ||
+														"Polygon Mainnet"}
+												</Badge>
+											</TableCell>
+
+											<TableCell className="max-w-[150px]">
+												<div className="flex items-center gap-2 font-mono text-xs text-muted-foreground bg-muted/30 p-1.5 rounded w-fit">
+													<span className="truncate max-w-[120px]">
+														{item.txHash}
+													</span>
+												</div>
+											</TableCell>
+
+											<TableCell className="text-right pr-6">
+												<Button
+													variant="ghost"
+													size="sm"
+													className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 font-medium h-8 gap-1"
+												>
+													<span>Verify</span>
+													<ArrowRight className="size-3 transition-transform group-hover:translate-x-0.5" />
+												</Button>
+											</TableCell>
+										</TableRow>
+									);
+								})
+							)}
+						</TableBody>
+					</Table>
+
+					{/* Footer Pagination */}
+					<div className="bg-muted/10 p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
+						<span className="text-xs text-muted-foreground text-center sm:text-left">
+							Showing{" "}
+							<span className="font-bold text-foreground">
+								1-{filteredRecords.length}
+							</span>{" "}
+							of{" "}
+							<span className="font-bold text-foreground">
+								{totalSigned.toLocaleString()}
+							</span>{" "}
+							entries
 						</span>
-						<Button
-							variant="ghost"
-							size="sm"
-							className="h-8 w-8 p-0 text-muted-foreground"
-						>
-							8
-						</Button>
-						<Button
-							variant="outline"
-							size="icon"
-							className="size-8 border-border"
-						>
-							<ChevronRight className="size-4" />
-						</Button>
+
+						<div className="flex items-center gap-1">
+							<Button
+								variant="outline"
+								size="icon"
+								className="size-8"
+								disabled
+							>
+								<ChevronLeft className="size-4" />
+							</Button>
+							<div className="flex items-center gap-1 mx-2">
+								<Button
+									variant="secondary"
+									size="sm"
+									className="size-8 p-0 font-bold bg-purple-100 text-purple-700"
+								>
+									1
+								</Button>
+								<Button
+									variant="ghost"
+									size="sm"
+									className="size-8 p-0 text-muted-foreground"
+								>
+									2
+								</Button>
+								<span className="text-xs text-muted-foreground px-1">
+									<MoreHorizontal className="size-3" />
+								</span>
+								<Button
+									variant="ghost"
+									size="sm"
+									className="size-8 p-0 text-muted-foreground"
+								>
+									8
+								</Button>
+							</div>
+							<Button
+								variant="outline"
+								size="icon"
+								className="size-8"
+							>
+								<ChevronRight className="size-4" />
+							</Button>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	);
-}
-
-// --- Sub-components ---
-
-function StatCard({
-	label,
-	value,
-	icon: Icon,
-	iconColor,
-}: {
-	label: string;
-	value: string;
-	icon: any;
-	iconColor?: string;
-}) {
-	return (
-		<Card className="flex-1 min-w-[140px] shadow-sm border-border bg-card">
-			<CardContent className="p-4 flex flex-col justify-between h-full gap-3">
-				<div className="flex justify-between items-start">
-					<span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
-						{label}
-					</span>
-					<Icon
-						className={`size-4 ${iconColor || "text-muted-foreground/40"}`}
-					/>
-				</div>
-				<div className="text-2xl font-bold font-heading text-foreground">
-					{value}
-				</div>
-			</CardContent>
-		</Card>
-	);
-}
-
-function NetworkBadge({ network }: { network: string }) {
-	const styles: Record<string, string> = {
-		Polygon: "bg-purple-100 text-purple-700 border-purple-200",
-		Ethereum: "bg-emerald-100 text-emerald-700 border-emerald-200",
-		Testnet: "bg-blue-100 text-blue-700 border-blue-200",
-	};
-
-	const style = styles[network] || styles.Testnet;
-
-	return (
-		<Badge
-			variant="outline"
-			className={`rounded-md px-2.5 py-0.5 font-semibold border ${style} shadow-none`}
-		>
-			{network}
-		</Badge>
 	);
 }

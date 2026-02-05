@@ -6,7 +6,6 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 export const Route = createFileRoute("/signer")({
 	component: RouteComponent,
 	beforeLoad: ({ context }) => {
-		// Only checks authentication.
 		if (!context.auth.user || context.auth.user.role !== Role.SIGNER) {
 			throw redirect({ to: "/login" });
 		}
@@ -18,8 +17,6 @@ function RouteComponent() {
 		<>
 			<SignerHeader />
 			<div className="flex flex-1 flex-col gap-4">
-				{/* This Outlet renders child routes like /admin/dashboard */}
-
 				<div className="px-16 pt-4">
 					<AppBreadcrumb />
 				</div>

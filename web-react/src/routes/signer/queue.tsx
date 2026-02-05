@@ -41,12 +41,9 @@ import { useState } from "react";
 export const Route = createFileRoute("/signer/queue")({
 	component: SignerQueuePage,
 	loader: async ({ context }) => {
-		const user = context.auth.user;
-		if (!user) return;
-
 		await Promise.all([
-			context.insights.getSingerDashboardInsights(user.id),
-			context.records.getSignerPendingRecords(user.id),
+			context.insights.getSingerDashboardInsights(),
+			context.records.getSignerPendingRecords(),
 		]);
 	},
 });
@@ -60,23 +57,16 @@ function SignerQueuePage() {
 	const [selectedIds, setSelectedIds] = useState<string[]>([]);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [filterType, setFilterType] = useState<string>("ALL");
-
-	// Control the Sheet visibility
 	const [isSheetOpen, setIsSheetOpen] = useState(false);
 	const [isSigning, setIsSigning] = useState(false);
 
 	// --- Derived Data ---
 	const filteredRecords = signerPendingRecords.filter((record) => {
+		const searchLower = searchQuery.toLowerCase();
 		const matchesSearch =
-			record.student.firstName
-				.toLowerCase()
-				.includes(searchQuery.toLowerCase()) ||
-			record.student.lastName
-				.toLowerCase()
-				.includes(searchQuery.toLowerCase()) ||
-			record.student.student_id
-				.toLowerCase()
-				.includes(searchQuery.toLowerCase());
+			record.student.firstName.toLowerCase().includes(searchLower) ||
+			record.student.lastName.toLowerCase().includes(searchLower) ||
+			record.student.student_id.toLowerCase().includes(searchLower);
 
 		const matchesType =
 			filterType === "ALL" || record.credentialType.name === filterType;
@@ -84,7 +74,6 @@ function SignerQueuePage() {
 		return matchesSearch && matchesType;
 	});
 
-	// Get the actual record objects for the selected IDs to display in the sheet
 	const selectedRecords = signerPendingRecords.filter((r) =>
 		selectedIds.includes(r.id),
 	);
@@ -92,7 +81,7 @@ function SignerQueuePage() {
 	// --- Handlers ---
 	const toggleSelectAll = (checked: boolean) => {
 		if (checked) {
-			setSelectedIds(filteredRecords.map((r: Record) => r.id));
+			setSelectedIds(filteredRecords.map((r) => r.id));
 		} else {
 			setSelectedIds([]);
 		}
@@ -115,15 +104,14 @@ function SignerQueuePage() {
 	const handleConfirmSign = async () => {
 		try {
 			setIsSigning(true);
-
 			await signRecords(selectedIds);
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 		} finally {
 			setIsSigning(false);
 			setIsSheetOpen(false);
 			setSelectedIds([]);
-			router.navigate({ to: "/signer/signing-summary" });
+			router.navigate({ to: "/signer/dashboard" }); // Fixed redirect path to dashboard
 		}
 	};
 
@@ -134,7 +122,7 @@ function SignerQueuePage() {
 
 	return (
 		<div className="min-h-screen bg-background font-sans text-foreground p-4 sm:p-6 pb-32">
-			{/* Header Section */}
+			{/* Header */}
 			<div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
 				<div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
 					<div>
@@ -161,7 +149,6 @@ function SignerQueuePage() {
 
 				{/* Toolbar */}
 				<div className="bg-card p-2 rounded-xl border border-border shadow-sm flex flex-col md:flex-row gap-2 items-stretch md:items-center sticky top-4 z-20">
-					{/* Checkbox Section */}
 					<div className="flex items-center gap-3 px-4 py-2 border-b md:border-b-0 md:border-r border-border min-w-fit">
 						<Checkbox
 							id="select-all"
@@ -180,7 +167,6 @@ function SignerQueuePage() {
 						</label>
 					</div>
 
-					{/* Filters Section */}
 					<div className="flex flex-col sm:flex-row items-center gap-2 flex-1 w-full px-2 pt-2 md:pt-0">
 						<Select
 							value={filterType}
@@ -227,7 +213,7 @@ function SignerQueuePage() {
 							</p>
 						</div>
 					) : (
-						filteredRecords.map((record: Record) => (
+						filteredRecords.map((record) => (
 							<QueueItem
 								key={record.id}
 								record={record}
@@ -239,7 +225,7 @@ function SignerQueuePage() {
 				</div>
 			</div>
 
-			{/* --- Floating Action Bar --- */}
+			{/* Floating Action Bar */}
 			<div
 				className={cn(
 					"fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] md:w-full max-w-3xl transition-all duration-300 ease-in-out z-30",
@@ -282,7 +268,7 @@ function SignerQueuePage() {
 				</div>
 			</div>
 
-			{/* --- Signing Confirmation Sheet --- */}
+			{/* Signing Sheet */}
 			<Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
 				<SheetContent className="w-full sm:max-w-md flex flex-col h-full sm:h-auto">
 					<SheetHeader className="space-y-4">
@@ -300,7 +286,6 @@ function SignerQueuePage() {
 						</SheetDescription>
 					</SheetHeader>
 
-					{/* Scrollable List of Selected Items */}
 					<div className="flex-1 overflow-y-auto my-6 pr-2 -mr-2 max-h-[60vh]">
 						<div className="space-y-3">
 							{selectedRecords.map((record) => (
@@ -405,10 +390,7 @@ const QueueItem = ({
 			<div className="flex items-center justify-center pl-0 sm:pl-2">
 				<Checkbox
 					checked={isSelected}
-					className={cn(
-						"size-5 rounded-md transition-all border-muted-foreground/30 data-[state=checked]:bg-button-primary data-[state=checked]:border-button-primary",
-						isSelected ? "scale-100" : "scale-100",
-					)}
+					className="size-5 rounded-md transition-all border-muted-foreground/30 data-[state=checked]:bg-button-primary data-[state=checked]:border-button-primary"
 				/>
 			</div>
 			<Avatar className="size-10 sm:size-12 border border-border bg-background shadow-sm shrink-0">

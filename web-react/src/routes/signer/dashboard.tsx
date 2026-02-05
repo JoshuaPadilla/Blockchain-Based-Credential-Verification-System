@@ -14,12 +14,10 @@ export const Route = createFileRoute("/signer/dashboard")({
 	component: RouteComponent,
 	loader: async ({ context }) => {
 		// Parallel data fetching for performance
-		const user = context.auth.user;
-		if (!user) return;
 
 		await Promise.all([
-			context.insights.getSingerDashboardInsights(user.id),
-			context.records.getSignerPendingRecords(user.id),
+			context.insights.getSingerDashboardInsights(),
+			context.records.getSignerPendingRecords(),
 		]);
 	},
 });

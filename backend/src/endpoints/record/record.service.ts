@@ -104,27 +104,27 @@ export class RecordService {
     return this.recordRepository.deleteAll();
   }
 
-  async findRecordsForSigner(userId: string): Promise<Record[]> {
-    return (
-      this.recordRepository
-        .createQueryBuilder("record")
-        // 1. Join the Credential Type to access its configuration
-        .innerJoinAndSelect("record.credentialType", "type")
+  // async findRecordsForSigner(userId: string): Promise<Record[]> {
+  //   return (
+  //     this.recordRepository
+  //       .createQueryBuilder("record")
+  //       // 1. Join the Credential Type to access its configuration
+  //       .innerJoinAndSelect("record.credentialType", "type")
 
-        // 2. Join the 'signers' list defined in that Credential Type
-        .innerJoin("type.signers", "allowedSigner")
+  //       // 2. Join the 'signers' list defined in that Credential Type
+  //       .innerJoin("type.signers", "allowedSigner")
 
-        // 3. Filter: Only keep records where the current user is in that 'signers' list
-        .where("allowedSigner.id = :userId", { userId })
+  //       // 3. Filter: Only keep records where the current user is in that 'signers' list
+  //       .where("allowedSigner.id = :userId", { userId })
 
-        // Optional: Check if they haven't signed it yet (Create a "Todo" list)
-        // This assumes you want to hide records they already finished signing
-        // .leftJoin('record.signedBy', 'actualSigner', 'actualSigner.id = :userId', { userId })
-        // .andWhere('actualSigner.id IS NULL')
+  //       // Optional: Check if they haven't signed it yet (Create a "Todo" list)
+  //       // This assumes you want to hide records they already finished signing
+  //       // .leftJoin('record.signedBy', 'actualSigner', 'actualSigner.id = :userId', { userId })
+  //       // .andWhere('actualSigner.id IS NULL')
 
-        .getMany()
-    );
-  }
+  //       .getMany()
+  //   );
+  // }
 
   async getSignerPendingRecords(userId: string): Promise<Record[]> {
     const pendingRecords = await this.recordRepository

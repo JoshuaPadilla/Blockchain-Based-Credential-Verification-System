@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Request,
   UseGuards,
 } from "@nestjs/common";
 import { RecordService } from "./record.service";
@@ -26,16 +27,16 @@ export class RecordController {
     return this.recordService.getAllRecords();
   }
 
-  @Roles(Role.SIGNER)
-  @Get("record-by-signer/:userId")
-  findRecordsForSigner(@Param("userId") userId: string) {
-    return this.recordService.findRecordsForSigner(userId);
-  }
+  // @Roles(Role.SIGNER)
+  // @Get("record-by-signer")
+  // findRecordsForSigner(@Request() req) {
+  //   return this.recordService.findRecordsForSigner(req.user.id);
+  // }
 
   @Roles(Role.SIGNER)
-  @Get("signer-pending-records/:userId")
-  getSignerPendingRecords(@Param("userId") userId: string) {
-    return this.recordService.getSignerPendingRecords(userId);
+  @Get("signer-pending-records")
+  getSignerPendingRecords(@Request() req) {
+    return this.recordService.getSignerPendingRecords(req.user.id);
   }
 
   @Get(":recordId")
