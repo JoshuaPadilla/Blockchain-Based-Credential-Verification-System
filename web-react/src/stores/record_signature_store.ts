@@ -6,7 +6,7 @@ type StoreProps = {
 	getRecordSignature: (signatureId: string) => Promise<RecordSignature>;
 };
 
-export const useRecordSignatureStore = create<StoreProps>((set) => ({
+export const useRecordSignatureStore = create<StoreProps>(() => ({
 	getRecordSignature: async (signatureId) => {
 		const res = await axiosClient.get(`record-signature/${signatureId}`);
 

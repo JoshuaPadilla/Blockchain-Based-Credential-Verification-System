@@ -12,7 +12,7 @@ type StoreProps = {
 		cutOffYear?: string,
 		cutOffSemester?: number,
 	) => Promise<Record>;
-	getAdminRecord: (recordId: string) => Promise<Record>;
+	getRecord: (recordId: string) => Promise<Record>;
 	verifyRecord: (credentialRef: string) => Promise<VerificationData | null>;
 	signerPendingRecords: Record[];
 	getSignerPendingRecords: () => Promise<void>;
@@ -47,7 +47,7 @@ export const useRecordStore = create<StoreProps>((set) => ({
 
 		if (res.status === 201) return res.data;
 	},
-	getAdminRecord: async (recordId) => {
+	getRecord: async (recordId) => {
 		try {
 			const res = await axiosClient.get(`record/${recordId}`);
 
