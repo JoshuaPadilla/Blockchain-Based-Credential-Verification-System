@@ -1,4 +1,5 @@
 import { CredentialTypeSelector } from "@/components/custom_components/credential_type_selector";
+import { PendingSpinner } from "@/components/custom_components/pending_spinner";
 import { StudentSelector } from "@/components/custom_components/student_selector";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -21,17 +22,17 @@ import {
 	Settings2,
 	ShieldCheck,
 } from "lucide-react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 // 1. Import Viewer Components
-import { Document, Page, pdfjs } from "react-pdf";
+import { pdfBlobToDataUrl } from "@/helpers/pdf_helper";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
 // 2. Worker Setup
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export const Route = createFileRoute("/admin/issue_credential")({
 	component: RouteComponent,
+	pendingComponent: () => <PendingSpinner />,
 });
 
 function RouteComponent() {
@@ -40,10 +41,9 @@ function RouteComponent() {
 	const { createRecord } = useRecordStore();
 	const navigate = useNavigate();
 
+	const [previewImage, setPreviewImage] = useState<string | null>(null);
+
 	// --- State ---
-	const [containerWidth, setContainerWidth] = useState<number>();
-	const resizeTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-	const [, setNumPages] = useState<number>();
 	const [selectedStudent, setSelectedStudent] = useState<Student | null>(
 		null,
 	);
@@ -80,31 +80,28 @@ function RouteComponent() {
 	});
 
 	// --- Resize Observer (Responsive PDF) ---
-	const onRefChange = useCallback((node: HTMLDivElement | null) => {
-		if (node) {
-			const resizeObserver = new ResizeObserver((entries) => {
-				if (resizeTimeoutRef.current)
-					clearTimeout(resizeTimeoutRef.current);
-				resizeTimeoutRef.current = setTimeout(() => {
-					if (entries[0]) {
-						const newWidth = entries[0].contentRect.width;
-						setContainerWidth((prev) =>
-							!prev || Math.abs(prev - newWidth) > 5
-								? newWidth
-								: prev,
+
+	useEffect(() => {
+		let active = true;
+
+		if (pdfBlob) {
+			pdfBlobToDataUrl(pdfBlob)
+				.then((base64Image) => {
+					if (active) {
+						setPreviewImage(base64Image);
+						console.log(
+							"Generated DataURL:",
+							base64Image.slice(0, 50) + "...",
 						);
 					}
-				}, 100);
-			});
-			resizeObserver.observe(node);
-			return () => resizeObserver.disconnect();
+				})
+				.catch((err) => console.error("PDF Conversion Failed", err));
 		}
-	}, []);
 
-	const documentKey = useMemo(() => {
-		if (!pdfBlob) return null;
-		return `${selectedStudent?.id}-${selectedCredentialType?.id}`;
-	}, [pdfBlob, selectedStudent?.id, selectedCredentialType?.id]);
+		return () => {
+			active = false;
+		};
+	}, [pdfBlob]);
 
 	// --- Render ---
 	return (
@@ -127,7 +124,7 @@ function RouteComponent() {
 				</div>
 			</div>
 
-			<div className="px-4 py-8 md:px-8 flex-1 max-w-[1600px] mx-auto w-full">
+			<div className="px-4 py-8 md:px-8 flex-1 max-w-400 mx-auto w-full">
 				<div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start">
 					{/* --- LEFT COL: Configuration --- */}
 					<div className="lg:col-span-3 space-y-6">
@@ -198,7 +195,6 @@ function RouteComponent() {
 
 							<div className="flex-1 flex items-center justify-center p-6 md:p-10 overflow-y-auto">
 								<div
-									ref={onRefChange}
 									className={cn(
 										"relative flex w-full max-w-3xl items-center justify-center transition-all duration-300",
 										!pdfBlob
@@ -219,28 +215,21 @@ function RouteComponent() {
 									{/* PDF Render */}
 									{!isPreviewLoading && pdfBlob && (
 										<div className="shadow-xl rounded-sm overflow-hidden border border-slate-200/60">
-											<Document
-												key={documentKey}
-												file={pdfBlob}
-												onLoadSuccess={({ numPages }) =>
-													setNumPages(numPages)
-												}
-												className="flex justify-center"
-												loading={null}
-											>
-												<Page
-													pageNumber={1}
-													width={
-														containerWidth
-															? containerWidth
-															: undefined
-													}
-													renderTextLayer={false}
-													renderAnnotationLayer={
-														false
-													}
-												/>
-											</Document>
+											{!isPreviewLoading &&
+											previewImage ? (
+												<div className="shadow-xl rounded-sm overflow-hidden border border-slate-200/60">
+													<img
+														src={previewImage}
+														alt="Certificate Preview"
+														className="w-full h-auto object-contain" // w-full handles the width automatically
+													/>
+												</div>
+											) : (
+												// Fallback or Loading state
+												<div className="...loading styles...">
+													Generating Image...
+												</div>
+											)}
 										</div>
 									)}
 

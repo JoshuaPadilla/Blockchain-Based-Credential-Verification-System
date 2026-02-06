@@ -36,6 +36,7 @@ import { toast } from "sonner"; // Assuming you have a toast library, or use con
 export const Route = createFileRoute("/signer/signing-summary")({
 	component: SigningSummaryPage,
 	beforeLoad: ({ context }) => {
+		console.log("Summary:", context.signer.signingResultData);
 		if (!context.signer.signingResultData) {
 			throw redirect({ to: "/signer/queue" });
 		}

@@ -1,8 +1,8 @@
-import { Document, Image, Page, Text, View } from "@react-pdf/renderer";
-import { styles } from "./styles";
 import school_logo from "@/assets/img/school_logo.png";
-import border from "../assets/diploma_bg.png";
 import { getOrdinalDay, yearToWords } from "@/helpers/number_to_words.helper";
+import { Document, Image, Page, Text, View } from "@react-pdf/renderer";
+import border from "../assets/diploma_bg.png";
+import { styles } from "./styles";
 
 interface DiplomaProps {
 	name: string;

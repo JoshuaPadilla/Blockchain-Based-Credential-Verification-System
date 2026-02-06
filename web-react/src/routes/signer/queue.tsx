@@ -111,7 +111,7 @@ function SignerQueuePage() {
 			setIsSigning(false);
 			setIsSheetOpen(false);
 			setSelectedIds([]);
-			router.navigate({ to: "/signer/dashboard" }); // Fixed redirect path to dashboard
+			router.navigate({ to: "/signer/signing-summary" }); // Fixed redirect path to dashboard
 		}
 	};
 

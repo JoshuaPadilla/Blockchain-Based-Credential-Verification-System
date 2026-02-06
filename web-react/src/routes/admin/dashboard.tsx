@@ -1,4 +1,5 @@
 import { DashboardStats } from "@/components/custom_components/dashboard_stats";
+import { PendingSkeleton } from "@/components/custom_components/pending_skeleton";
 import { RecentTransactionTable } from "@/components/custom_components/recent_transaction_table";
 import { Button } from "@/components/ui/button";
 import { useInsightsStore } from "@/stores/insights_store";
@@ -10,11 +11,17 @@ export const Route = createFileRoute("/admin/dashboard")({
 	component: RouteComponent,
 	loader: async ({ context }) => {
 		// Parallel data fetching for performance
+
+		setTimeout(() => {
+			console.log("sa");
+		}, 1000);
+
 		await Promise.all([
 			context.insights.getAdminDashboardInsights(),
 			context.records.getRecords(),
 		]);
 	},
+	pendingComponent: () => <PendingSkeleton />,
 });
 
 function RouteComponent() {

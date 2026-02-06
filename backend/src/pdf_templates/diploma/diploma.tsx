@@ -13,7 +13,7 @@ interface DiplomaProps {
   name: string;
   course: string;
   distinction: string;
-  qrCodeUrl: string;
+  qrCodeUrl?: string;
 }
 
 export const Diploma = ({
@@ -60,7 +60,7 @@ export const Diploma = ({
               <Text style={styles.city}>Calbayog City</Text>
             </View>
 
-            <Image src={qrCodeUrl} style={styles.headerQr} />
+            {qrCodeUrl && <Image src={qrCodeUrl} style={styles.headerQr} />}
           </View>
 
           {/* Salutation */}

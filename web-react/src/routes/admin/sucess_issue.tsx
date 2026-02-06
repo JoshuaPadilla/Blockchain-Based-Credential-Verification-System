@@ -16,10 +16,9 @@ import {
 	ShieldCheck,
 } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
-import { Document, Page, pdfjs } from "react-pdf";
+import { Document, Page } from "react-pdf";
 
 // Worker setup
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 type RouteSearch = {
 	recordId: string;
@@ -87,6 +86,7 @@ function RouteComponent() {
 	return (
 		<div className="min-h-screen bg-slate-50/50 flex flex-col items-center py-12 px-4 sm:px-8 font-sans text-slate-900">
 			{/* --- Success Hero --- */}
+
 			<div className="flex flex-col items-center text-center gap-6 mb-12">
 				<div className="relative">
 					<div className="absolute inset-0 bg-green-200 rounded-full blur-xl opacity-50" />
@@ -307,7 +307,7 @@ function RouteComponent() {
 								${record.credentialRef}`}
 								className="text-[10px] text-blue-300 font-mono"
 							>
-								http://localhost:5137/verify/
+								https://cert-us.website/verify/
 								{record.credentialRef}
 							</a>
 							<button className="text-slate-400 hover:text-white transition-colors">
@@ -324,7 +324,7 @@ function RouteComponent() {
 					<CheckCircle2 className="size-3 text-green-500" />
 					Record secured on Blockchain • SHA-256 Checksum Verified
 				</div>
-				<div>Blockchain Issuance System v1.0</div>
+				<div>Cert-us v1.0</div>
 			</div>
 		</div>
 	);

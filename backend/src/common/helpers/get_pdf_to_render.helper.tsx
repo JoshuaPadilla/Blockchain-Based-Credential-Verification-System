@@ -10,7 +10,7 @@ import { NotFoundException } from '@nestjs/common';
 export const getPdfToRender = (
   student: Student,
   credentialName: CredentialType,
-  qrData: string,
+  qrData?: string,
 ): React.ReactElement | null => {
   switch (credentialName) {
     case CredentialType.DIPLOMA:

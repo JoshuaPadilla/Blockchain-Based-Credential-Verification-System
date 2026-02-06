@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { renderToStream } from "@react-pdf/renderer";
+import { renderToBuffer, renderToStream } from "@react-pdf/renderer";
 import React from "react"; // Mandatory for JSX
 import { Diploma } from "../../pdf_templates/diploma/diploma";
 import { generateQr } from "src/common/helpers/qr_helper";
@@ -22,7 +22,7 @@ export class PdfService {
   ): Promise<NodeJS.ReadableStream> {
     // Render the React component to a stream
 
-    const qrCodeData = await generateQr("myapp.com/verify/asdsass");
+    // const qrCodeData = await generateQr("myapp.com/verify/asdsass");
 
     const student = await this.studentRepo.findOneBy({ id: studentId });
 
@@ -30,7 +30,7 @@ export class PdfService {
       throw new NotFoundException("Student not found");
     }
 
-    const diplomaPdf = getPdfToRender(student, credentialType, qrCodeData);
+    const diplomaPdf = getPdfToRender(student, credentialType);
 
     if (!diplomaPdf) {
       throw new NotFoundException("credential type not found");

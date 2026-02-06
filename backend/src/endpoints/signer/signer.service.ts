@@ -193,8 +193,6 @@ export class SignerService {
       // ---------------------------------------------------------
       // If the batch transaction fails, NONE of them are signed.
 
-      console.error("Batch failed", error);
-
       // Mark all attempts as FAILED in DB
       await signatureRepo
         .createQueryBuilder()
