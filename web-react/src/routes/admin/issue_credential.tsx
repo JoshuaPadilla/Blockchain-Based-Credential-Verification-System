@@ -28,13 +28,6 @@ import { pdfBlobToDataUrl } from "@/helpers/pdf_helper";
 
 // 2. Worker Setup
 
-const STANDARD_OPTIONS = {
-	// ✅ CORRECT: Forces browser to look at domain root
-	cMapUrl: "/cmaps/",
-	cMapPacked: true,
-	standardFontDataUrl: "/standard_fonts/",
-};
-
 export const Route = createFileRoute("/admin/issue_credential")({
 	component: RouteComponent,
 	pendingComponent: () => <PendingSpinner />,
@@ -205,17 +198,15 @@ function RouteComponent() {
 							</div>
 
 							<div className="flex-1 flex items-center justify-center p-6 md:p-10 overflow-y-auto">
+								{/* PDF Render Section */}
 								<div
 									className={cn(
 										"relative flex w-full max-w-3xl items-center justify-center transition-all duration-300",
-										!pdfBlob
-											? "opacity-100"
-											: "opacity-100", // Always visible container
 									)}
 								>
 									{/* Loading State */}
 									{isPreviewLoading && (
-										<div className="absolute inset-0 flex flex-col items-center justify-center bg-white/50 backdrop-blur-sm z-20 rounded-lg">
+										<div className="flex flex-col items-center justify-center bg-white/50 backdrop-blur-sm rounded-lg p-8">
 											<Loader className="size-8 animate-spin text-[var(--button-primary)] mb-2" />
 											<p className="text-xs font-medium text-slate-500">
 												Generating Preview...
@@ -223,26 +214,36 @@ function RouteComponent() {
 										</div>
 									)}
 
-									{/* PDF Render */}
-									{!isPreviewLoading && pdfBlob && (
-										<div className="shadow-xl rounded-sm overflow-hidden border border-slate-200/60">
-											{!isPreviewLoading &&
-											previewImage ? (
-												<div className="shadow-xl rounded-sm overflow-hidden border border-slate-200/60">
-													<img
-														src={previewImage}
-														alt="Certificate Preview"
-														className="w-full h-auto object-contain" // w-full handles the width automatically
-													/>
-												</div>
-											) : (
-												// Fallback or Loading state
-												<div className="...loading styles...">
-													Generating Image...
-												</div>
-											)}
-										</div>
-									)}
+									{/* Preview Image - FIXED CONDITION */}
+									{!isPreviewLoading &&
+										pdfBlob &&
+										previewImage && (
+											<div className="shadow-xl rounded-sm overflow-hidden border border-slate-200/60">
+												<img
+													src={previewImage}
+													alt="Certificate Preview"
+													className="w-full h-auto object-contain"
+													onError={(e) => {
+														console.error(
+															"Image failed to load:",
+															e,
+														);
+													}}
+												/>
+											</div>
+										)}
+
+									{/* Converting State - Show while blob exists but image not ready */}
+									{!isPreviewLoading &&
+										pdfBlob &&
+										!previewImage && (
+											<div className="flex flex-col items-center justify-center p-8">
+												<Spinner className="size-8 text-[var(--button-primary)] mb-2" />
+												<p className="text-xs font-medium text-slate-500">
+													Converting to image...
+												</p>
+											</div>
+										)}
 
 									{/* Empty State */}
 									{!isPreviewLoading && !pdfBlob && (
