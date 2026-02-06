@@ -15,6 +15,7 @@ export const usePdfStore = create<StoreProps>(() => ({
 			`pdf/preview?studentId=${studentId}&credentialName=${credentialType}`,
 			{
 				responseType: "blob",
+				signal: AbortSignal.timeout(15000),
 			},
 		);
 

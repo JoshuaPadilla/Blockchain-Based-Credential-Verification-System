@@ -65,10 +65,13 @@ function RouteComponent() {
 		queryFn: () =>
 			getPreview(selectedStudent!.id, selectedCredentialType!.name),
 		// 🛑 ADD THESE LINES TO STOP THE LOOP 🛑
-		staleTime: Infinity, // Once loaded, never reload it for this session
-		gcTime: 1000 * 60 * 30, // Keep in memory for 30 minutes
-		refetchOnWindowFocus: false, // Don't reload just because I clicked alt-tab
-		refetchOnMount: false, // Don't reload if I go back and forth
+		enabled: !!(selectedStudent && selectedCredentialType), // ⭐ ADD THIS
+		staleTime: Infinity,
+		gcTime: 1000 * 60 * 30,
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false, // ⭐ ADD THIS
+		retry: 1,
 	});
 
 	const { mutate, isPending: isCreating } = useMutation({
