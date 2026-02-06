@@ -25,8 +25,6 @@ import {
 import { useEffect, useState } from "react";
 // 1. Import Viewer Components
 import { pdfBlobToDataUrl } from "@/helpers/pdf_helper";
-import "react-pdf/dist/Page/AnnotationLayer.css";
-import "react-pdf/dist/Page/TextLayer.css";
 
 // 2. Worker Setup
 

@@ -39,6 +39,8 @@ export class PdfService {
     const stream = await renderToStream(
       diplomaPdf as React.ReactElement<DocumentProps>,
     );
+
+    
     return stream;
   }
 }
