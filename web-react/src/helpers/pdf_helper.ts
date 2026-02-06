@@ -1,6 +1,7 @@
 import pdfjs from "@/lib/pdf-setup"; // Make sure this points to your setup file
 
 export async function pdfBlobToDataUrl(blob: Blob): Promise<string> {
+	if (blob) console.log("Blob received with size:", blob.size);
 	const url = URL.createObjectURL(blob);
 
 	try {

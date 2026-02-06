@@ -28,6 +28,13 @@ import { pdfBlobToDataUrl } from "@/helpers/pdf_helper";
 
 // 2. Worker Setup
 
+const STANDARD_OPTIONS = {
+	// ✅ CORRECT: Forces browser to look at domain root
+	cMapUrl: "/cmaps/",
+	cMapPacked: true,
+	standardFontDataUrl: "/standard_fonts/",
+};
+
 export const Route = createFileRoute("/admin/issue_credential")({
 	component: RouteComponent,
 	pendingComponent: () => <PendingSpinner />,
@@ -57,8 +64,11 @@ function RouteComponent() {
 		],
 		queryFn: () =>
 			getPreview(selectedStudent!.id, selectedCredentialType!.name),
-		enabled: !!selectedStudent && !!selectedCredentialType,
-		staleTime: 1000 * 60 * 5,
+		// 🛑 ADD THESE LINES TO STOP THE LOOP 🛑
+		staleTime: Infinity, // Once loaded, never reload it for this session
+		gcTime: 1000 * 60 * 30, // Keep in memory for 30 minutes
+		refetchOnWindowFocus: false, // Don't reload just because I clicked alt-tab
+		refetchOnMount: false, // Don't reload if I go back and forth
 	});
 
 	const { mutate, isPending: isCreating } = useMutation({
