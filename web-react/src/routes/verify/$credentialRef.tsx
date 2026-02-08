@@ -22,7 +22,7 @@ import {
 	Users,
 	X,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 // --- Worker Setup ---
 
@@ -40,21 +40,21 @@ const STATUS = {
 /**
  * Handles element resizing for responsive PDF rendering
  */
-function useElementWidth<T extends HTMLElement>() {
-	const ref = useRef<T>(null);
-	const [width, setWidth] = useState<number>(0);
+// function useElementWidth<T extends HTMLElement>() {
+// 	const ref = useRef<T>(null);
+// 	const [width, setWidth] = useState<number>(0);
 
-	useEffect(() => {
-		if (!ref.current) return;
-		const observer = new ResizeObserver((entries) => {
-			if (entries[0]) setWidth(entries[0].contentRect.width);
-		});
-		observer.observe(ref.current);
-		return () => observer.disconnect();
-	}, []);
+// 	useEffect(() => {
+// 		if (!ref.current) return;
+// 		const observer = new ResizeObserver((entries) => {
+// 			if (entries[0]) setWidth(entries[0].contentRect.width);
+// 		});
+// 		observer.observe(ref.current);
+// 		return () => observer.disconnect();
+// 	}, []);
 
-	return { ref, width };
-}
+// 	return { ref, width };
+// }
 
 /**
  * Centralizes verification logic and status derivation

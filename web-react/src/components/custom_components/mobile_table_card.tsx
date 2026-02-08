@@ -7,9 +7,10 @@ import { TableTxHash } from "./table_txhash";
 
 type Props = {
 	record: Record;
+	onView: (id: string) => void;
 };
 
-export const MobileRecordTableCard = ({ record }: Props) => {
+export const MobileRecordTableCard = ({ record, onView }: Props) => {
 	const { firstName, lastName } = record.student;
 	const initials = `${firstName[0]}${lastName[0]}`;
 
@@ -42,7 +43,7 @@ export const MobileRecordTableCard = ({ record }: Props) => {
 						</p>
 					</div>
 				</div>
-				<RecordActions record={record} />
+				<RecordActions record={record} onView={onView} />
 			</div>
 
 			{/* Divider */}

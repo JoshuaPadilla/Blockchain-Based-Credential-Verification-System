@@ -41,7 +41,7 @@ export function CredentialTypeSelector({ onSelectCredential }: Props) {
 		useState<CredentialType | null>(null);
 	const { fetchCredentialTypes } = useCredentialTypeStore();
 
-	const [searchTerm, setSearchTerm] = useState("");
+	const [searchTerm] = useState("");
 	const [debouncedSearch] = useDebounce(searchTerm, 500);
 
 	// Fetch Logic

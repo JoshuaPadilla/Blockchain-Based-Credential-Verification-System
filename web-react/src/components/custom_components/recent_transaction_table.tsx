@@ -143,6 +143,7 @@ export const RecentTransactionTable = ({ records }: Props) => {
 							<MobileRecordTableCard
 								key={record.id}
 								record={record}
+								onView={handleViewRecord}
 							/>
 						))
 				)}
