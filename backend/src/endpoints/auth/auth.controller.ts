@@ -22,8 +22,10 @@ import type { Response } from "express";
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @HttpCode(HttpStatus.CREATED)
   @Post("register")
   register(@Body() body: CreateUserDto) {
+    console.log("here");
     return this.authService.register(body);
   }
 

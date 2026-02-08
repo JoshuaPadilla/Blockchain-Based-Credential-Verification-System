@@ -101,7 +101,7 @@ export class BlockChainService implements OnModuleInit {
 
   async verify(recordId: string) {
     try {
-      const record = await this.ownerContract.records(recordId);
+      const record = await this.ownerContract.getRecord(recordId);
 
       if (record.dataHash === EMPTY_BYTES) {
         throw new NotFoundException('Record does not exist on the blockchain');
@@ -120,11 +120,11 @@ export class BlockChainService implements OnModuleInit {
     }
   }
 
-  async isCredentialSigner(credentialTypeId: string, addresses: string) {
+  async isCredentialSigner(credentialTypeId: string, address: string) {
     try {
       const tx = await this.ownerContract.credentialTypeSigner(
         id(credentialTypeId),
-        addresses,
+        address,
       );
 
       return tx;
@@ -146,6 +146,27 @@ export class BlockChainService implements OnModuleInit {
         id(credentialTypeId),
         address,
         allowed,
+      );
+
+      return tx;
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(
+        error.reason || 'Failed to add credential signer',
+      );
+    }
+  }
+
+  async addNewCredentialType(
+    credentialTypeId: string,
+    addresses: string[],
+    requiredSignatureCount: number,
+  ) {
+    try {
+      const tx = await this.ownerContract.addNewCredentialType(
+        id(credentialTypeId),
+        addresses,
+        requiredSignatureCount,
       );
 
       return tx;
@@ -196,7 +217,6 @@ export class BlockChainService implements OnModuleInit {
 
       // IMPORTANT: Save this hash to DB immediately!
       // If your server crashes 1 second later, you still have the tracking number.
-      console.log('Transaction Sent! Hash:', tx.hash);
       // TODO: db.update({ status: 'SUBMITTED', txHash: tx.hash })
 
       return tx;
@@ -210,5 +230,20 @@ export class BlockChainService implements OnModuleInit {
 
   async getNetwork() {
     return await this.provider.getNetwork();
+  }
+
+  async checkRequireSignCount(credentialTypeId: string) {
+    try {
+      const tx = await this.ownerContract.requiredSignatureCount(
+        id(credentialTypeId),
+      );
+
+      console.log(tx);
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(
+        error.reason || 'Failed to check if authorized credential signer',
+      );
+    }
   }
 }

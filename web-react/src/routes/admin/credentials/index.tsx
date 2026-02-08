@@ -1,3 +1,4 @@
+import { PendingSkeleton } from "@/components/custom_components/pending_skeleton";
 import { RecentTransactionTable } from "@/components/custom_components/recent_transaction_table";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -23,11 +24,9 @@ import { CalendarIcon, FileDown, FilterX, Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { DateRange } from "react-day-picker";
 
-export const Route = createFileRoute("/admin/credentials")({
+export const Route = createFileRoute("/admin/credentials/")({
 	component: CredentialsPage,
-	loader: async ({ context }) => {
-		await context.records.getRecords();
-	},
+	pendingComponent: () => <PendingSkeleton />,
 });
 
 function CredentialsPage() {

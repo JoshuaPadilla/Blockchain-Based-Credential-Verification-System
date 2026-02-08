@@ -57,10 +57,11 @@ export const useRecordStore = create<StoreProps>((set) => ({
 		}
 	},
 	verifyRecord: async (credentialRef) => {
-		console.log(credentialRef);
 		const res = await axiosClient.get(
 			`verification/verify/${credentialRef}`,
 		);
+
+		console.log(res.data);
 
 		if (res.status === 200) return res.data;
 

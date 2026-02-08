@@ -19,7 +19,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { useCredentialTypeStore } from "@/stores/credential_type_store";
 import type { CredentialType } from "@/types/credential_type.type";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import {
 	Check,
 	ChevronDown,
@@ -29,6 +29,7 @@ import {
 	Users,
 } from "lucide-react";
 import { useState } from "react";
+import { useDebounce } from "use-debounce";
 
 interface Props {
 	onSelectCredential: (credential: CredentialType) => void;
@@ -40,10 +41,13 @@ export function CredentialTypeSelector({ onSelectCredential }: Props) {
 		useState<CredentialType | null>(null);
 	const { fetchCredentialTypes } = useCredentialTypeStore();
 
+	const [searchTerm, setSearchTerm] = useState("");
+	const [debouncedSearch] = useDebounce(searchTerm, 500);
+
 	// Fetch Logic
-	const { data: credentialTypes = [], isLoading } = useQuery({
-		queryKey: ["fetch_credential_types"],
-		queryFn: fetchCredentialTypes,
+	const { data: credentialTypes = [], isLoading } = useSuspenseQuery({
+		queryKey: ["fetch_credential_types", debouncedSearch],
+		queryFn: () => fetchCredentialTypes(debouncedSearch),
 	});
 
 	const handleSelectCredential = (credential: CredentialType) => {
@@ -198,7 +202,10 @@ export function CredentialTypeSelector({ onSelectCredential }: Props) {
 												<div className="flex items-center gap-1.5 text-[10px] text-slate-500">
 													<ShieldCheck className="size-3 text-green-500" />
 													<span className="truncate">
-														{signer.signerPosition.toUpperCase()}
+														{(
+															signer.signerPosition ||
+															""
+														).toUpperCase()}
 													</span>
 												</div>
 											</div>

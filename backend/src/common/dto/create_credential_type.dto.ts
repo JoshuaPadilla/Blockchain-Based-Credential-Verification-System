@@ -19,6 +19,5 @@ export class CreateCredentialTypeDto {
 
   @IsArray()
   @ArrayNotEmpty()
-  @IsUUID('loose', { each: true }) // Validates that every string in the array is a UUID
   signerIds: string[];
 }

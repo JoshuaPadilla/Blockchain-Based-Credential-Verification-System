@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Query,
   Request,
   UseGuards,
 } from "@nestjs/common";
@@ -20,8 +21,8 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  findAll(@Query("role") role?: Role, @Query("term") term?: string) {
+    return this.userService.findAll(role, term);
   }
 
   @UseGuards(JwtAuthGuard)

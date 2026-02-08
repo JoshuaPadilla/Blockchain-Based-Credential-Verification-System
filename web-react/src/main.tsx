@@ -14,6 +14,7 @@ import { useAuthStore } from "./stores/auth_store";
 import { useInsightsStore } from "./stores/insights_store";
 import { useRecordStore } from "./stores/record_store";
 import { useSignersStore } from "./stores/signer_store";
+import { useUserStore } from "./stores/user_store";
 
 // Create a new router instance
 const router = createRouter({
@@ -23,6 +24,7 @@ const router = createRouter({
 		insights: undefined!,
 		records: undefined!,
 		signer: undefined!,
+		user: undefined!,
 	},
 });
 
@@ -40,12 +42,13 @@ function App() {
 	const insights = useInsightsStore();
 	const records = useRecordStore();
 	const signer = useSignersStore();
+	const user = useUserStore();
 
 	// 2. Pass the live state into the context prop
 	return (
 		<RouterProvider
 			router={router}
-			context={{ auth, insights, records, signer }}
+			context={{ auth, insights, records, signer, user }}
 		/>
 	);
 }

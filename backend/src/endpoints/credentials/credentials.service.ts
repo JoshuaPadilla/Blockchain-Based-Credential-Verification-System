@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -7,6 +8,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { CreateCredentialTypeDto } from "src/common/dto/create_credential_type.dto";
 import { CredentialTypeEntity } from "src/common/entities/credential_type.entity";
 import { User } from "src/common/entities/user.entity";
+import { BlockChainService } from "src/services/blockchain/blockchain.service";
 import { In, Repository } from "typeorm";
 
 @Injectable()
@@ -16,12 +18,14 @@ export class CredentialTypesService {
     private userRepository: Repository<User>,
     @InjectRepository(CredentialTypeEntity)
     private credentialRepository: Repository<CredentialTypeEntity>,
+    private blockchainService: BlockChainService,
   ) {}
 
   async createCreadentialType(createCredentialDto: CreateCredentialTypeDto) {
     const existing = await this.credentialRepository.findOne({
       where: { name: createCredentialDto.name },
     });
+
     if (existing) {
       throw new ConflictException(
         `Configuration for ${createCredentialDto.name} already exists.`,
@@ -37,14 +41,44 @@ export class CredentialTypesService {
       signers: signersObject,
     });
 
-    return this.credentialRepository.save(newCredentialType);
+    const signersAddresses = signersObject.map((s) => s.publicAddress);
+
+    const savedCredentialType =
+      await this.credentialRepository.save(newCredentialType);
+
+    const tx = await this.blockchainService.addNewCredentialType(
+      savedCredentialType.id,
+      signersAddresses,
+      signersAddresses.length,
+    );
+
+    const receipt = tx.wait();
+
+    if (receipt.status === 1) {
+      return savedCredentialType;
+    } else {
+      throw new BadRequestException("Failed syncing credential type onchain");
+    }
   }
 
-  async findAll() {
-    return this.credentialRepository.find({
-      relations: ["signers"], // Load the signers data
-      order: { name: "ASC" },
-    });
+  async findAll(term?: string): Promise<CredentialTypeEntity[]> {
+    const query = this.credentialRepository.createQueryBuilder("cred");
+
+    // 1. Join relation (equivalent to relations: ['signers'])
+    query.leftJoinAndSelect("cred.signers", "signer");
+
+    // 2. Handle the ENUM search
+    if (term) {
+      // THE FIX: "cred.name::text" casts the Enum to a string so ILIKE works
+      query.where("cred.name::text ILIKE :search", {
+        search: `%${term}%`,
+      });
+    }
+
+    // 3. Sort by the Enum value (Alphabetical)
+    query.orderBy("cred.name", "ASC");
+
+    return query.getMany();
   }
 
   async findOne(id: string) {

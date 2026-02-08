@@ -7,6 +7,7 @@ export class VerificationController {
 
   @Get("verify/:recordId")
   verify(@Param("recordId") recordId: string) {
+    console.log(`Received verification request for record ID: ${recordId}`);
     return this.verificationService.verify(recordId);
   }
 }

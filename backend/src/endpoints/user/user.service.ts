@@ -6,7 +6,7 @@ import { Role } from "src/common/enums/user_role.enum";
 import { encrypt } from "src/common/helpers/encryption.helper";
 import { hash } from "src/common/helpers/hash_password.helper";
 import { BlockChainService } from "src/services/blockchain/blockchain.service";
-import { Repository } from "typeorm";
+import { Brackets, Repository } from "typeorm";
 
 @Injectable()
 export class UserService {
@@ -42,8 +42,33 @@ export class UserService {
     await this.userRepository.deleteAll();
   }
 
-  async findAll() {
-    return this.userRepository.find();
+  // ... inside your service class
+  async findAll(role?: Role, term?: string) {
+    const query = this.userRepository.createQueryBuilder("user");
+
+    // 1. Strict Filter: Role (Always applies if provided)
+    if (role) {
+      query.andWhere("user.role = :role", { role });
+    }
+
+    // 2. Fuzzy Search: Names & Email
+    if (term) {
+      const searchTerm = `%${term}%`;
+
+      query.andWhere(
+        new Brackets((qb) => {
+          qb.where("user.firstName ILIKE :search", { search: searchTerm })
+            .orWhere("user.middleName ILIKE :search", { search: searchTerm }) // Handles nulls automatically
+            .orWhere("user.lastName ILIKE :search", { search: searchTerm })
+            .orWhere("user.email ILIKE :search", { search: searchTerm });
+        }),
+      );
+    } else {
+      // Only limit results if NOT searching (optional UX choice)
+      query.take(10);
+    }
+
+    return query.getMany();
   }
 
   async findOne(id: string) {

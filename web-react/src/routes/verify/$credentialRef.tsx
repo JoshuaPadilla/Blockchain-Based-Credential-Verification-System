@@ -1,5 +1,6 @@
 import app_logo from "@/assets/img/app_logo.png";
 import { Button } from "@/components/ui/button";
+import { pdfBlobToDataUrl } from "@/helpers/pdf_helper";
 import { usePdfStore } from "@/stores/pdf_store";
 import { useRecordStore } from "@/stores/record_store";
 import { useQuery } from "@tanstack/react-query";
@@ -22,7 +23,6 @@ import {
 	X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Document, Page } from "react-pdf";
 
 // --- Worker Setup ---
 
@@ -187,6 +187,8 @@ function VerificationPage() {
 		retry: false,
 	});
 
+	const [previewImage, setPreviewImage] = useState<string | null>(null);
+
 	// 2. Logic Extraction
 	const { theme, isCompromised, auditSteps } = useVerificationLogic(
 		data?.statuses,
@@ -202,8 +204,35 @@ function VerificationPage() {
 				data!.record.credentialType.name,
 			),
 		enabled: shouldFetchPdf,
-		staleTime: 1000 * 60 * 60,
+		staleTime: Infinity,
+		gcTime: 1000 * 60 * 30,
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false, // ⭐ ADD THIS
+		retry: 1,
 	});
+
+	useEffect(() => {
+		let active = true;
+
+		if (pdfBlob) {
+			pdfBlobToDataUrl(pdfBlob)
+				.then((base64Image) => {
+					if (active) {
+						setPreviewImage(base64Image);
+						console.log(
+							"Generated DataURL:",
+							base64Image.slice(0, 50) + "...",
+						);
+					}
+				})
+				.catch((err) => console.error("PDF Conversion Failed", err));
+		}
+
+		return () => {
+			active = false;
+		};
+	}, [pdfBlob]);
 
 	if (isLoading) return <LoadingScreen />;
 	if (isError || !data) return <ErrorScreen credentialRef={credentialRef} />;
@@ -248,7 +277,7 @@ function VerificationPage() {
 					<div className="lg:col-span-5">
 						<div className="sticky top-24 space-y-4">
 							<DocumentViewer
-								pdfBlob={pdfBlob}
+								previewImage={previewImage}
 								isLoading={isPreviewLoading}
 								isCompromised={isCompromised}
 								hash={record.dataHash}
@@ -430,16 +459,16 @@ const MetaField = ({ label, value, sub, highlight }: any) => (
 	</div>
 );
 
-const DocumentViewer = ({ pdfBlob, isLoading, isCompromised, hash }: any) => {
-	const { ref, width } = useElementWidth<HTMLDivElement>();
-
+const DocumentViewer = ({
+	previewImage,
+	isLoading,
+	isCompromised,
+	hash,
+}: any) => {
 	return (
 		<div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
 			{/* Preview Area */}
-			<div
-				ref={ref}
-				className="bg-slate-100/50 relative min-h-[500px] flex items-center justify-center"
-			>
+			<div className="bg-slate-100/50 relative min-h-[500px] flex items-center justify-center">
 				{isCompromised ? (
 					<div className="text-center p-8 max-w-xs animate-in fade-in zoom-in-95">
 						<div className="size-20 mx-auto bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
@@ -460,19 +489,17 @@ const DocumentViewer = ({ pdfBlob, isLoading, isCompromised, hash }: any) => {
 							Loading Document...
 						</p>
 					</div>
-				) : pdfBlob ? (
-					<Document
-						file={pdfBlob}
-						loading={null}
-						className="shadow-lg"
-					>
-						<Page
-							pageNumber={1}
-							width={width > 0 ? width : 400}
-							renderTextLayer={false}
-							renderAnnotationLayer={false}
+				) : previewImage ? (
+					<div className="shadow-xl rounded-sm overflow-hidden border border-slate-200/60">
+						<img
+							src={previewImage}
+							alt="Certificate Preview"
+							className="w-full h-auto object-contain"
+							onError={(e) => {
+								console.error("Image failed to load:", e);
+							}}
 						/>
-					</Document>
+					</div>
 				) : null}
 			</div>
 
@@ -480,7 +507,7 @@ const DocumentViewer = ({ pdfBlob, isLoading, isCompromised, hash }: any) => {
 			<div className="p-6 bg-white border-t border-slate-100">
 				<Button
 					className="w-full h-11 shadow-sm"
-					disabled={isCompromised || !pdfBlob}
+					disabled={isCompromised || !previewImage}
 					variant={isCompromised ? "secondary" : "default"}
 				>
 					<Download className="mr-2 size-4" />

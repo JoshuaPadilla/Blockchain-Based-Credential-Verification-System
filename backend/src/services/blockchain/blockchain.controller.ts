@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { BlockChainService } from './blockchain.service';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from 'src/common/enums/user_role.enum';
@@ -22,5 +22,11 @@ export class BlockChainController {
 
     // Fallback to actual blockchain logic
     return this.blockchainService.getNetwork();
+  }
+
+  @Get('checkCount/:credId')
+  checkCount(@Param('credId') credId: string) {
+    console.log('here');
+    this.blockchainService.checkRequireSignCount(credId);
   }
 }

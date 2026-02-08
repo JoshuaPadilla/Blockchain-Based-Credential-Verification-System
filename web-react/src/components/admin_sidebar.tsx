@@ -25,8 +25,10 @@ import {
 	LayoutDashboard,
 	LogOut,
 	Newspaper,
+	Paperclip,
 	Settings,
 	User,
+	UserPen,
 } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { SideBarHeaderCustom } from "./custom_components/side_bar_header";
@@ -47,7 +49,7 @@ const data = {
 			label: "Management",
 			items: [
 				{
-					title: "Credentials",
+					title: "Records",
 					url: "/admin/credentials",
 					icon: Newspaper,
 				},
@@ -55,6 +57,16 @@ const data = {
 					title: "Students",
 					url: "/admin/students",
 					icon: GraduationCap,
+				},
+				{
+					title: "Authorized Signers",
+					url: "/admin/signers",
+					icon: UserPen,
+				},
+				{
+					title: "Credential Types",
+					url: "/admin/credential-types",
+					icon: Paperclip,
 				},
 			],
 		},

@@ -6,6 +6,9 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
+  HttpCode,
+  HttpStatus,
 } from "@nestjs/common";
 import { CreateCredentialTypeDto } from "src/common/dto/create_credential_type.dto";
 import { CredentialTypesService } from "./credentials.service";
@@ -15,15 +18,18 @@ export class CredentialTypesController {
   constructor(private readonly credentialsService: CredentialTypesService) {}
 
   // POST /credential-types
+  @HttpCode(HttpStatus.CREATED)
   @Post()
   create(@Body() createDto: CreateCredentialTypeDto) {
+    console.log(createDto);
     return this.credentialsService.createCreadentialType(createDto);
+    1;
   }
 
   // GET /credential-types
   @Get()
-  findAll() {
-    return this.credentialsService.findAll();
+  findAll(@Query("term") term: string) {
+    return this.credentialsService.findAll(term);
   }
 
   // GET /credential-types/by-name/:name

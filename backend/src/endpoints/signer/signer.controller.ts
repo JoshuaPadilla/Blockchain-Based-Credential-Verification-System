@@ -23,7 +23,12 @@ export class SignerController {
 
   @HttpCode(HttpStatus.OK)
   @Post("batch-sign")
-  batchSign(@Body() body: { recordIds: string[] }, @Request() req) {
-    return this.signerService.batchSignRecords(body.recordIds, req.user.id);
+  async batchSign(@Body() body: { recordIds: string[] }, @Request() req) {
+    const summary = await this.signerService.batchSignRecords(
+      body.recordIds,
+      req.user.id,
+    );
+    console.log(summary);
+    return { summary };
   }
 }

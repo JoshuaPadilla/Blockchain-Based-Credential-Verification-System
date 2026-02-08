@@ -34,7 +34,7 @@ export class VerificationService {
       this.blockchainService.verify(recordId).catch(() => null), // Handle errors gracefully
       this.recordRepository.findOne({
         where: { credentialRef: recordId },
-        relations: ["student", "signedBy", "credentialType"],
+        relations: ["student", "credentialType"],
       }),
     ]);
 
@@ -90,6 +90,11 @@ export class VerificationService {
       offChainRecord.credentialType.requiredSignaturesCount ===
       Number(onChainRecord.currentSignatures);
 
+    console.log(
+      offChainRecord.credentialType.requiredSignaturesCount,
+      Number(onChainRecord.currentSignatures),
+    );
+
     if (isTampered) {
       statuses.push(VerificationStatus.TAMPERED);
     }
@@ -99,7 +104,7 @@ export class VerificationService {
     if (isExpired) {
       statuses.push(VerificationStatus.EXPIRED);
     }
-    if (isFullySigned) {
+    if (!isFullySigned) {
       statuses.push(VerificationStatus.PENDING);
     }
 

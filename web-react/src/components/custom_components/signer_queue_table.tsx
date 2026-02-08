@@ -54,6 +54,12 @@ export const SignerQueueTable = ({ records }: Props) => {
 						</TableRow>
 					) : (
 						records.map((record) => {
+							console.log(
+								"Processing record:",
+								record.currentSignatures,
+								record.credentialType.requiredSignaturesCount,
+							);
+
 							const { firstName, lastName, student_id } =
 								record.student; // Assuming student has 'id' field
 
@@ -139,7 +145,7 @@ export const SignerQueueTable = ({ records }: Props) => {
 											className="bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm"
 											size="sm"
 										>
-											Review & Sign
+											Review
 										</Button>
 									</TableCell>
 								</TableRow>

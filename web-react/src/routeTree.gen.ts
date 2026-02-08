@@ -24,9 +24,12 @@ import { Route as SignerDashboardRouteImport } from './routes/signer/dashboard'
 import { Route as AdminSucess_issueRouteImport } from './routes/admin/sucess_issue'
 import { Route as AdminIssue_credentialRouteImport } from './routes/admin/issue_credential'
 import { Route as AdminDashboardRouteImport } from './routes/admin/dashboard'
-import { Route as AdminCredentialsRouteImport } from './routes/admin/credentials'
 import { Route as AdminStudentsRouteRouteImport } from './routes/admin/students/route'
 import { Route as AdminStudentsIndexRouteImport } from './routes/admin/students/index'
+import { Route as AdminSignersIndexRouteImport } from './routes/admin/signers/index'
+import { Route as AdminCredentialsIndexRouteImport } from './routes/admin/credentials/index'
+import { Route as AdminCredentialTypesIndexRouteImport } from './routes/admin/credential-types/index'
+import { Route as AdminCredentialsCredential_idRouteImport } from './routes/admin/credentials/$credential_id'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -103,11 +106,6 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AdminRouteRoute,
 } as any)
-const AdminCredentialsRoute = AdminCredentialsRouteImport.update({
-  id: '/credentials',
-  path: '/credentials',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
 const AdminStudentsRouteRoute = AdminStudentsRouteRouteImport.update({
   id: '/students',
   path: '/students',
@@ -118,6 +116,28 @@ const AdminStudentsIndexRoute = AdminStudentsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminStudentsRouteRoute,
 } as any)
+const AdminSignersIndexRoute = AdminSignersIndexRouteImport.update({
+  id: '/signers/',
+  path: '/signers/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCredentialsIndexRoute = AdminCredentialsIndexRouteImport.update({
+  id: '/credentials/',
+  path: '/credentials/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminCredentialTypesIndexRoute =
+  AdminCredentialTypesIndexRouteImport.update({
+    id: '/credential-types/',
+    path: '/credential-types/',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
+const AdminCredentialsCredential_idRoute =
+  AdminCredentialsCredential_idRouteImport.update({
+    id: '/credentials/$credential_id',
+    path: '/credentials/$credential_id',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -126,7 +146,6 @@ export interface FileRoutesByFullPath {
   '/verify': typeof VerifyRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/admin/students': typeof AdminStudentsRouteRouteWithChildren
-  '/admin/credentials': typeof AdminCredentialsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/issue_credential': typeof AdminIssue_credentialRoute
   '/admin/sucess_issue': typeof AdminSucess_issueRoute
@@ -137,13 +156,16 @@ export interface FileRoutesByFullPath {
   '/verify/$credentialRef': typeof VerifyCredentialRefRoute
   '/admin/': typeof AdminIndexRoute
   '/signer/': typeof SignerIndexRoute
+  '/admin/credentials/$credential_id': typeof AdminCredentialsCredential_idRoute
+  '/admin/credential-types/': typeof AdminCredentialTypesIndexRoute
+  '/admin/credentials/': typeof AdminCredentialsIndexRoute
+  '/admin/signers/': typeof AdminSignersIndexRoute
   '/admin/students/': typeof AdminStudentsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/verify': typeof VerifyRouteRouteWithChildren
   '/login': typeof LoginRoute
-  '/admin/credentials': typeof AdminCredentialsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/issue_credential': typeof AdminIssue_credentialRoute
   '/admin/sucess_issue': typeof AdminSucess_issueRoute
@@ -154,6 +176,10 @@ export interface FileRoutesByTo {
   '/verify/$credentialRef': typeof VerifyCredentialRefRoute
   '/admin': typeof AdminIndexRoute
   '/signer': typeof SignerIndexRoute
+  '/admin/credentials/$credential_id': typeof AdminCredentialsCredential_idRoute
+  '/admin/credential-types': typeof AdminCredentialTypesIndexRoute
+  '/admin/credentials': typeof AdminCredentialsIndexRoute
+  '/admin/signers': typeof AdminSignersIndexRoute
   '/admin/students': typeof AdminStudentsIndexRoute
 }
 export interface FileRoutesById {
@@ -164,7 +190,6 @@ export interface FileRoutesById {
   '/verify': typeof VerifyRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/admin/students': typeof AdminStudentsRouteRouteWithChildren
-  '/admin/credentials': typeof AdminCredentialsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/issue_credential': typeof AdminIssue_credentialRoute
   '/admin/sucess_issue': typeof AdminSucess_issueRoute
@@ -175,6 +200,10 @@ export interface FileRoutesById {
   '/verify/$credentialRef': typeof VerifyCredentialRefRoute
   '/admin/': typeof AdminIndexRoute
   '/signer/': typeof SignerIndexRoute
+  '/admin/credentials/$credential_id': typeof AdminCredentialsCredential_idRoute
+  '/admin/credential-types/': typeof AdminCredentialTypesIndexRoute
+  '/admin/credentials/': typeof AdminCredentialsIndexRoute
+  '/admin/signers/': typeof AdminSignersIndexRoute
   '/admin/students/': typeof AdminStudentsIndexRoute
 }
 export interface FileRouteTypes {
@@ -186,7 +215,6 @@ export interface FileRouteTypes {
     | '/verify'
     | '/login'
     | '/admin/students'
-    | '/admin/credentials'
     | '/admin/dashboard'
     | '/admin/issue_credential'
     | '/admin/sucess_issue'
@@ -197,13 +225,16 @@ export interface FileRouteTypes {
     | '/verify/$credentialRef'
     | '/admin/'
     | '/signer/'
+    | '/admin/credentials/$credential_id'
+    | '/admin/credential-types/'
+    | '/admin/credentials/'
+    | '/admin/signers/'
     | '/admin/students/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/verify'
     | '/login'
-    | '/admin/credentials'
     | '/admin/dashboard'
     | '/admin/issue_credential'
     | '/admin/sucess_issue'
@@ -214,6 +245,10 @@ export interface FileRouteTypes {
     | '/verify/$credentialRef'
     | '/admin'
     | '/signer'
+    | '/admin/credentials/$credential_id'
+    | '/admin/credential-types'
+    | '/admin/credentials'
+    | '/admin/signers'
     | '/admin/students'
   id:
     | '__root__'
@@ -223,7 +258,6 @@ export interface FileRouteTypes {
     | '/verify'
     | '/login'
     | '/admin/students'
-    | '/admin/credentials'
     | '/admin/dashboard'
     | '/admin/issue_credential'
     | '/admin/sucess_issue'
@@ -234,6 +268,10 @@ export interface FileRouteTypes {
     | '/verify/$credentialRef'
     | '/admin/'
     | '/signer/'
+    | '/admin/credentials/$credential_id'
+    | '/admin/credential-types/'
+    | '/admin/credentials/'
+    | '/admin/signers/'
     | '/admin/students/'
   fileRoutesById: FileRoutesById
 }
@@ -352,13 +390,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDashboardRouteImport
       parentRoute: typeof AdminRouteRoute
     }
-    '/admin/credentials': {
-      id: '/admin/credentials'
-      path: '/credentials'
-      fullPath: '/admin/credentials'
-      preLoaderRoute: typeof AdminCredentialsRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
     '/admin/students': {
       id: '/admin/students'
       path: '/students'
@@ -372,6 +403,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/students/'
       preLoaderRoute: typeof AdminStudentsIndexRouteImport
       parentRoute: typeof AdminStudentsRouteRoute
+    }
+    '/admin/signers/': {
+      id: '/admin/signers/'
+      path: '/signers'
+      fullPath: '/admin/signers/'
+      preLoaderRoute: typeof AdminSignersIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/credentials/': {
+      id: '/admin/credentials/'
+      path: '/credentials'
+      fullPath: '/admin/credentials/'
+      preLoaderRoute: typeof AdminCredentialsIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/credential-types/': {
+      id: '/admin/credential-types/'
+      path: '/credential-types'
+      fullPath: '/admin/credential-types/'
+      preLoaderRoute: typeof AdminCredentialTypesIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/credentials/$credential_id': {
+      id: '/admin/credentials/$credential_id'
+      path: '/credentials/$credential_id'
+      fullPath: '/admin/credentials/$credential_id'
+      preLoaderRoute: typeof AdminCredentialsCredential_idRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
   }
 }
@@ -389,20 +448,26 @@ const AdminStudentsRouteRouteWithChildren =
 
 interface AdminRouteRouteChildren {
   AdminStudentsRouteRoute: typeof AdminStudentsRouteRouteWithChildren
-  AdminCredentialsRoute: typeof AdminCredentialsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminIssue_credentialRoute: typeof AdminIssue_credentialRoute
   AdminSucess_issueRoute: typeof AdminSucess_issueRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminCredentialsCredential_idRoute: typeof AdminCredentialsCredential_idRoute
+  AdminCredentialTypesIndexRoute: typeof AdminCredentialTypesIndexRoute
+  AdminCredentialsIndexRoute: typeof AdminCredentialsIndexRoute
+  AdminSignersIndexRoute: typeof AdminSignersIndexRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminStudentsRouteRoute: AdminStudentsRouteRouteWithChildren,
-  AdminCredentialsRoute: AdminCredentialsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminIssue_credentialRoute: AdminIssue_credentialRoute,
   AdminSucess_issueRoute: AdminSucess_issueRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminCredentialsCredential_idRoute: AdminCredentialsCredential_idRoute,
+  AdminCredentialTypesIndexRoute: AdminCredentialTypesIndexRoute,
+  AdminCredentialsIndexRoute: AdminCredentialsIndexRoute,
+  AdminSignersIndexRoute: AdminSignersIndexRoute,
 }
 
 const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
