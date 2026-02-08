@@ -63,6 +63,7 @@ export class AdminController {
     );
   }
 
+  @HttpCode(HttpStatus.OK)
   @Post("revoke/:recordId")
   revokeRecord(@Param("recordId") recordId: string) {
     return this.adminService.revokeRecord(recordId);

@@ -90,11 +90,6 @@ export class VerificationService {
       offChainRecord.credentialType.requiredSignaturesCount ===
       Number(onChainRecord.currentSignatures);
 
-    console.log(
-      offChainRecord.credentialType.requiredSignaturesCount,
-      Number(onChainRecord.currentSignatures),
-    );
-
     if (isTampered) {
       statuses.push(VerificationStatus.TAMPERED);
     }

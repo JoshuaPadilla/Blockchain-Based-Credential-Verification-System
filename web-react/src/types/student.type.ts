@@ -10,4 +10,5 @@ export type Student = {
 	guardianName: string;
 	yearLevel: number;
 	course: string;
+	email?: string;
 };

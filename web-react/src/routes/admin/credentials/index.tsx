@@ -26,6 +26,14 @@ import type { DateRange } from "react-day-picker";
 
 export const Route = createFileRoute("/admin/credentials/")({
 	component: CredentialsPage,
+	loader: async ({ context }) => {
+		// Parallel data fetching for performance
+
+		await Promise.all([
+			context.insights.getAdminDashboardInsights(),
+			context.records.getRecords(),
+		]);
+	},
 	pendingComponent: () => <PendingSkeleton />,
 });
 

@@ -12,10 +12,6 @@ export const Route = createFileRoute("/admin/dashboard")({
 	loader: async ({ context }) => {
 		// Parallel data fetching for performance
 
-		setTimeout(() => {
-			console.log("sa");
-		}, 1000);
-
 		await Promise.all([
 			context.insights.getAdminDashboardInsights(),
 			context.records.getRecords(),

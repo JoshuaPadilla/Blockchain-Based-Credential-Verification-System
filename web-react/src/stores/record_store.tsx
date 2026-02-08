@@ -16,6 +16,7 @@ type StoreProps = {
 	verifyRecord: (credentialRef: string) => Promise<VerificationData | null>;
 	signerPendingRecords: Record[];
 	getSignerPendingRecords: () => Promise<void>;
+	revokeRecord: (credentialRef: string) => Promise<void>;
 };
 
 export const useRecordStore = create<StoreProps>((set) => ({
@@ -48,6 +49,7 @@ export const useRecordStore = create<StoreProps>((set) => ({
 		if (res.status === 201) return res.data;
 	},
 	getRecord: async (recordId) => {
+		console.log("Record:", recordId);
 		try {
 			const res = await axiosClient.get(`record/${recordId}`);
 
@@ -74,6 +76,15 @@ export const useRecordStore = create<StoreProps>((set) => ({
 			if (res.status === 200) {
 				set({ signerPendingRecords: res.data });
 			}
+		} catch (error) {
+			console.log(error);
+		}
+	},
+	revokeRecord: async (credentialRef) => {
+		try {
+			const res = await axiosClient.post(`admin/revoke/${credentialRef}`);
+
+			if (res.status !== 200) throw new Error("failed revoking request");
 		} catch (error) {
 			console.log(error);
 		}

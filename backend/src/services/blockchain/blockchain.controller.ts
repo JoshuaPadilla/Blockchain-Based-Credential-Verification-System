@@ -26,7 +26,6 @@ export class BlockChainController {
 
   @Get('checkCount/:credId')
   checkCount(@Param('credId') credId: string) {
-    console.log('here');
     this.blockchainService.checkRequireSignCount(credId);
   }
 }

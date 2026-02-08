@@ -16,6 +16,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import type { Record } from "@/types/record.type";
+import { useNavigate } from "@tanstack/react-router";
 import { Copy, Download, Eye, MoreHorizontal } from "lucide-react";
 import { MobileRecordTableCard } from "./mobile_table_card";
 import { TableCredentialStatus } from "./table_credential_status";
@@ -29,6 +30,17 @@ type Props = {
 };
 
 export const RecentTransactionTable = ({ records }: Props) => {
+	const navigate = useNavigate();
+
+	const handleViewRecord = (id: string) => {
+		navigate({
+			to: "/admin/credentials/$credential_id",
+			params: {
+				credential_id: id,
+			},
+		});
+	};
+
 	return (
 		<div className="space-y-4">
 			{/* --- Desktop View (Table) --- */}
@@ -105,7 +117,10 @@ export const RecentTransactionTable = ({ records }: Props) => {
 											</div>
 										</TableCell>
 										<TableCell>
-											<RecordActions record={record} />
+											<RecordActions
+												record={record}
+												onView={handleViewRecord}
+											/>
 										</TableCell>
 									</TableRow>
 								);
@@ -137,7 +152,13 @@ export const RecentTransactionTable = ({ records }: Props) => {
 };
 
 // Extracted Action Menu for Reuse
-export const RecordActions = ({ record }: { record: Record }) => (
+export const RecordActions = ({
+	record,
+	onView,
+}: {
+	record: Record;
+	onView: (id: string) => void;
+}) => (
 	<DropdownMenu>
 		<DropdownMenuTrigger asChild>
 			<Button
@@ -157,7 +178,7 @@ export const RecordActions = ({ record }: { record: Record }) => (
 				Copy ID
 			</DropdownMenuItem>
 			<DropdownMenuSeparator />
-			<DropdownMenuItem>
+			<DropdownMenuItem onClick={() => onView(record.id)}>
 				<Eye className="mr-2 h-4 w-4" />
 				View Details
 			</DropdownMenuItem>
