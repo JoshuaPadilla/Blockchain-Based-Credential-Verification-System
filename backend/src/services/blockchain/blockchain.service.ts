@@ -65,6 +65,10 @@ export class BlockChainService implements OnModuleInit {
         id(credentialType.id), // Hashing string to bytes32
       );
 
+      const receipt = await tx.wait();
+
+      if (receipt.status !== 1)
+        throw new BadRequestException('Error adding record in blockchain');
       return tx;
     } catch (error) {
       console.log(error);

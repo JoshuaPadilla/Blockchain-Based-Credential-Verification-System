@@ -16,12 +16,15 @@ export const useSignersStore = create<StoreProps>((set) => ({
 			recordIds,
 		});
 
+		console.log("Status:", res.data.summary.status);
+
 		if (res.status !== 200) {
 			throw new Error("failed to sign records");
 		}
 
-		if (res.data.status === SigningResultStatus.SUCCESS) {
-			set({ signingResultData: res.data });
+		if (res.data.summary.status === SigningResultStatus.SUCCESS) {
+			console.log("hereee");
+			set({ signingResultData: res.data.summary });
 		} else {
 			throw new Error(res.data.message || "signing failed");
 		}
