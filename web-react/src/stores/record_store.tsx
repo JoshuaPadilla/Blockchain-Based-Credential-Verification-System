@@ -15,7 +15,7 @@ type StoreProps = {
 	getRecord: (recordId: string) => Promise<Record>;
 	verifyRecord: (credentialRef: string) => Promise<VerificationData | null>;
 	signerPendingRecords: Record[];
-	getSignerPendingRecords: () => Promise<void>;
+	getSignerRecordsToSign: () => Promise<void>;
 	revokeRecord: (credentialRef: string) => Promise<void>;
 };
 
@@ -69,9 +69,9 @@ export const useRecordStore = create<StoreProps>((set) => ({
 
 		return null;
 	},
-	getSignerPendingRecords: async () => {
+	getSignerRecordsToSign: async () => {
 		try {
-			const res = await axiosClient.get(`record/signer-pending-records`);
+			const res = await axiosClient.get(`record/signer-records-to-sign`);
 
 			if (res.status === 200) {
 				set({ signerPendingRecords: res.data });

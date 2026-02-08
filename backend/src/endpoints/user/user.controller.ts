@@ -31,12 +31,6 @@ export class UserController {
     return this.userService.findOne(req.user.id);
   }
 
-  @HttpCode(HttpStatus.OK)
-  @Delete()
-  deleteAll() {
-    this.userService.deleteAll();
-  }
-
   @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
@@ -44,5 +38,11 @@ export class UserController {
   @Delete(":id")
   remove(@Param("id") id: string) {
     this.userService.remove(id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Delete()
+  deleteAll() {
+    this.userService.deleteAll();
   }
 }

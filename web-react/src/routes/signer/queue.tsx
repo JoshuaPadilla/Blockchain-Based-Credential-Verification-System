@@ -43,7 +43,7 @@ export const Route = createFileRoute("/signer/queue")({
 	loader: async ({ context }) => {
 		await Promise.all([
 			context.insights.getSingerDashboardInsights(),
-			context.records.getSignerPendingRecords(),
+			context.records.getSignerRecordsToSign(),
 		]);
 	},
 });

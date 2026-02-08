@@ -160,14 +160,12 @@ export class SignerService {
           .execute();
 
         for (const record of validRecords) {
-          console.log(record.currentSignatures);
           await queryRunner.manager.increment(
             Record,
             { id: record.id },
             "currentSignatures",
             1,
           );
-          console.log(await recordRepo.findOneBy({ id: record.id }));
         }
 
         await queryRunner.commitTransaction();

@@ -83,6 +83,7 @@ export class UserService {
   }
 
   async remove(id: string) {
+    console.log(id);
     const result = await this.userRepository.delete(id);
     if (result.affected === 0) {
       throw new NotFoundException(`User with ID ${id} not found`);

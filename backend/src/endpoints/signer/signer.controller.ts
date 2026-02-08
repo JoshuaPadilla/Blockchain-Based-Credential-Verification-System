@@ -28,7 +28,6 @@ export class SignerController {
       body.recordIds,
       req.user.id,
     );
-    console.log(summary);
     return { summary };
   }
 }

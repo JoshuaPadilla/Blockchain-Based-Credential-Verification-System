@@ -13,12 +13,13 @@ import { Record } from "src/common/entities/record.entity";
 import { Student } from "src/common/entities/student.entity";
 import { CredentialType } from "src/common/enums/credential_type.enum";
 import { Expiration } from "src/common/enums/expiration.enum";
+import { SignatureStatus } from "src/common/enums/signature_status.enum";
 import { CredentialNormalizer } from "src/common/helpers/data_normalizer.class";
 import { getExpiration } from "src/common/helpers/get_expiration.helper";
 import { generateShortCode } from "src/common/helpers/url.helper";
 import { OnChainRecord } from "src/common/interfaces/onchain_record.interface";
 import { BlockChainService } from "src/services/blockchain/blockchain.service";
-import { Repository } from "typeorm";
+import { Brackets, Repository } from "typeorm";
 
 @Injectable()
 export class RecordService {
@@ -126,15 +127,13 @@ export class RecordService {
   //   );
   // }
 
-  async getSignerPendingRecords(userId: string): Promise<Record[]> {
-    const pendingRecords = await this.recordRepository
+  async getSignerRecordsToSign(userId: string): Promise<Record[]> {
+    const recordsToSign = await this.recordRepository
       .createQueryBuilder("record")
       .innerJoinAndSelect("record.student", "student")
-
-      // 1. Join config to check permission
       .innerJoinAndSelect("record.credentialType", "type")
 
-      // 2. Filter: User MUST be in the allowed signers list
+      // 1. Ensure user is an allowed signer for this type
       .innerJoin(
         "type.signers",
         "allowedSigner",
@@ -142,27 +141,31 @@ export class RecordService {
         { userId },
       )
 
-      // 3. Filter: Record MUST NOT be fully signed yet
+      // 2. Standard Filters
       .where("record.currentSignatures < type.requiredSignaturesCount")
-
-      // 4. Filter: Record MUST NOT be revoked
       .andWhere("record.revoked IS NOT TRUE")
 
-      // 5. Anti-Join: Check against the new RecordSignature table
-      // logic: Join "signatures" where signer is ME.
+      // 3. The Logic Change:
+      // Left join signatures specifically for THIS user
       .leftJoin(
         "record.signatures",
         "mySignature",
         "mySignature.signer.id = :userId",
         { userId },
       )
-      // 6. Keep only records where the join FAILED (meaning I haven't signed yet)
-      // We explicitly exclude PENDING/SUBMITTED/CONFIRMED.
-      // If you want to allow retrying FAILED txs, see the "Pro Tip" below.
-      .andWhere("mySignature.id IS NULL")
 
+      // 4. Filter for PENDING, FAILED, or NEVER STARTED (NULL)
+      // We explicitly exclude SUBMITTED (in flight) and CONFIRMED (done)
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where("mySignature.id IS NULL") // Case: User hasn't even clicked sign yet
+            .orWhere("mySignature.status IN (:...statuses)", {
+              statuses: [SignatureStatus.PENDING, SignatureStatus.FAILED],
+            });
+        }),
+      )
       .getMany();
 
-    return pendingRecords;
+    return recordsToSign;
   }
 }

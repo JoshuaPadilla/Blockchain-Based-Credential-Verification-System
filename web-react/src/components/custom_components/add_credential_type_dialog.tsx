@@ -208,7 +208,7 @@ export function CreateCredentialTypeDialog({ isOpen, setOpen }: Props) {
 										</CommandEmpty>
 
 										<CommandGroup>
-											{signers.map((signer: any) => {
+											{signers.map((signer) => {
 												const isSelected =
 													selectedSignerIds.includes(
 														signer.id,
@@ -265,7 +265,7 @@ export function CreateCredentialTypeDialog({ isOpen, setOpen }: Props) {
 																	}
 																</span>
 																<span className="text-xs text-gray-500 mt-1">
-																	{signer.role ||
+																	{signer.signerPosition ||
 																		"Signer"}
 																</span>
 															</div>

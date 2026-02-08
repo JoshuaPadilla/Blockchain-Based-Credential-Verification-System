@@ -34,9 +34,9 @@ export class RecordController {
   // }
 
   @Roles(Role.SIGNER)
-  @Get("signer-pending-records")
+  @Get("signer-records-to-sign")
   getSignerPendingRecords(@Request() req) {
-    return this.recordService.getSignerPendingRecords(req.user.id);
+    return this.recordService.getSignerRecordsToSign(req.user.id);
   }
 
   @Get(":recordId")

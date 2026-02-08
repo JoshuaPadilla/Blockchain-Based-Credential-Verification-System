@@ -17,7 +17,7 @@ export const Route = createFileRoute("/signer/dashboard")({
 
 		await Promise.all([
 			context.insights.getSingerDashboardInsights(),
-			context.records.getSignerPendingRecords(),
+			context.records.getSignerRecordsToSign(),
 		]);
 	},
 });
