@@ -1,6 +1,6 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Assuming shadcn avatar
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress"; // Assuming you have this shadcn component
+import { Progress } from "@/components/ui/progress";
 import {
 	Table,
 	TableBody,
@@ -11,21 +11,20 @@ import {
 } from "@/components/ui/table";
 import { getCredentialStyle } from "@/helpers/get_credential_style";
 import type { Record } from "@/types/record.type";
-import { format } from "date-fns"; // Standard date formatting
+import { format } from "date-fns";
 
 type Props = {
 	records: Record[];
 };
 
-// Helper to map your specific types to colors (based on screenshot)
-
 export const SignerQueueTable = ({ records }: Props) => {
 	return (
 		<div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-			<Table>
-				<TableHeader className="bg-slate-50/50">
+			{/* Desktop Table Header - Completely hidden on mobile */}
+			<Table className="w-full">
+				<TableHeader className="hidden md:table-header-group bg-slate-50/50">
 					<TableRow className="hover:bg-transparent border-slate-100">
-						<TableHead className="w-[300px] font-bold text-xs uppercase tracking-wider text-slate-500 py-4 pl-6">
+						<TableHead className="w-[250px] font-bold text-xs uppercase tracking-wider text-slate-500 py-4 pl-6">
 							Student
 						</TableHead>
 						<TableHead className="font-bold text-xs uppercase tracking-wider text-slate-500">
@@ -34,40 +33,33 @@ export const SignerQueueTable = ({ records }: Props) => {
 						<TableHead className="font-bold text-xs uppercase tracking-wider text-slate-500">
 							Date Issued
 						</TableHead>
-						<TableHead className="w-[250px] font-bold text-xs uppercase tracking-wider text-slate-500">
+						<TableHead className="w-[200px] font-bold text-xs uppercase tracking-wider text-slate-500">
 							Signature Progress
 						</TableHead>
-						<TableHead className="text-left font-bold text-xs uppercase tracking-wider text-slate-500 pr-6 w-25">
+						<TableHead className="text-right font-bold text-xs uppercase tracking-wider text-slate-500 pr-6">
 							Action
 						</TableHead>
 					</TableRow>
 				</TableHeader>
-				<TableBody>
+
+				<TableBody className="block md:table-row-group">
 					{records.length === 0 ? (
 						<TableRow>
-							<td
+							<TableCell
 								colSpan={5}
 								className="h-24 text-center text-sm text-slate-500"
 							>
 								No pending requests found.
-							</td>
+							</TableCell>
 						</TableRow>
 					) : (
 						records.map((record) => {
-							console.log(
-								"Processing record:",
-								record.currentSignatures,
-								record.credentialType.requiredSignaturesCount,
-							);
-
 							const { firstName, lastName, student_id } =
-								record.student; // Assuming student has 'id' field
-
-							// Progress Logic
+								record.student;
 							const current = record.currentSignatures;
 							const total =
 								record.credentialType.requiredSignaturesCount ||
-								3; // Fallback to 3 if undefined
+								3;
 							const progressPercentage = Math.round(
 								(current / total) * 100,
 							);
@@ -75,10 +67,10 @@ export const SignerQueueTable = ({ records }: Props) => {
 							return (
 								<TableRow
 									key={record.id}
-									className="group hover:bg-slate-50 border-slate-100 transition-colors"
+									className="block md:table-row border-b border-slate-100 md:hover:bg-slate-50 transition-colors p-4 md:p-0"
 								>
-									{/* Student Column */}
-									<TableCell className="py-4 pl-6 text-left">
+									{/* Student Info - Acts as the card header on mobile */}
+									<TableCell className="block md:table-cell py-2 md:py-4 md:pl-6 align-middle">
 										<div className="flex items-center gap-3">
 											<Avatar className="h-10 w-10">
 												<AvatarImage
@@ -90,39 +82,52 @@ export const SignerQueueTable = ({ records }: Props) => {
 												</AvatarFallback>
 											</Avatar>
 											<div className="flex flex-col">
-												<span className="font-semibold text-slate-900">
+												<span className="font-semibold text-slate-900 leading-none">
 													{firstName} {lastName}
 												</span>
-												<span className="text-xs text-slate-500">
+												<span className="text-xs text-slate-500 mt-1">
 													ID: {student_id || "N/A"}
 												</span>
 											</div>
 										</div>
 									</TableCell>
 
-									{/* Credential Type Badge */}
-									<TableCell className="text-left">
-										<span
-											className={`px-3 py-1 rounded-full text-xs font-semibold ${getCredentialStyle(record.credentialType.name)}`}
-										>
-											{record.credentialType.name.replace(
-												/_/g,
-												" ",
-											)}
-										</span>
+									{/* Credential & Date - Grouped horizontally on mobile */}
+									<TableCell className="block md:table-cell py-2 md:py-4">
+										<div className="flex flex-wrap items-center gap-2 md:block">
+											<span
+												className={`px-3 py-1 rounded-full text-[10px] md:text-xs font-semibold whitespace-nowrap ${getCredentialStyle(
+													record.credentialType.name,
+												)}`}
+											>
+												{record.credentialType.name.replace(
+													/_/g,
+													" ",
+												)}
+											</span>
+											<span className="md:hidden text-xs text-slate-400">
+												•
+											</span>
+											<span className="text-sm text-slate-600 md:hidden">
+												{format(
+													new Date(record.createdAt),
+													"MMM d, yyyy",
+												)}
+											</span>
+										</div>
 									</TableCell>
 
-									{/* Date Issued */}
-									<TableCell className="text-sm text-slate-600 font-medium text-left">
+									{/* Date Issued - Only visible in table mode */}
+									<TableCell className="hidden md:table-cell text-sm text-slate-600 font-medium">
 										{format(
 											new Date(record.createdAt),
 											"MMM d, yyyy",
 										)}
 									</TableCell>
 
-									{/* Signature Progress Bar */}
-									<TableCell className="text-left">
-										<div className="w-full max-w-[200px] space-y-1.5 ">
+									{/* Progress - Full width on mobile */}
+									<TableCell className="block md:table-cell py-2 md:py-4">
+										<div className="w-full md:max-w-[200px] space-y-1.5">
 											<div className="flex justify-between text-xs font-medium text-slate-500">
 												<span>
 													Step {current} of {total}
@@ -134,18 +139,17 @@ export const SignerQueueTable = ({ records }: Props) => {
 											<Progress
 												value={progressPercentage}
 												className="h-2 bg-slate-100"
-												// indicatorClassName="bg-blue-600"
 											/>
 										</div>
 									</TableCell>
 
-									{/* Action Button */}
-									<TableCell className="text-right pr-6 w-25">
+									{/* Action - Right-aligned or full-width button */}
+									<TableCell className="block md:table-cell py-3 md:py-4 md:pr-6 text-right">
 										<Button
-											className="bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm"
+											className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm"
 											size="sm"
 										>
-											Review
+											Review Request
 										</Button>
 									</TableCell>
 								</TableRow>

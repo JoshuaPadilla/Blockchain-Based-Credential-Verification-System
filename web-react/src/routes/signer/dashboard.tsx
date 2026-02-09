@@ -13,8 +13,6 @@ import {
 export const Route = createFileRoute("/signer/dashboard")({
 	component: RouteComponent,
 	loader: async ({ context }) => {
-		// Parallel data fetching for performance
-
 		await Promise.all([
 			context.insights.getSingerDashboardInsights(),
 			context.records.getSignerRecordsToSign(),
@@ -28,15 +26,17 @@ function RouteComponent() {
 	const { signerPendingRecords } = useRecordStore();
 
 	return (
-		<div className="flex flex-col gap-8 px-16">
+		// CHANGE 1: Responsive padding (px-4 for mobile, px-16 for desktop)
+		<div className="flex flex-col gap-8 px-4 md:px-8 lg:px-16 py-6 pb-20">
 			{/* Header Section */}
-			<div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+			{/* CHANGE 2: Stack vertically on mobile, row on medium screens */}
+			<div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
 				{/* Left: Title & Subtitle */}
 				<div>
-					<h1 className="text-3xl font-heading tracking-tight text-slate-900">
+					<h1 className="text-2xl md:text-3xl font-heading tracking-tight text-slate-900">
 						Welcome back, {userProfile?.firstName}
 					</h1>
-					<p className="mt-1 text-muted-foreground font-mono">
+					<p className="mt-1 text-sm md:text-base text-muted-foreground font-mono">
 						You have{" "}
 						<span className="font-bold">
 							{signerDashboardInsights?.pendingRecords} pending
@@ -47,10 +47,11 @@ function RouteComponent() {
 				</div>
 
 				{/* Right: Stats Cards */}
-				<div className="flex items-center gap-4">
+				{/* CHANGE 3: Grid layout for stats ensures they don't squish */}
+				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full md:w-auto">
 					{/* Card 1: Pending Tasks */}
-					<div className="flex min-w-[200px] items-center gap-4 rounded-xl border bg-white p-4 shadow-sm">
-						<div className="flex size-12 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+					<div className="flex items-center gap-4 rounded-xl border bg-white p-4 shadow-sm">
+						<div className="flex size-12 items-center justify-center rounded-lg bg-blue-50 text-blue-600 shrink-0">
 							<ClipboardList className="size-6" />
 						</div>
 						<div>
@@ -58,15 +59,14 @@ function RouteComponent() {
 								Pending Tasks
 							</p>
 							<p className="text-2xl font-bold text-slate-900">
-								{/* Fallback to 12 if data isn't ready, matching the image */}
 								{signerDashboardInsights?.pendingRecords ?? 0}
 							</p>
 						</div>
 					</div>
 
 					{/* Card 2: Total Signed */}
-					<div className="flex min-w-[200px] items-center gap-4 rounded-xl border bg-white p-4 shadow-sm">
-						<div className="flex size-12 items-center justify-center rounded-lg bg-green-50 text-green-600">
+					<div className="flex items-center gap-4 rounded-xl border bg-white p-4 shadow-sm">
+						<div className="flex size-12 items-center justify-center rounded-lg bg-green-50 text-green-600 shrink-0">
 							<FileSignature className="size-6" />
 						</div>
 						<div>
@@ -74,7 +74,6 @@ function RouteComponent() {
 								Total Signed
 							</p>
 							<p className="text-2xl font-bold text-slate-900">
-								{/* Fallback to 145 if data isn't ready, matching the image */}
 								{signerDashboardInsights?.totalSignedRecords ??
 									145}
 							</p>
@@ -83,30 +82,28 @@ function RouteComponent() {
 				</div>
 			</div>
 
-			<div
-				className="flex items-center justify-between
-			"
-			>
+			{/* Table Header Section */}
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 				<div className="flex gap-2 items-center">
-					<span className="p-2">
-						<ClockAlert className="color text-red-600" />
+					<span className="p-2 bg-red-50 rounded-full">
+						<ClockAlert className="text-red-600 size-5" />
 					</span>
-					<h1 className="text-2xl font-heading tracking-tight text-slate-900">
+					<h1 className="text-xl md:text-2xl font-heading tracking-tight text-slate-900">
 						Your Signing Queue
 					</h1>
 				</div>
 
 				<Link
 					to="/signer/queue"
-					className="font-mono text-sm flex gap-2 items-end hover:text-button-primary "
+					className="font-mono text-sm flex gap-2 items-center text-slate-600 hover:text-blue-600 transition-colors"
 				>
 					View Queue
 					<MoveRight className="size-4" />
 				</Link>
 			</div>
 
-			{/* Rest of your page content can go here */}
-			<div className="h-full rounded-xl border border-dashed text-center text-muted-foreground ">
+			{/* Table Content */}
+			<div className="h-full rounded-xl border border-dashed text-center text-muted-foreground">
 				<SignerQueueTable records={signerPendingRecords} />
 			</div>
 		</div>
