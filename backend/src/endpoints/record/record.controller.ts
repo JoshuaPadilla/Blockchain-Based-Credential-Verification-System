@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Request,
   UseGuards,
 } from "@nestjs/common";
@@ -14,6 +15,7 @@ import { Roles } from "src/common/decorators/roles.decorator";
 import { Role } from "src/common/enums/user_role.enum";
 import { RolesGuard } from "src/common/guards/roles.guard";
 import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";
+import { RecordQuery } from "src/common/dto/queries_dto/record_query.dto";
 
 @Roles(Role.ADMIN, Role.SIGNER)
 @UseGuards(RolesGuard)
@@ -23,8 +25,8 @@ export class RecordController {
   constructor(private readonly recordService: RecordService) {}
 
   @Get()
-  findAll() {
-    return this.recordService.getAllRecords();
+  findAll(@Query() query: RecordQuery) {
+    return this.recordService.getAllRecords(query);
   }
 
   // @Roles(Role.SIGNER)

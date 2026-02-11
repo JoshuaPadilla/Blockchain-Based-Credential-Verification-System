@@ -1,11 +1,14 @@
 import axiosClient from "@/api/axios_client";
 import type { Record } from "@/types/record.type";
+import type { RecordsQuery } from "@/types/record_query.type";
 import type { VerificationData } from "@/types/verification_data.type";
 import { create } from "zustand";
 
 type StoreProps = {
 	adminRecords: Record[];
-	getRecords: () => Promise<void>;
+	getRecords: (
+		query?: RecordsQuery,
+	) => Promise<{ records: Record[]; total: number }>;
 	createRecord: (
 		studentId: string,
 		credentialTypeId: string,
@@ -22,15 +25,18 @@ type StoreProps = {
 export const useRecordStore = create<StoreProps>((set) => ({
 	adminRecords: [],
 	signerPendingRecords: [],
-	getRecords: async () => {
+	getRecords: async (query) => {
 		try {
-			const res = await axiosClient.get("record");
+			const res = await axiosClient.get("record", {
+				params: query,
+			});
 
-			console.log(res.statusText);
 			if (res.status === 200) {
-				set({ adminRecords: res.data });
+				set({ adminRecords: res.data.records });
+
+				return res.data;
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.log(error);
 		}
 	},

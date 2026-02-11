@@ -8,6 +8,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ethers } from "ethers";
 import { EMPTY_BYTES } from "src/common/constants/empty_bytes.constant";
 import { IssueCredentialDto } from "src/common/dto/issue_credential.dto";
+import { RecordQuery } from "src/common/dto/queries_dto/record_query.dto";
 import { CredentialTypeEntity } from "src/common/entities/credential_type.entity";
 import { Record } from "src/common/entities/record.entity";
 import { Student } from "src/common/entities/student.entity";
@@ -19,7 +20,7 @@ import { getExpiration } from "src/common/helpers/get_expiration.helper";
 import { generateShortCode } from "src/common/helpers/url.helper";
 import { OnChainRecord } from "src/common/interfaces/onchain_record.interface";
 import { BlockChainService } from "src/services/blockchain/blockchain.service";
-import { Brackets, Repository } from "typeorm";
+import { Between, Brackets, ILike, Repository } from "typeorm";
 
 @Injectable()
 export class RecordService {
@@ -88,10 +89,64 @@ export class RecordService {
     return savedRecord;
   }
 
-  async getAllRecords() {
-    return this.recordRepository.find({
-      relations: ["student"],
-    });
+  async getAllRecords(query: RecordQuery) {
+    const { page, limit, search, date, revoked, type } = query;
+    const skip = (page - 1) * limit;
+
+    const qb = this.recordRepository.createQueryBuilder("record");
+
+    // Join Relations
+    qb.leftJoinAndSelect("record.student", "student");
+    qb.leftJoinAndSelect("record.credentialType", "credentialType");
+    qb.leftJoinAndSelect("record.signatures", "signatures");
+
+    // --- FILTERS (AND Logic) ---
+    if (revoked !== undefined) {
+      qb.andWhere("record.revoked = :revoked", { revoked });
+    }
+
+    if (type) {
+      qb.andWhere("credentialType.name = :type", { type });
+    }
+
+    if (date) {
+      qb.andWhere("record.createdAt BETWEEN :from AND :to", {
+        from: date.from,
+        to: date.to,
+      });
+    }
+
+    // --- SEARCH (OR Logic) ---
+    if (search) {
+      qb.andWhere(
+        new Brackets((sqb) => {
+          sqb
+            .where("record.txHash ILIKE :search", { search: `%${search}%` })
+            .orWhere("record.credentialRef ILIKE :search", {
+              search: `%${search}%`,
+            })
+            // --- FIX HERE: Quote the Alias and Column ---
+            .orWhere('"credentialType"."name"::text ILIKE :search', {
+              search: `%${search}%`,
+            })
+            .orWhere(
+              // Safe concat (Assuming student alias is safe, but explicit is better)
+              "CONCAT(student.firstName, ' ', student.lastName) ILIKE :search",
+              { search: `%${search}%` },
+            );
+        }),
+      );
+    }
+
+    // Pagination
+    qb.orderBy("record.createdAt", "DESC").skip(skip).take(limit);
+
+    const [data, total] = await qb.getManyAndCount();
+
+    return {
+      records: data,
+      total,
+    };
   }
 
   async getRecord(recordId: string) {

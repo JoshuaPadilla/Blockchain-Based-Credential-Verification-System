@@ -1,5 +1,5 @@
 export type BaseQuery = {
-	page: number;
-	limit: 10;
-	search: string;
+	page: number | 1;
+	limit: number | 5;
+	search?: string;
 };

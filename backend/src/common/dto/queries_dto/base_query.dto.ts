@@ -12,7 +12,7 @@ export class BaseQueryDto {
   @IsOptional()
   @IsPositive()
   @Type(() => Number)
-  limit: number = 10;
+  limit: number = 5;
 
   @IsOptional()
   @IsString()

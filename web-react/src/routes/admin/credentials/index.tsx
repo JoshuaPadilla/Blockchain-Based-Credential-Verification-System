@@ -1,5 +1,7 @@
 import { PendingSkeleton } from "@/components/custom_components/pending_skeleton";
 import { RecentTransactionTable } from "@/components/custom_components/recent_transaction_table";
+import { DataTablePagination } from "@/components/custom_components/table_pagination";
+import { TableSkeleton } from "@/components/custom_components/table_skeleton";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -15,14 +17,20 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { CredentialTypeEnum } from "@/enums/credential_type.enum"; // Adjust path as needed
+import {
+	CredentialTypeEnum,
+	type CredentialEnumType,
+} from "@/enums/credential_type.enum"; // Adjust path as needed
 import { cn } from "@/lib/utils";
 import { useRecordStore } from "@/stores/record_store";
-import { createFileRoute } from "@tanstack/react-router";
-import { addDays, format, startOfDay } from "date-fns";
+import type { RecordsQuery } from "@/types/record_query.type";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { format } from "date-fns";
 import { CalendarIcon, FileDown, FilterX, Plus, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { DateRange } from "react-day-picker";
+import { useDebounce } from "use-debounce";
 
 export const Route = createFileRoute("/admin/credentials/")({
 	component: CredentialsPage,
@@ -38,64 +46,75 @@ export const Route = createFileRoute("/admin/credentials/")({
 });
 
 function CredentialsPage() {
-	const { adminRecords } = useRecordStore();
-
+	const { getRecords } = useRecordStore();
+	const navigate = useNavigate();
 	// --- Filter States ---
 	const [searchTerm, setSearchTerm] = useState("");
-	const [typeFilter, setTypeFilter] = useState<string>("ALL");
-	const [statusFilter, setStatusFilter] = useState<string>("ALL");
+	const [debouncedSearch] = useDebounce(searchTerm, 500);
+	const [page, setPage] = useState(1);
+	const limit = 5;
+
+	const [typeFilter, setTypeFilter] = useState<CredentialEnumType | "All">(
+		"All",
+	);
+	const [statusFilter, setStatusFilter] = useState<
+		"All" | "ACTIVE" | "REVOKED"
+	>("All");
 	const [date, setDate] = useState<DateRange | undefined>(undefined);
 
 	// --- Filtering Logic ---
-	const filteredRecords = useMemo(() => {
-		return adminRecords.filter((record) => {
-			// 1. Text Search (Student Name, ID, or Credential Ref)
-			const searchLower = searchTerm.toLowerCase();
-			const matchesSearch =
-				record.student.firstName.toLowerCase().includes(searchLower) ||
-				record.student.lastName.toLowerCase().includes(searchLower) ||
-				record.student.student_id.toLowerCase().includes(searchLower) ||
-				record.credentialRef.toLowerCase().includes(searchLower);
+	const { data: queryData, isPending } = useQuery({
+		queryKey: [
+			"adminRecords",
+			debouncedSearch,
+			typeFilter,
+			statusFilter,
+			date,
+			page,
+			limit,
+		],
+		queryFn: async () => {
+			// 1. Build Payload strictly for Backend DTO
+			const payload: RecordsQuery = {
+				page,
+				limit,
+			};
 
-			// 2. Credential Type Filter
-			const matchesType =
-				typeFilter === "ALL" ||
-				record.credentialType.name === typeFilter;
+			if (debouncedSearch) payload.search = debouncedSearch;
+			if (typeFilter !== "All") payload.type = typeFilter;
 
-			// 3. Status Filter (Active vs Revoked)
-			// If 'REVOKED', we look for revoked: true. If 'ACTIVE', we look for revoked: false.
-			const matchesStatus =
-				statusFilter === "ALL"
-					? true
-					: statusFilter === "REVOKED"
-						? record.revoked
-						: !record.revoked; // ACTIVE
+			// Handle Boolean Logic
+			if (statusFilter === "REVOKED") payload.revoked = true;
+			if (statusFilter === "ACTIVE") payload.revoked = false;
 
-			// 4. Date Range Filter (CreatedAt)
-			let matchesDate = true;
+			// Handle Date
 			if (date?.from) {
-				const recordDate = new Date(record.createdAt);
-				const fromDate = startOfDay(date.from);
-				const toDate = date.to
-					? addDays(date.to, 1)
-					: addDays(date.from, 1); // Inclusive logic
-
-				matchesDate =
-					recordDate >= fromDate &&
-					(date.to ? recordDate <= toDate : true);
+				payload.date = {
+					from: date.from,
+					to: date.to || date.from, // Strict DTO requires 'to'
+				};
 			}
 
-			return matchesSearch && matchesType && matchesStatus && matchesDate;
-		});
-	}, [adminRecords, searchTerm, typeFilter, statusFilter, date]);
+			// 2. Fetch
+			const response = await getRecords(payload);
+
+			// 3. Return safe object
+			// Backend returns { records: [], total: 0 }
+			return response || { records: [], total: 0 };
+		},
+	});
+
+	const tableData = queryData?.records || [];
+	const totalCount = queryData?.total || 0;
 
 	// --- Handlers ---
 	const clearFilters = () => {
 		setSearchTerm("");
-		setTypeFilter("ALL");
-		setStatusFilter("ALL");
+		setTypeFilter("All");
+		setStatusFilter("All");
 		setDate(undefined);
 	};
+	// Helper to handle Status Select conversion (String -> Boolean)
 
 	return (
 		<div className="min-h-screen bg-[#F8F9FA] font-sans text-slate-900 p-8 space-y-8">
@@ -118,7 +137,12 @@ function CredentialsPage() {
 					>
 						<FileDown className="mr-2 size-4" /> Export CSV
 					</Button>
-					<Button className="bg-[var(--button-primary)] hover:opacity-90 shadow-sm">
+					<Button
+						className="bg-[var(--button-primary)] hover:opacity-90 shadow-sm"
+						onClick={() =>
+							navigate({ to: "/admin/issue_credential" })
+						}
+					>
 						<Plus className="mr-2 size-4" /> Issue New
 					</Button>
 				</div>
@@ -180,14 +204,27 @@ function CredentialsPage() {
 					</div>
 
 					{/* Credential Type Filter */}
-					<Select value={typeFilter} onValueChange={setTypeFilter}>
+					<Select
+						value={typeFilter}
+						onValueChange={(val) => {
+							// If value is "ALL", set to empty string, otherwise cast to Enum
+							setTypeFilter(
+								val === "All"
+									? "All"
+									: (val as CredentialEnumType),
+							);
+						}}
+					>
 						<SelectTrigger className="w-[180px] bg-slate-50 border-slate-200">
 							<SelectValue placeholder="Credential Type" />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="ALL">All Types</SelectItem>
+							<SelectItem value="All">All Types</SelectItem>
 							{Object.values(CredentialTypeEnum).map((type) => (
-								<SelectItem key={type} value={type}>
+								<SelectItem
+									key={type}
+									value={type as CredentialEnumType}
+								>
 									{type.replace(/_/g, " ")}
 								</SelectItem>
 							))}
@@ -197,13 +234,17 @@ function CredentialsPage() {
 					{/* Status Filter (Active/Revoked) */}
 					<Select
 						value={statusFilter}
-						onValueChange={setStatusFilter}
+						onValueChange={(val) => {
+							setStatusFilter(
+								val as "All" | "ACTIVE" | "REVOKED",
+							);
+						}}
 					>
 						<SelectTrigger className="w-[150px] bg-slate-50 border-slate-200">
 							<SelectValue placeholder="Status" />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="ALL">All Statuses</SelectItem>
+							<SelectItem value="All">All Statuses</SelectItem>
 							<SelectItem value="ACTIVE">Active Only</SelectItem>
 							<SelectItem value="REVOKED">
 								Revoked Only
@@ -212,10 +253,7 @@ function CredentialsPage() {
 					</Select>
 
 					{/* Reset Button (Only shows if filters are active) */}
-					{(searchTerm ||
-						typeFilter !== "ALL" ||
-						statusFilter !== "ALL" ||
-						date) && (
+					{(searchTerm || typeFilter || statusFilter || date) && (
 						<Button
 							variant="ghost"
 							size="icon"
@@ -231,7 +269,23 @@ function CredentialsPage() {
 
 			{/* --- Data Table --- */}
 			{/* Using the enhanced table from previous steps for full features */}
-			<RecentTransactionTable records={filteredRecords} />
+			{isPending ? (
+				<TableSkeleton />
+			) : (
+				<RecentTransactionTable records={tableData || []} />
+			)}
+			{/* --- Shared Pagination (Visible on both Desktop & Mobile) --- */}
+
+			{/* Only show pagination if we have data */}
+			{tableData.length > 0 && (
+				<DataTablePagination
+					currentPage={page}
+					onPageChange={setPage}
+					pageSize={limit}
+					totalResults={totalCount}
+					totalPages={Math.ceil(totalCount / limit)}
+				/>
+			)}
 		</div>
 	);
 }
