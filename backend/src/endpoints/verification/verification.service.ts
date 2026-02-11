@@ -103,6 +103,8 @@ export class VerificationService {
       statuses.push(VerificationStatus.PENDING);
     }
 
+    console.log(onChainRecord);
+
     // 6. Return a Rich Object (Don't just return the record!)
     return {
       statuses, // The UI uses this to pick the Green/Red/Orange card

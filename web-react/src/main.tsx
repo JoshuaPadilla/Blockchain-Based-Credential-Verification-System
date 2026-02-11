@@ -11,6 +11,7 @@ import "./index.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { routeTree } from "./routeTree.gen";
 import { useAuthStore } from "./stores/auth_store";
+import { useBlockchainStore } from "./stores/blockchain_store";
 import { useInsightsStore } from "./stores/insights_store";
 import { useRecordStore } from "./stores/record_store";
 import { useSignersStore } from "./stores/signer_store";
@@ -25,6 +26,7 @@ const router = createRouter({
 		records: undefined!,
 		signer: undefined!,
 		user: undefined!,
+		blockchain: undefined!,
 	},
 });
 
@@ -43,12 +45,13 @@ function App() {
 	const records = useRecordStore();
 	const signer = useSignersStore();
 	const user = useUserStore();
+	const blockchain = useBlockchainStore();
 
 	// 2. Pass the live state into the context prop
 	return (
 		<RouterProvider
 			router={router}
-			context={{ auth, insights, records, signer, user }}
+			context={{ auth, insights, records, signer, user, blockchain }}
 		/>
 	);
 }

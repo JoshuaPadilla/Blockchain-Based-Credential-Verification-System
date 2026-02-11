@@ -233,7 +233,8 @@ export class BlockChainService implements OnModuleInit {
   }
 
   async getNetwork() {
-    return await this.provider.getNetwork();
+    const networkDetails = await this.provider.getNetwork();
+    return { networkName: networkDetails.name };
   }
 
   async checkRequireSignCount(credentialTypeId: string) {

@@ -15,6 +15,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useBlockchainStore } from "@/stores/blockchain_store";
 import { useRecordSignatureStore } from "@/stores/record_signature_store";
 import { useSignersStore } from "@/stores/signer_store";
 import type { RecordSignature } from "@/types/record_signature";
@@ -45,6 +46,7 @@ export const Route = createFileRoute("/signer/signing-summary")({
 
 function SigningSummaryPage() {
 	const navigate = useNavigate();
+	const { blockchainDetails } = useBlockchainStore();
 	const { signingResultData } = useSignersStore();
 	const { getRecordSignature } = useRecordSignatureStore();
 
@@ -113,8 +115,8 @@ function SigningSummaryPage() {
 							<span className="font-semibold text-foreground">
 								{result.signedCount} credentials
 							</span>{" "}
-							have been successfully anchored to the Ethereum
-							Mainnet.
+							have been successfully anchored to the{" "}
+							{blockchainDetails?.networkName || "Mainnet"}.
 						</p>
 					</div>
 				</div>
@@ -287,7 +289,7 @@ function SigningSummaryPage() {
 									<div className="flex items-center justify-between text-xs text-slate-400">
 										<span>Transaction Hash</span>
 										<a
-											href={`https://etherscan.io/tx/${result.txHash}`}
+											href={`https://sepolia.etherscan.io/tx/${result.txHash}`}
 											target="_blank"
 											rel="noreferrer"
 											className="flex items-center gap-1 hover:text-white transition-colors"

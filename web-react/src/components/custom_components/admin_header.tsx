@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useBlockchainStore } from "@/stores/blockchain_store";
 import { Bell, Menu, Wifi } from "lucide-react";
 import { AppBreadcrumb } from "./app_breadcrumb";
 import { HeaderProfile } from "./header_profile";
@@ -7,6 +8,9 @@ import { HeaderProfile } from "./header_profile";
 export const AdminHeader = () => {
 	// Assuming you are using Shadcn sidebar context
 	const { toggleSidebar } = useSidebar();
+	const { blockchainDetails } = useBlockchainStore();
+
+	console.log(blockchainDetails);
 
 	return (
 		<header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-slate-200 bg-white/80 px-6 backdrop-blur-md transition-all">
@@ -39,7 +43,10 @@ export const AdminHeader = () => {
 						<span className="relative inline-flex rounded-full size-2 bg-green-500"></span>
 					</div>
 					<span className="text-xs font-semibold text-slate-700">
-						Sepolia{" "}
+						{(
+							blockchainDetails?.networkName.at(0) || ""
+						).toUpperCase()}
+						{blockchainDetails?.networkName.slice(1)}{" "}
 						<span className="text-slate-400 font-normal">
 							Testnet
 						</span>

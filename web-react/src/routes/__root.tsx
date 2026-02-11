@@ -1,4 +1,5 @@
 import { useAuthStore } from "@/stores/auth_store";
+import type { useBlockchainStore } from "@/stores/blockchain_store";
 import type { useInsightsStore } from "@/stores/insights_store";
 import type { useRecordStore } from "@/stores/record_store";
 import type { useSignersStore } from "@/stores/signer_store";
@@ -12,6 +13,7 @@ interface MyRouterContext {
 	records: ReturnType<typeof useRecordStore.getState>;
 	signer: ReturnType<typeof useSignersStore.getState>;
 	user: ReturnType<typeof useUserStore.getState>;
+	blockchain: ReturnType<typeof useBlockchainStore.getState>;
 }
 
 const RootLayout = () => {
@@ -26,6 +28,8 @@ const RootLayout = () => {
 export const Route = createRootRouteWithContext<MyRouterContext>()({
 	beforeLoad: async ({ context }) => {
 		// Only check auth if we don't have a user yet
+		await context.blockchain.getBlockchainDetails();
+
 		if (!context.auth.user) {
 			await context.auth.checkAuth();
 		}

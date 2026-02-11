@@ -1,4 +1,11 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { BlockChainService } from './blockchain.service';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from 'src/common/enums/user_role.enum';
@@ -13,13 +20,9 @@ import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
 export class BlockChainController {
   constructor(private readonly blockchainService: BlockChainService) {}
 
-  @Get()
+  @HttpCode(HttpStatus.OK)
+  @Get('details')
   getNetwork() {
-    console.log(process.env.NODE_ENV);
-    if (process.env.NODE_ENV === 'dev') {
-      return { name: 'dev' };
-    }
-
     // Fallback to actual blockchain logic
     return this.blockchainService.getNetwork();
   }

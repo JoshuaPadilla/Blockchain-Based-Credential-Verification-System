@@ -303,7 +303,7 @@ function RouteComponent() {
 						</div>
 						<div className="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-full border border-slate-700/50">
 							<a
-								href={`http://127.0.0.1:5137/verify/
+								href={`https://cert-us.website/verify/
 								${record.credentialRef}`}
 								className="text-[10px] text-blue-300 font-mono"
 							>

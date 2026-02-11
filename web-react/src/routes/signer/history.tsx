@@ -22,7 +22,7 @@ import { useInsightsStore } from "@/stores/insights_store";
 import { createFileRoute } from "@tanstack/react-router";
 import { format } from "date-fns";
 import {
-	ArrowRight,
+	ArrowUpRight,
 	Calendar as CalendarIcon,
 	CheckCircle2,
 	ChevronLeft,
@@ -204,7 +204,10 @@ function SignerHistoryPage() {
 									Timestamp
 								</TableHead>
 								<TableHead className="text-xs font-bold uppercase">
-									Network
+									type
+								</TableHead>
+								<TableHead className="text-xs font-bold uppercase">
+									credential ref
 								</TableHead>
 								<TableHead className="text-xs font-bold uppercase">
 									Tx Hash
@@ -231,14 +234,7 @@ function SignerHistoryPage() {
 									</TableCell>
 								</TableRow>
 							) : (
-								filteredRecords.map((item, index) => {
-									const badgeVariant =
-										index % 3 === 0
-											? "bg-purple-50 text-purple-700 border-purple-200"
-											: index % 3 === 1
-												? "bg-emerald-50 text-emerald-700 border-emerald-200"
-												: "bg-blue-50 text-blue-700 border-blue-200";
-
+								filteredRecords.map((item) => {
 									return (
 										<TableRow
 											key={item.id}
@@ -307,7 +303,6 @@ function SignerHistoryPage() {
 														variant="outline"
 														className={cn(
 															"text-[10px] px-2 py-0 md:hidden",
-															badgeVariant,
 														)}
 													>
 														{item.record
@@ -317,18 +312,30 @@ function SignerHistoryPage() {
 												</div>
 											</TableCell>
 
+											{/* type */}
 											<TableCell className="hidden md:table-cell">
 												<Badge
 													variant="outline"
 													className={cn(
 														"rounded-md font-medium px-2.5 py-0.5",
-														badgeVariant,
 													)}
 												>
 													{item.record.credentialType
 														?.name ||
 														"Polygon Mainnet"}
 												</Badge>
+											</TableCell>
+
+											{/* Credential ref */}
+											<TableCell className="block md:table-cell py-2 md:py-4">
+												<div className="flex items-center gap-2 font-mono text-[10px] md:text-xs text-muted-foreground bg-muted/30 p-1.5 rounded w-fit md:w-full max-w-[150px]">
+													<span className="truncate">
+														{
+															item.record
+																.credentialRef
+														}
+													</span>
+												</div>
 											</TableCell>
 
 											{/* Tx Hash */}
@@ -344,14 +351,20 @@ function SignerHistoryPage() {
 											{/* Action */}
 											<TableCell className="block md:table-cell py-2 md:py-4 md:pr-6 text-right">
 												<Button
-													variant="ghost"
+													asChild
+													variant="outline"
 													size="sm"
-													className="w-full md:w-auto text-purple-600 hover:text-purple-700 hover:bg-purple-50 font-bold h-9 gap-1"
+													className="w-full md:w-auto text-button-primary hover:bg-button-primary font-bold h-9 gap-1"
 												>
-													<span>
-														Verify on Explorer
-													</span>
-													<ArrowRight className="size-3 md:hidden lg:block" />
+													<a
+														href={`https://sepolia.etherscan.io/tx/${item.txHash}`}
+														target="_blank"
+														rel="noreferrer"
+														className="flex items-center gap-1 hover:text-white transition-colors"
+													>
+														View Explorer{" "}
+														<ArrowUpRight className="size-3" />
+													</a>
 												</Button>
 											</TableCell>
 										</TableRow>

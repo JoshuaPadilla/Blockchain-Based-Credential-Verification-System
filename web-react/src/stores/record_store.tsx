@@ -2,6 +2,7 @@ import axiosClient from "@/api/axios_client";
 import type { Record } from "@/types/record.type";
 import type { RecordsQuery } from "@/types/record_query.type";
 import type { VerificationData } from "@/types/verification_data.type";
+import axios from "axios";
 import { create } from "zustand";
 
 type StoreProps = {
@@ -65,15 +66,27 @@ export const useRecordStore = create<StoreProps>((set) => ({
 		}
 	},
 	verifyRecord: async (credentialRef) => {
-		const res = await axiosClient.get(
-			`verification/verify/${credentialRef}`,
-		);
+		try {
+			const res = await axiosClient.get(
+				`verification/verify/${credentialRef}`,
+			);
 
-		console.log(res.data);
+			if (res.status === 200) return res.data;
 
-		if (res.status === 200) return res.data;
-
-		return null;
+			return null;
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				// Now TypeScript knows 'error' is an AxiosError
+				// You can safely access .response
+				const serverMessage =
+					error.response?.data?.message || "An error occurred";
+				console.log("Status:", error.response?.status);
+				console.log("Message:", serverMessage);
+			} else {
+				// This handles non-axios errors (like a code crash)
+				console.error("Native Error:", error);
+			}
+		}
 	},
 	getSignerRecordsToSign: async () => {
 		try {
