@@ -58,7 +58,7 @@ export class PdfService {
     }
 
     const qrCodeData = await generateQr(
-      `cert-us.website/verify/${record.credentialRef}`,
+      `https://cert-us.website/verify/${record.credentialRef}`,
     );
 
     const diplomaPdf = getPdfToRender(
