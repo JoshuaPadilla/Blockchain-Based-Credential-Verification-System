@@ -101,7 +101,7 @@ export class RecordService {
     qb.leftJoinAndSelect("record.signatures", "signatures");
     qb.leftJoin("signatures.signer", "signer").addSelect([
       "signer.id",
-      "signer.position", // Replace 'position' with your actual column name
+      "signer.signerPosition", // Replace 'position' with your actual column name
       "signer.firstName",
       "signer.middleName",
       "signer.lastName",
