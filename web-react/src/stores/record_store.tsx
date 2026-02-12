@@ -56,7 +56,6 @@ export const useRecordStore = create<StoreProps>((set) => ({
 		if (res.status === 201) return res.data;
 	},
 	getRecord: async (recordId) => {
-		console.log("Record:", recordId);
 		try {
 			const res = await axiosClient.get(`record/${recordId}`);
 

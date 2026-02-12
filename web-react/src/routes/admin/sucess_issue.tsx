@@ -1,5 +1,6 @@
 import { PendingBadge } from "@/components/custom_components/pending_badge";
 import { Button } from "@/components/ui/button";
+import { pdfBlobToDataUrl } from "@/helpers/pdf_helper";
 import { usePdfStore } from "@/stores/pdf_store";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -10,13 +11,13 @@ import {
 	Download,
 	ExternalLink,
 	FileCheck,
+	FileStack,
 	Globe,
 	LayoutDashboard,
 	Loader,
 	ShieldCheck,
 } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
-import { Document, Page } from "react-pdf";
+import { useEffect, useState } from "react";
 
 // Worker setup
 
@@ -40,40 +41,18 @@ export const Route = createFileRoute("/admin/sucess_issue")({
 function RouteComponent() {
 	const record = Route.useLoaderData();
 	const navigate = useNavigate();
-	const { getPreview } = usePdfStore();
+	const { getFinalPdf } = usePdfStore();
 	const [copied, setCopied] = useState(false);
+
+	const [imagePdf, setImagePdf] = useState<string | null>(null);
 
 	// Fetch PDF Preview
 	const { data: pdfBlob, isFetching: isPreviewLoading } = useQuery({
-		queryKey: [
-			"pdf-preview",
-			record?.student?.id,
-			record?.credentialType?.name,
-		],
-		queryFn: () =>
-			getPreview(record.student.id, record.credentialType.name),
+		queryKey: ["pdf-preview", record],
+		queryFn: () => getFinalPdf(record.id),
 		enabled: !!record,
 		staleTime: 1000 * 60 * 60,
 	});
-
-	// Resize Observer Logic
-	const [containerWidth, setContainerWidth] = useState<number>();
-	const resizeTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-	const onRefChange = useCallback((node: HTMLDivElement | null) => {
-		if (node) {
-			const resizeObserver = new ResizeObserver((entries) => {
-				if (resizeTimeoutRef.current)
-					clearTimeout(resizeTimeoutRef.current);
-				resizeTimeoutRef.current = setTimeout(() => {
-					if (entries[0]) {
-						setContainerWidth(entries[0].contentRect.width);
-					}
-				}, 100);
-			});
-			resizeObserver.observe(node);
-			return () => resizeObserver.disconnect();
-		}
-	}, []);
 
 	const handleCopyHash = () => {
 		if (record?.txHash) {
@@ -82,6 +61,20 @@ function RouteComponent() {
 			setTimeout(() => setCopied(false), 2000);
 		}
 	};
+
+	useEffect(() => {
+		let active = true;
+		if (pdfBlob) {
+			pdfBlobToDataUrl(pdfBlob)
+				.then((base64Image) => {
+					if (active) setImagePdf(base64Image);
+				})
+				.catch((err) => console.error("PDF Conversion Failed", err));
+		}
+		return () => {
+			active = false;
+		};
+	}, [pdfBlob]);
 
 	return (
 		<div className="min-h-screen bg-slate-50/50 flex flex-col items-center py-12 px-4 sm:px-8 font-sans text-slate-900">
@@ -258,37 +251,34 @@ function RouteComponent() {
 
 					{/* Canvas */}
 					<div className="flex-1 bg-slate-100/50 relative p-8 flex flex-col items-center justify-center overflow-hidden">
-						<div
-							ref={onRefChange}
-							className="w-full h-full flex items-center justify-center shadow-2xl rounded-sm max-w-[95%] relative transition-all duration-500"
-						>
+						<div className="relative w-full max-w-4xl shadow-2xl transition-all duration-300">
 							{isPreviewLoading && (
-								<div className="flex flex-col items-center gap-3">
-									<Loader className="animate-spin text-slate-400 size-8" />
-									<span className="text-xs text-slate-400 font-medium">
-										Rendering Final Document...
-									</span>
+								<div className="flex flex-col items-center justify-center bg-white/50 backdrop-blur-sm rounded-lg p-8 h-96">
+									<Loader className="size-8 animate-spin text-white mb-2" />
+									<p className="text-xs font-medium text-slate-300">
+										Fetching finalized pdf...
+									</p>
 								</div>
 							)}
 
-							{!isPreviewLoading && pdfBlob && (
-								<Document
-									file={pdfBlob}
-									className="flex justify-center shadow-lg"
-									loading={null}
-								>
-									<Page
-										pageNumber={1}
-										width={
-											containerWidth
-												? containerWidth
-												: 500
-										}
-										renderTextLayer={false}
-										renderAnnotationLayer={false}
-										className="shadow-xl"
+							{!isPreviewLoading && pdfBlob && imagePdf && (
+								<div className="shadow-xl rounded-sm overflow-hidden border border-slate-200/60 bg-white">
+									<img
+										src={imagePdf}
+										alt="Certificate Preview"
+										className="w-full h-auto object-contain"
 									/>
-								</Document>
+								</div>
+							)}
+
+							{/* No Preview State */}
+							{!isPreviewLoading && !pdfBlob && (
+								<div className="flex flex-col items-center justify-center gap-4 text-slate-300 py-12">
+									<FileStack className="size-16 opacity-20" />
+									<p className="text-sm opacity-50">
+										Preview unavailable for this record
+									</p>
+								</div>
 							)}
 						</div>
 					</div>

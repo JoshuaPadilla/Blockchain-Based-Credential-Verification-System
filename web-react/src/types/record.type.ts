@@ -1,4 +1,5 @@
 import type { CredentialType } from "./credential_type.type";
+import type { RecordSignature } from "./record_signature";
 import type { Student } from "./student.type";
 
 export type Record = {
@@ -10,6 +11,7 @@ export type Record = {
 	credentialType: CredentialType;
 	currentSignatures: number;
 	student: Student;
+	signatures: RecordSignature[];
 	credentialRef: string;
 	createdAt: Date;
 };

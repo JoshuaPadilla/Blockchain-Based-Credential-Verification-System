@@ -9,14 +9,16 @@ import { Student } from "src/common/entities/student.entity";
 import { Repository } from "typeorm";
 import { CredentialType } from "src/common/enums/credential_type.enum";
 import { DocumentProps } from "@react-pdf/renderer";
+import { Record } from "src/common/entities/record.entity";
 
 @Injectable()
 export class PdfService {
   constructor(
     @InjectRepository(Student) private studentRepo: Repository<Student>,
+    @InjectRepository(Record) private recordRepository: Repository<Record>,
   ) {}
 
-  async generateCertificate(
+  async generatePreview(
     studentId: string,
     credentialType: CredentialType,
   ): Promise<NodeJS.ReadableStream> {
@@ -40,7 +42,39 @@ export class PdfService {
       diplomaPdf as React.ReactElement<DocumentProps>,
     );
 
-    
+    return stream;
+  }
+
+  async generateFinalPdf(recordId: string): Promise<NodeJS.ReadableStream> {
+    // Render the React component to a stream
+
+    const record = await this.recordRepository.findOne({
+      where: { id: recordId },
+      relations: ["student", "credentialType"],
+    });
+
+    if (!record || !record.student || !record.credentialType) {
+      throw new NotFoundException("No Record Found, Please verify again");
+    }
+
+    const qrCodeData = await generateQr(
+      `cert-us.website/verify/${record.credentialRef}`,
+    );
+
+    const diplomaPdf = getPdfToRender(
+      record.student,
+      record.credentialType.name,
+      qrCodeData,
+    );
+
+    if (!diplomaPdf) {
+      throw new NotFoundException("credential type not found");
+    }
+
+    const stream = await renderToStream(
+      diplomaPdf as React.ReactElement<DocumentProps>,
+    );
+
     return stream;
   }
 }

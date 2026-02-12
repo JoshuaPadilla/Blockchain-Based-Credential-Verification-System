@@ -11,17 +11,39 @@ export class PdfController {
 
   // The endpoint will be: http://localhost:3000/pdf/download?name=Joshua
   @Get("preview")
-  async downloadPdf(
+  async preview(
     @Query("studentId") studentId: string,
     @Query("credentialName") credentialType: CredentialType,
     @Res() res: Response, // We need direct access to the Express response
   ) {
     // const studentName = name || "Student";
     // // 1. Ask the Service to create the stream
-    const pdfStream = await this.pdfService.generateCertificate(
+    const pdfStream = await this.pdfService.generatePreview(
       studentId,
       credentialType,
     );
+    // // 2. Tell the browser "This is a PDF file, please download it"
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename=certificate.pdf`,
+    });
+    // // 3. Send the stream to the user
+    pdfStream.pipe(res);
+
+    pdfStream.on("end", () => res.end());
+    pdfStream.on("error", (err) => {
+      console.error(err);
+      res.status(500).end();
+    });
+  }
+
+  @Get("final-pdf")
+  async getSignedPdf(
+    @Query("recordId") recordId: string,
+    @Res() res: Response, // We need direct access to the Express response
+  ) {
+    console.log(recordId);
+    const pdfStream = await this.pdfService.generateFinalPdf(recordId);
     // // 2. Tell the browser "This is a PDF file, please download it"
     res.set({
       "Content-Type": "application/pdf",

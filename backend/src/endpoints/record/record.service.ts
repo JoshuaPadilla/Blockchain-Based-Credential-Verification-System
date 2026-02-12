@@ -99,6 +99,13 @@ export class RecordService {
     qb.leftJoinAndSelect("record.student", "student");
     qb.leftJoinAndSelect("record.credentialType", "credentialType");
     qb.leftJoinAndSelect("record.signatures", "signatures");
+    qb.leftJoin("signatures.signer", "signer").addSelect([
+      "signer.id",
+      "signer.position", // Replace 'position' with your actual column name
+      "signer.firstName",
+      "signer.middleName",
+      "signer.lastName",
+    ]);
 
     // --- FILTERS (AND Logic) ---
     if (revoked !== undefined) {
@@ -152,7 +159,7 @@ export class RecordService {
   async getRecord(recordId: string) {
     return this.recordRepository.findOne({
       where: { id: recordId },
-      relations: ["student"],
+      relations: ["student", "signatures", "signatures.signer"],
     });
   }
 
