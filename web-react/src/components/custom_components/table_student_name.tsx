@@ -7,11 +7,7 @@ type Props = {
 	lastName: string;
 };
 
-export const TableStudentName = ({
-	firstName,
-	middleName,
-	lastName,
-}: Props) => {
+export const TableStudentName = ({ firstName, lastName }: Props) => {
 	const initials = `${firstName[0]}${lastName[0]}`;
 
 	return (

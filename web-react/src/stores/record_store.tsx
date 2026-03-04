@@ -41,12 +41,7 @@ export const useRecordStore = create<StoreProps>((set) => ({
 			console.log(error);
 		}
 	},
-	createRecord: async (
-		studentId,
-		credentialTypeId,
-		cutOffYear,
-		cutOffSemester,
-	) => {
+	createRecord: async (studentId, credentialTypeId) => {
 		const res = await axiosClient.post("record", {
 			studentId: studentId,
 			credentialTypeId: credentialTypeId,
