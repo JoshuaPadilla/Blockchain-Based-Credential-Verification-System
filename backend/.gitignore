@@ -12,8 +12,13 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
 # OS
-.DS_Store
+.DS_Storev
 
 # Tests
 /coverage
