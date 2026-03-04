@@ -174,7 +174,7 @@ export const Route = createFileRoute("/verify/$credentialRef")({
 function VerificationPage() {
 	const { credentialRef } = Route.useLoaderData();
 	const { verifyRecord } = useRecordStore();
-	const { getPreview } = usePdfStore();
+	const { getFinalPdf } = usePdfStore();
 
 	// 1. Data Fetching
 	const { data, isLoading, isError } = useQuery({
@@ -198,11 +198,7 @@ function VerificationPage() {
 	const shouldFetchPdf = !!data?.record && !isCompromised;
 	const { data: pdfBlob, isFetching: isPreviewLoading } = useQuery({
 		queryKey: ["pdf-preview", data?.record?.id],
-		queryFn: () =>
-			getPreview(
-				data!.record.student.id,
-				data!.record.credentialType.name,
-			),
+		queryFn: () => getFinalPdf(data!.record.id),
 		enabled: shouldFetchPdf,
 		staleTime: Infinity,
 		gcTime: 1000 * 60 * 30,
@@ -220,10 +216,6 @@ function VerificationPage() {
 				.then((base64Image) => {
 					if (active) {
 						setPreviewImage(base64Image);
-						console.log(
-							"Generated DataURL:",
-							base64Image.slice(0, 50) + "...",
-						);
 					}
 				})
 				.catch((err) => console.error("PDF Conversion Failed", err));
@@ -238,6 +230,23 @@ function VerificationPage() {
 	if (isError || !data) return <ErrorScreen credentialRef={credentialRef} />;
 
 	const { record } = data;
+	const handleDownloadPdf = () => {
+		if (!pdfBlob) return;
+
+		const objectUrl = URL.createObjectURL(pdfBlob);
+		const anchor = document.createElement("a");
+		const recipientName =
+			`${record.student.lastName}_${record.student.firstName}`
+				.replace(/\s+/g, "_")
+				.replace(/[^a-zA-Z0-9_-]/g, "");
+
+		anchor.href = objectUrl;
+		anchor.download = `${recipientName || "credential"}_${record.id}.pdf`;
+		document.body.appendChild(anchor);
+		anchor.click();
+		anchor.remove();
+		URL.revokeObjectURL(objectUrl);
+	};
 
 	return (
 		<div className="min-h-screen bg-[#F8F9FA] font-sans text-slate-900 pb-20">
@@ -281,6 +290,8 @@ function VerificationPage() {
 								isLoading={isPreviewLoading}
 								isCompromised={isCompromised}
 								hash={record.dataHash}
+								onDownload={handleDownloadPdf}
+								hasPdf={!!pdfBlob}
 							/>
 							<HelpBox />
 						</div>
@@ -464,6 +475,8 @@ const DocumentViewer = ({
 	isLoading,
 	isCompromised,
 	hash,
+	onDownload,
+	hasPdf,
 }: any) => {
 	return (
 		<div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
@@ -507,7 +520,8 @@ const DocumentViewer = ({
 			<div className="p-6 bg-white border-t border-slate-100">
 				<Button
 					className="w-full h-11 shadow-sm"
-					disabled={isCompromised || !previewImage}
+					onClick={onDownload}
+					disabled={isCompromised || !hasPdf}
 					variant={isCompromised ? "secondary" : "default"}
 				>
 					<Download className="mr-2 size-4" />

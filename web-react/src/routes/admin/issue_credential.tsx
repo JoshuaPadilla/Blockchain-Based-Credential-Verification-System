@@ -93,10 +93,6 @@ function RouteComponent() {
 				.then((base64Image) => {
 					if (active) {
 						setPreviewImage(base64Image);
-						console.log(
-							"Generated DataURL:",
-							base64Image.slice(0, 50) + "...",
-						);
 					}
 				})
 				.catch((err) => console.error("PDF Conversion Failed", err));

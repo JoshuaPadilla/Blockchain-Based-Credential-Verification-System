@@ -20,7 +20,6 @@ export const useCredentialTypeStore = create<StoreProps>(() => ({
 	},
 	createNewCredentialType: async (form) => {
 		try {
-			console.log(form);
 			const res = await axiosClient.post("credential-types", form);
 
 			if (res.status === 201) return res.data;

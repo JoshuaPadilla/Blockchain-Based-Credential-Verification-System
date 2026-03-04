@@ -10,8 +10,6 @@ export const AdminHeader = () => {
 	const { toggleSidebar } = useSidebar();
 	const { blockchainDetails } = useBlockchainStore();
 
-	console.log(blockchainDetails);
-
 	return (
 		<header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between gap-4 border-b border-slate-200 bg-white/80 px-6 backdrop-blur-md transition-all">
 			{/* --- LEFT: Navigation Context --- */}

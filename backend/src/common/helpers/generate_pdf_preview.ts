@@ -1,78 +1,41 @@
-import { NotFoundException } from '@nestjs/common';
-import { Student } from '../entities/student.entity';
-import { CredentialType } from '../enums/credential_type.enum';
-
 import fontkit from '@pdf-lib/fontkit';
 import fs from 'fs/promises';
 import path from 'path';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
-import * as QRCode from 'qrcode';
-import { Record } from '../entities/record.entity';
+import { Student } from '../entities/student.entity';
 import {
   getMonthName,
   getOrdinalDay,
   yearToWords,
 } from './number_to_words.helper';
 
-const formatStudentName = (student: Student): string => {
-  return [student.firstName, student.middleName, student.lastName]
-    .filter((part) => !!part)
-    .join(' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-};
-
-export const getPdfToRender = (
-  record: Record,
-  qrContent: string,
-): Promise<Buffer | string> => {
-  switch (record.credentialType.name) {
-    case CredentialType.DIPLOMA:
-      return generateDiploma(record, qrContent);
-
-    default:
-      throw new NotFoundException(
-        `Unsupported credential type: ${record.credentialType.name}`,
-      );
-  }
-};
-
-export async function generateDiploma(
-  record: Record,
-  qrContent: string,
+export async function generatedDiplomaPreview(
+  student: Student,
 ): Promise<Buffer> {
   // Read files from the local file system
   const oldEnglishBytes = await fs.readFile(
     path.join(process.cwd(), 'src/assets/fonts/Canterbury.ttf'),
   );
-  const diplomaTemplateBytes = await fs.readFile(
+  const existingPdfBytes = await fs.readFile(
     path.join(process.cwd(), 'src/certificate_templates/diploma_template.pdf'),
   );
 
-  const pdfDoc = await PDFDocument.load(diplomaTemplateBytes);
+  const pdfDoc = await PDFDocument.load(existingPdfBytes);
   pdfDoc.registerFontkit(fontkit);
 
   const page = pdfDoc.getPages()[0];
   const oldEnglishFont = await pdfDoc.embedFont(oldEnglishBytes);
   const timesNew = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
 
-  const qrBuffer = await QRCode.toBuffer(qrContent, {
-    width: 200,
-    margin: 1,
-  });
-
-  const qrImage = await pdfDoc.embedPng(qrBuffer);
-
-  const today = new Date(record.createdAt) ?? new Date();
-  const name = formatStudentName(record.student);
-  const course = record.student.course ?? '';
+  const today = new Date();
+  const name = student.firstName + student.middleName + student.lastName;
+  const course = student.course ?? '';
   const year = `${yearToWords(today.getFullYear())}. `;
   const date = `${getOrdinalDay(today.getDate())} day of ${getMonthName(today.getMonth() + 1)}.`;
 
   const nameSize = 40;
   const courseSize = 30;
   const pageWidth = page.getWidth();
-  const pageHeight = page.getHeight();
 
   const nameWidth = timesNew.widthOfTextAtSize(name, nameSize);
   const courseWidth = oldEnglishFont.widthOfTextAtSize(course, courseSize);
@@ -126,13 +89,6 @@ export async function generateDiploma(
     size: 16,
     font: oldEnglishFont,
     color: rgb(0, 0, 0),
-  });
-
-  page.drawImage(qrImage, {
-    x: pageWidth - 145,
-    y: pageHeight - 145,
-    width: 80,
-    height: 80,
   });
 
   const pdfBytes = await pdfDoc.save();

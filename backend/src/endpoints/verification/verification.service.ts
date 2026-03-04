@@ -1,20 +1,10 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  GoneException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { compareSync } from "bcrypt";
 import { ethers } from "ethers";
-import { EMPTY_BYTES } from "src/common/constants/empty_bytes.constant";
 import { Record } from "src/common/entities/record.entity";
 import { Student } from "src/common/entities/student.entity";
 import { VerificationStatus } from "src/common/enums/verification_status.enum";
 import { CredentialNormalizer } from "src/common/helpers/data_normalizer.class";
-import { OnChainRecord } from "src/common/interfaces/onchain_record.interface";
 import { BlockChainService } from "src/services/blockchain/blockchain.service";
 import { Repository } from "typeorm";
 
@@ -102,8 +92,6 @@ export class VerificationService {
     if (!isFullySigned) {
       statuses.push(VerificationStatus.PENDING);
     }
-
-    console.log(onChainRecord);
 
     // 6. Return a Rich Object (Don't just return the record!)
     return {

@@ -18,7 +18,6 @@ export const useAuthStore = create<StoreProps>((set, get) => ({
 	userProfile: null,
 	isLoading: false,
 	login: async (email, password) => {
-		console.log(email, password);
 		try {
 			const res = await axiosClient.post("auth/login", {
 				email,

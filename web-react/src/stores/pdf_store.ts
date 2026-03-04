@@ -7,7 +7,7 @@ type StoreProps = {
 		studentId: string,
 		credentialType: CredentialEnumType,
 	) => Promise<Blob | null>;
-	getFinalPdf: (record: string) => Promise<Blob | null>;
+	getFinalPdf: (recordId: string) => Promise<Blob | null>;
 };
 
 export const usePdfStore = create<StoreProps>(() => ({
