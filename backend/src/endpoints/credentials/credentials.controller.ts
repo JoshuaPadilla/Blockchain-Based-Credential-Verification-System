@@ -1,14 +1,14 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  Query,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
 } from "@nestjs/common";
 import { CreateCredentialTypeDto } from "src/common/dto/create_credential_type.dto";
 import { CredentialTypesService } from "./credentials.service";
@@ -21,7 +21,6 @@ export class CredentialTypesController {
   @HttpCode(HttpStatus.CREATED)
   @Post()
   create(@Body() createDto: CreateCredentialTypeDto) {
-    console.log(createDto);
     return this.credentialsService.createCreadentialType(createDto);
     1;
   }

@@ -1,22 +1,19 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   HttpStatus,
-  Param,
   Post,
-  Req,
   Request,
   Res,
   UseGuards,
 } from "@nestjs/common";
-import { AuthService } from "./auth.service";
+import type { Response } from "express";
 import { CreateUserDto } from "src/common/dto/create_user.dto";
 import { LocalAuthGuard } from "src/common/guards/local-auth.guard";
 import { RefreshAuthGuard } from "src/common/guards/refresh-auth.guard";
-import type { Response } from "express";
+import { AuthService } from "./auth.service";
 
 @Controller("auth")
 export class AuthController {
@@ -25,7 +22,6 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Post("register")
   register(@Body() body: CreateUserDto) {
-    console.log("here");
     return this.authService.register(body);
   }
 

@@ -1,15 +1,11 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { renderToBuffer, renderToStream } from "@react-pdf/renderer";
-import React from "react"; // Mandatory for JSX
-import { Diploma } from "../../pdf_templates/diploma/diploma";
-import { generateQr } from "src/common/helpers/qr_helper";
-import { getPdfToRender } from "src/common/helpers/get_pdf_to_render.helper";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Student } from "src/common/entities/student.entity";
-import { Repository } from "typeorm";
-import { CredentialType } from "src/common/enums/credential_type.enum";
-import { DocumentProps } from "@react-pdf/renderer";
 import { Record } from "src/common/entities/record.entity";
+import { Student } from "src/common/entities/student.entity";
+import { CredentialType } from "src/common/enums/credential_type.enum";
+import { generatedDiplomaPreview } from "src/common/helpers/generate_pdf_preview";
+import { getPdfToRender } from "src/common/helpers/get_pdf_to_render.helper";
+import { Repository } from "typeorm";
 
 @Injectable()
 export class PdfService {
@@ -21,7 +17,7 @@ export class PdfService {
   async generatePreview(
     studentId: string,
     credentialType: CredentialType,
-  ): Promise<NodeJS.ReadableStream> {
+  ): Promise<Buffer> {
     // Render the React component to a stream
 
     // const qrCodeData = await generateQr("myapp.com/verify/asdsass");
@@ -32,20 +28,12 @@ export class PdfService {
       throw new NotFoundException("Student not found");
     }
 
-    const diplomaPdf = getPdfToRender(student, credentialType);
+    const pdfBuffer = await generatedDiplomaPreview(student);
 
-    if (!diplomaPdf) {
-      throw new NotFoundException("credential type not found");
-    }
-
-    const stream = await renderToStream(
-      diplomaPdf as React.ReactElement<DocumentProps>,
-    );
-
-    return stream;
+    return pdfBuffer;
   }
 
-  async generateFinalPdf(recordId: string): Promise<NodeJS.ReadableStream> {
+  async generateFinalPdf(recordId: string): Promise<Buffer | string> {
     // Render the React component to a stream
 
     const record = await this.recordRepository.findOne({
@@ -57,24 +45,9 @@ export class PdfService {
       throw new NotFoundException("No Record Found, Please verify again");
     }
 
-    const qrCodeData = await generateQr(
-      `https://cert-us.website/verify/${record.credentialRef}`,
-    );
+    const qrContent = `https://cert-us.website/verify/${record.credentialRef}`;
+    const pdfBuffer = await getPdfToRender(record, qrContent);
 
-    const diplomaPdf = getPdfToRender(
-      record.student,
-      record.credentialType.name,
-      qrCodeData,
-    );
-
-    if (!diplomaPdf) {
-      throw new NotFoundException("credential type not found");
-    }
-
-    const stream = await renderToStream(
-      diplomaPdf as React.ReactElement<DocumentProps>,
-    );
-
-    return stream;
+    return pdfBuffer;
   }
 }

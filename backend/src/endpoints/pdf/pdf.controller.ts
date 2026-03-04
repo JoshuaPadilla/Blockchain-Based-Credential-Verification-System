@@ -1,9 +1,7 @@
-import { Controller, Get, Res, Query } from "@nestjs/common";
-import { PdfService } from "./pdf.service";
+import { Controller, Get, Query, Res } from "@nestjs/common";
 import type { Response } from "express";
-import { Font } from "@react-pdf/renderer";
-import path from "path";
 import { CredentialType } from "src/common/enums/credential_type.enum";
+import { PdfService } from "./pdf.service";
 
 @Controller("pdf")
 export class PdfController {
@@ -16,25 +14,25 @@ export class PdfController {
     @Query("credentialName") credentialType: CredentialType,
     @Res() res: Response, // We need direct access to the Express response
   ) {
-    // const studentName = name || "Student";
-    // // 1. Ask the Service to create the stream
-    const pdfStream = await this.pdfService.generatePreview(
-      studentId,
-      credentialType,
-    );
-    // // 2. Tell the browser "This is a PDF file, please download it"
-    res.set({
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename=certificate.pdf`,
-    });
-    // // 3. Send the stream to the user
-    pdfStream.pipe(res);
+    try {
+      // This now returns a Buffer (Uint8Array)
+      const pdfBuffer = await this.pdfService.generatePreview(
+        studentId,
+        credentialType,
+      );
 
-    pdfStream.on("end", () => res.end());
-    pdfStream.on("error", (err) => {
+      res.set({
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `inline; filename=certificate.pdf`, // 'inline' is better for previews
+        "Content-Length": pdfBuffer.length,
+      });
+
+      // Send the buffer directly
+      res.end(pdfBuffer);
+    } catch (err) {
       console.error(err);
-      res.status(500).end();
-    });
+      res.status(500).send("Error generating PDF");
+    }
   }
 
   @Get("final-pdf")
@@ -42,20 +40,21 @@ export class PdfController {
     @Query("recordId") recordId: string,
     @Res() res: Response, // We need direct access to the Express response
   ) {
-    console.log(recordId);
-    const pdfStream = await this.pdfService.generateFinalPdf(recordId);
-    // // 2. Tell the browser "This is a PDF file, please download it"
-    res.set({
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename=certificate.pdf`,
-    });
-    // // 3. Send the stream to the user
-    pdfStream.pipe(res);
+    try {
+      // This now returns a Buffer (Uint8Array)
+      const pdfBuffer = await this.pdfService.generateFinalPdf(recordId);
 
-    pdfStream.on("end", () => res.end());
-    pdfStream.on("error", (err) => {
+      res.set({
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `inline; filename=certificate.pdf`, // 'inline' is better for previews
+        "Content-Length": pdfBuffer.length,
+      });
+
+      // Send the buffer directly
+      res.end(pdfBuffer);
+    } catch (err) {
       console.error(err);
-      res.status(500).end();
-    });
+      res.status(500).send("Error generating PDF");
+    }
   }
 }

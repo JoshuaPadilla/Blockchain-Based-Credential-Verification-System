@@ -75,3 +75,25 @@ export const getOrdinalDay = (day: number) => {
 	if (j == 3 && k != 13) return day + "rd";
 	return day + "th";
 };
+
+// Helper: Get Month Name (e.g. 3 -> "March")
+export const getMonthName = (month: number) => {
+	const months = [
+		"January",
+		"February",
+		"March",
+		"April",
+		"May",
+		"June",
+		"July",
+		"August",
+		"September",
+		"October",
+		"November",
+		"December",
+	];
+
+	if (month < 1 || month > 12) return "";
+
+	return months[month - 1];
+};

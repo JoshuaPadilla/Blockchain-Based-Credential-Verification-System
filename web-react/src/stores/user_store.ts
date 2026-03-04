@@ -12,7 +12,6 @@ type StoreProps = {
 export const useUserStore = create<StoreProps>(() => ({
 	signers: [],
 	getSigners: async (role?: string, term?: string) => {
-		console.log("Fetching signers with role:", role, "and term:", term);
 		try {
 			const res = await axiosClient.get(
 				`user?role=${role || ""}&term=${term || ""}`,
@@ -26,7 +25,6 @@ export const useUserStore = create<StoreProps>(() => ({
 		}
 	},
 	createSigner: async (form) => {
-		console.log(form);
 		try {
 			const res = await axiosClient.post("auth/register", form);
 			if (res.status === 201) return res.data;
