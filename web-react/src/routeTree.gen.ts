@@ -29,6 +29,7 @@ import { Route as AdminStudentsIndexRouteImport } from './routes/admin/students/
 import { Route as AdminSignersIndexRouteImport } from './routes/admin/signers/index'
 import { Route as AdminCredentialsIndexRouteImport } from './routes/admin/credentials/index'
 import { Route as AdminCredentialTypesIndexRouteImport } from './routes/admin/credential-types/index'
+import { Route as AdminCredentialsPreviewRouteImport } from './routes/admin/credentials/preview'
 import { Route as AdminCredentialsCredential_idRouteImport } from './routes/admin/credentials/$credential_id'
 
 const LoginRoute = LoginRouteImport.update({
@@ -132,6 +133,11 @@ const AdminCredentialTypesIndexRoute =
     path: '/credential-types/',
     getParentRoute: () => AdminRouteRoute,
   } as any)
+const AdminCredentialsPreviewRoute = AdminCredentialsPreviewRouteImport.update({
+  id: '/credentials/preview',
+  path: '/credentials/preview',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminCredentialsCredential_idRoute =
   AdminCredentialsCredential_idRouteImport.update({
     id: '/credentials/$credential_id',
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/signer/': typeof SignerIndexRoute
   '/admin/credentials/$credential_id': typeof AdminCredentialsCredential_idRoute
+  '/admin/credentials/preview': typeof AdminCredentialsPreviewRoute
   '/admin/credential-types/': typeof AdminCredentialTypesIndexRoute
   '/admin/credentials/': typeof AdminCredentialsIndexRoute
   '/admin/signers/': typeof AdminSignersIndexRoute
@@ -177,6 +184,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/signer': typeof SignerIndexRoute
   '/admin/credentials/$credential_id': typeof AdminCredentialsCredential_idRoute
+  '/admin/credentials/preview': typeof AdminCredentialsPreviewRoute
   '/admin/credential-types': typeof AdminCredentialTypesIndexRoute
   '/admin/credentials': typeof AdminCredentialsIndexRoute
   '/admin/signers': typeof AdminSignersIndexRoute
@@ -201,6 +209,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/signer/': typeof SignerIndexRoute
   '/admin/credentials/$credential_id': typeof AdminCredentialsCredential_idRoute
+  '/admin/credentials/preview': typeof AdminCredentialsPreviewRoute
   '/admin/credential-types/': typeof AdminCredentialTypesIndexRoute
   '/admin/credentials/': typeof AdminCredentialsIndexRoute
   '/admin/signers/': typeof AdminSignersIndexRoute
@@ -226,6 +235,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/signer/'
     | '/admin/credentials/$credential_id'
+    | '/admin/credentials/preview'
     | '/admin/credential-types/'
     | '/admin/credentials/'
     | '/admin/signers/'
@@ -246,6 +256,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/signer'
     | '/admin/credentials/$credential_id'
+    | '/admin/credentials/preview'
     | '/admin/credential-types'
     | '/admin/credentials'
     | '/admin/signers'
@@ -269,6 +280,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/signer/'
     | '/admin/credentials/$credential_id'
+    | '/admin/credentials/preview'
     | '/admin/credential-types/'
     | '/admin/credentials/'
     | '/admin/signers/'
@@ -425,6 +437,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCredentialTypesIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/credentials/preview': {
+      id: '/admin/credentials/preview'
+      path: '/credentials/preview'
+      fullPath: '/admin/credentials/preview'
+      preLoaderRoute: typeof AdminCredentialsPreviewRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/credentials/$credential_id': {
       id: '/admin/credentials/$credential_id'
       path: '/credentials/$credential_id'
@@ -453,6 +472,7 @@ interface AdminRouteRouteChildren {
   AdminSucess_issueRoute: typeof AdminSucess_issueRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminCredentialsCredential_idRoute: typeof AdminCredentialsCredential_idRoute
+  AdminCredentialsPreviewRoute: typeof AdminCredentialsPreviewRoute
   AdminCredentialTypesIndexRoute: typeof AdminCredentialTypesIndexRoute
   AdminCredentialsIndexRoute: typeof AdminCredentialsIndexRoute
   AdminSignersIndexRoute: typeof AdminSignersIndexRoute
@@ -465,6 +485,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminSucess_issueRoute: AdminSucess_issueRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminCredentialsCredential_idRoute: AdminCredentialsCredential_idRoute,
+  AdminCredentialsPreviewRoute: AdminCredentialsPreviewRoute,
   AdminCredentialTypesIndexRoute: AdminCredentialTypesIndexRoute,
   AdminCredentialsIndexRoute: AdminCredentialsIndexRoute,
   AdminSignersIndexRoute: AdminSignersIndexRoute,

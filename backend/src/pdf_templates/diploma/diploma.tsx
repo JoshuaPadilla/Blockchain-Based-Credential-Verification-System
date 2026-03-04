@@ -1,13 +1,13 @@
 import { Document, Image, Page, Text, View } from '@react-pdf/renderer';
 
 import { join } from 'path';
+import React from 'react';
 import {
+  getMonthName,
   getOrdinalDay,
   yearToWords,
 } from 'src/common/helpers/number_to_words.helper';
 import { styles } from './styles';
-import React from 'react';
-import { generateQr } from 'src/common/helpers/qr_helper';
 
 interface DiplomaProps {
   name: string;
@@ -33,6 +33,7 @@ export const Diploma = ({
   const today = new Date();
 
   const date = getOrdinalDay(today.getDate());
+  const month = getMonthName(today.getMonth() + 1);
   const year = yearToWords(today.getFullYear());
 
   return (
@@ -100,7 +101,8 @@ export const Diploma = ({
           {/* Date */}
           <Text style={styles.dateText}>
             Given at Northwest Samar State University, Calbayog City,
-            Philippines this {date} day of April in the year of our Lord {year}.
+            Philippines this {date} day of {month} in the year of our Lord{' '}
+            {year}.
           </Text>
 
           {/* Signatures */}
