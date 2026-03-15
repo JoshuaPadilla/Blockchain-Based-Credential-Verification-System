@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useBlockchainStore } from "@/stores/blockchain_store";
 import { Bell, Menu, Wifi } from "lucide-react";
+import { toast } from "sonner";
 import { AppBreadcrumb } from "./app_breadcrumb";
 import { HeaderProfile } from "./header_profile";
 
@@ -58,6 +59,7 @@ export const AdminHeader = () => {
 					variant="ghost"
 					size="icon"
 					className="relative text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-full size-9"
+					onClick={() => toast.info("Notifications coming soon")}
 				>
 					<Bell className="size-5" />
 					{/* Unread Indicator */}

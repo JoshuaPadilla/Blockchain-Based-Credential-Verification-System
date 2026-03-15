@@ -15,6 +15,7 @@ export const useBlockchainStore = create<StoreProps>((set) => ({
 
 			if (res.status === 200) {
 				set({ blockchainDetails: res.data });
+				return;
 			}
 
 			throw new Error();

@@ -1,7 +1,7 @@
-import { NestFactory, Reflector } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser'; // Import this
+import { AppModule } from './app.module';
 
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
@@ -18,6 +18,8 @@ async function bootstrap() {
       'http://localhost:4173',
       'http://198.96.88.142:5173',
       'http://127.0.0.1:4173',
+      'https://cert-us.website',
+      'https://www.cert-us.website',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,

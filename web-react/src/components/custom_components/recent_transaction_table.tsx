@@ -15,9 +15,12 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { usePdfStore } from "@/stores/pdf_store";
 import type { Record } from "@/types/record.type";
 import { useNavigate } from "@tanstack/react-router";
-import { Copy, Download, Eye, MoreHorizontal } from "lucide-react";
+import { Copy, Download, Eye, Loader2, MoreHorizontal } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { MobileRecordTableCard } from "./mobile_table_card";
 import { TableCredentialStatus } from "./table_credential_status";
 import { TableCredentialType } from "./table_credential_type";
@@ -159,34 +162,71 @@ export const RecordActions = ({
 }: {
 	record: Record;
 	onView: (id: string) => void;
-}) => (
-	<DropdownMenu>
-		<DropdownMenuTrigger asChild>
-			<Button
-				variant="ghost"
-				className="h-8 p-0 text-slate-400 hover:text-slate-600 w-12.5"
-			>
-				<span className="sr-only">Open menu</span>
-				<MoreHorizontal className="h-4 w-4" />
-			</Button>
-		</DropdownMenuTrigger>
-		<DropdownMenuContent align="end">
-			<DropdownMenuLabel>Actions</DropdownMenuLabel>
-			<DropdownMenuItem
-				onClick={() => navigator.clipboard.writeText(record.id)}
-			>
-				<Copy className="mr-2 h-4 w-4" />
-				Copy ID
-			</DropdownMenuItem>
-			<DropdownMenuSeparator />
-			<DropdownMenuItem onClick={() => onView(record.id)}>
-				<Eye className="mr-2 h-4 w-4" />
-				View Details
-			</DropdownMenuItem>
-			<DropdownMenuItem>
-				<Download className="mr-2 h-4 w-4" />
-				Download PDF
-			</DropdownMenuItem>
-		</DropdownMenuContent>
-	</DropdownMenu>
-);
+}) => {
+	const { getFinalPdf } = usePdfStore();
+	const [isDownloading, setIsDownloading] = useState(false);
+
+	const handleDownload = async () => {
+		try {
+			setIsDownloading(true);
+			const blob = await getFinalPdf(record.id);
+			if (blob) {
+				const url = window.URL.createObjectURL(blob);
+				const link = document.createElement("a");
+				link.href = url;
+				link.download = `${record.credentialType.name}-${record.student.lastName}.pdf`;
+				link.click();
+				window.URL.revokeObjectURL(url);
+				toast.success("PDF downloaded");
+			} else {
+				toast.error("Could not retrieve PDF");
+			}
+		} catch {
+			toast.error("Download failed. Please try again.");
+		} finally {
+			setIsDownloading(false);
+		}
+	};
+
+	return (
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Button
+					variant="ghost"
+					className="h-8 p-0 text-slate-400 hover:text-slate-600 w-12.5"
+				>
+					<span className="sr-only">Open menu</span>
+					<MoreHorizontal className="h-4 w-4" />
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align="end">
+				<DropdownMenuLabel>Actions</DropdownMenuLabel>
+				<DropdownMenuItem
+					onClick={() => {
+						navigator.clipboard.writeText(record.id);
+						toast.success("ID copied to clipboard");
+					}}
+				>
+					<Copy className="mr-2 h-4 w-4" />
+					Copy ID
+				</DropdownMenuItem>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem onClick={() => onView(record.id)}>
+					<Eye className="mr-2 h-4 w-4" />
+					View Details
+				</DropdownMenuItem>
+				<DropdownMenuItem
+					onClick={handleDownload}
+					disabled={isDownloading}
+				>
+					{isDownloading ? (
+						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+					) : (
+						<Download className="mr-2 h-4 w-4" />
+					)}
+					{isDownloading ? "Downloading..." : "Download PDF"}
+				</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
+};

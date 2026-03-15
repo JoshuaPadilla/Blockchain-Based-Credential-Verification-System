@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils"; // Assuming you have this utility from shadcn
 import { Link, useLocation } from "@tanstack/react-router";
 import { Bell, History, LayoutDashboard, ListTodo, Menu } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { HeaderProfile } from "./header_profile";
 
 const data = {
@@ -187,6 +188,7 @@ export const SignerHeader = () => {
 					variant="ghost"
 					size="icon"
 					className="relative size-9 rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+					onClick={() => toast.info("Notifications coming soon")}
 				>
 					<Bell className="size-5" />
 					<span className="absolute top-2 right-2.5 size-2 rounded-full border-2 border-background bg-destructive" />

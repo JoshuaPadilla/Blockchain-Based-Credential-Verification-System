@@ -30,6 +30,7 @@ import { format } from "date-fns";
 import { CalendarIcon, FileDown, FilterX, Plus, Search } from "lucide-react";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
+import { toast } from "sonner";
 import { useDebounce } from "use-debounce";
 
 export const Route = createFileRoute("/admin/credentials/")({
@@ -43,6 +44,7 @@ export const Route = createFileRoute("/admin/credentials/")({
 		]);
 	},
 	pendingComponent: () => <PendingSkeleton />,
+	pendingMs: 0,
 });
 
 function CredentialsPage() {
@@ -134,6 +136,7 @@ function CredentialsPage() {
 					<Button
 						variant="outline"
 						className="bg-white border-slate-200 text-slate-700"
+						onClick={() => toast.info("Export feature coming soon")}
 					>
 						<FileDown className="mr-2 size-4" /> Export CSV
 					</Button>

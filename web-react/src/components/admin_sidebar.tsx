@@ -18,7 +18,8 @@ import {
 	SidebarSeparator,
 	useSidebar, // 1. Import the hook
 } from "@/components/ui/sidebar";
-import { Link, useLocation } from "@tanstack/react-router";
+import { useAuthStore } from "@/stores/auth_store";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
 	ChevronUp,
 	GraduationCap,
@@ -31,6 +32,7 @@ import {
 	UserPen,
 } from "lucide-react";
 import { useEffect, useMemo } from "react";
+import { toast } from "sonner";
 import { SideBarHeaderCustom } from "./custom_components/side_bar_header";
 
 const data = {
@@ -76,6 +78,8 @@ const data = {
 export function AdminSidebar() {
 	// 2. Get the controller from Shadcn
 	const { setOpen } = useSidebar();
+	const { logout, userProfile } = useAuthStore();
+	const navigate = useNavigate();
 
 	// 3. Get current URL from TanStack Router
 	const { pathname } = useLocation();
@@ -98,6 +102,16 @@ export function AdminSidebar() {
 			setOpen(false); // Close sidebar on "Focus" pages (Success, Details, etc.)
 		}
 	}, [pathname, validUrls, setOpen]);
+
+	const handleLogout = async () => {
+		try {
+			await logout();
+			navigate({ to: "/login" });
+			toast.success("Logged out successfully");
+		} catch {
+			toast.error("Failed to log out. Please try again.");
+		}
+	};
 
 	return (
 		<Sidebar variant="inset" collapsible="icon">
@@ -153,10 +167,12 @@ export function AdminSidebar() {
 									</div>
 									<div className="grid flex-1 text-left text-sm leading-tight">
 										<span className="truncate font-semibold">
-											Admin User
+											{userProfile?.firstName
+												? `${userProfile.firstName} ${userProfile.lastName ?? ""}`
+												: "Admin User"}
 										</span>
 										<span className="truncate text-xs">
-											admin@school.edu
+											{userProfile?.role ?? "admin"}
 										</span>
 									</div>
 									<ChevronUp className="ml-auto size-4" />
@@ -170,7 +186,10 @@ export function AdminSidebar() {
 									<Settings className="mr-2 size-4" />
 									<span>Settings</span>
 								</DropdownMenuItem>
-								<DropdownMenuItem className="text-red-500 focus:text-red-500">
+								<DropdownMenuItem
+									className="text-red-500 focus:text-red-500"
+									onClick={handleLogout}
+								>
 									<LogOut className="mr-2 size-4" />
 									<span>Sign out</span>
 								</DropdownMenuItem>

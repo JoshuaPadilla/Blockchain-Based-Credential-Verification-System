@@ -37,6 +37,7 @@ import {
 	X,
 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/signer/queue")({
 	component: SignerQueuePage,
@@ -105,13 +106,14 @@ function SignerQueuePage() {
 		try {
 			setIsSigning(true);
 			await signRecords(selectedIds);
-		} catch (e) {
-			console.error(e);
-		} finally {
-			setIsSigning(false);
 			setIsSheetOpen(false);
 			setSelectedIds([]);
-			router.navigate({ to: "/signer/signing-summary" }); // Fixed redirect path to dashboard
+			router.navigate({ to: "/signer/signing-summary" });
+		} catch (e) {
+			console.error(e);
+			toast.error("Failed to sign records. Please try again.");
+		} finally {
+			setIsSigning(false);
 		}
 	};
 
