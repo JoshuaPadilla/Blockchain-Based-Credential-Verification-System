@@ -66,4 +66,19 @@ if (!rootElement.innerHTML) {
 			</QueryClientProvider>
 		</StrictMode>,
 	);
+
+	// Fade out and remove the instant HTML loader once React has painted
+	requestAnimationFrame(() => {
+		requestAnimationFrame(() => {
+			const loader = document.getElementById("app-loader");
+			if (loader) {
+				loader.style.opacity = "0";
+				loader.addEventListener(
+					"transitionend",
+					() => loader.remove(),
+					{ once: true },
+				);
+			}
+		});
+	});
 }

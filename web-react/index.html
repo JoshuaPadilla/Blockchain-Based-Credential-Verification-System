@@ -8,6 +8,39 @@
 		<title>Certus</title>
 	</head>
 	<body>
+		<div
+			id="app-loader"
+			style="
+				position: fixed;
+				inset: 0;
+				z-index: 9999;
+				background: #f6f6f8;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				transition: opacity 0.4s ease;
+			"
+		>
+			<style>
+				@keyframes certus-pulse {
+					0%,
+					100% {
+						opacity: 1;
+						transform: scale(1);
+					}
+					50% {
+						opacity: 0.5;
+						transform: scale(0.93);
+					}
+				}
+				#app-loader img {
+					width: 150px;
+					height: auto;
+					animation: certus-pulse 1.6s ease-in-out infinite;
+				}
+			</style>
+			<img src="/assets/app_logo.png" alt="Certus" />
+		</div>
 		<div id="root"></div>
 		<script type="module" src="/src/main.tsx"></script>
 	</body>
