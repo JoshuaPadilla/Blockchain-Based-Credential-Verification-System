@@ -129,10 +129,10 @@ export async function generateDiploma(
   });
 
   page.drawImage(qrImage, {
-    x: pageWidth - 145,
-    y: pageHeight - 145,
-    width: 80,
-    height: 80,
+    x: pageWidth - 125,
+    y: pageHeight - 125,
+    width: 40,
+    height: 40,
   });
 
   const pdfBytes = await pdfDoc.save();
