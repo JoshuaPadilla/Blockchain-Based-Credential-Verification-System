@@ -1,0 +1,59 @@
+<mxfile host="65bd71144e">
+    <diagram id="q833z0wZ_bAGLSrsnW0P" name="Page-1">
+        <mxGraphModel dx="1105" dy="536" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="pub" value="Public User" style="ellipse;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="100" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="adm" value="Admin" style="ellipse;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=13;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="370" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="sgn" value="Signer" style="ellipse;fillColor=#ffe6cc;strokeColor=#d6b656;fontStyle=1;fontSize=13;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="620" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="fe" value="Frontend&#xa;(React)" style="rounded=1;fillColor=#f5f5f5;strokeColor=#666;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="340" y="340" width="160" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="be" value="Backend&#xa;(NestJS API)" style="rounded=1;fillColor=#f5f5f5;strokeColor=#666;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="640" y="340" width="160" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="db" value="PostgreSQL" style="shape=cylinder3;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="200" width="140" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="bc" value="Ethereum&#xa;Blockchain" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=14;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="480" width="140" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1" value="Verify credential" style="edgeStyle=orthogonalEdgeStyle;fontSize=11;" parent="1" source="pub" target="fe" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2" value="Issue / manage" style="edgeStyle=orthogonalEdgeStyle;fontSize=11;" parent="1" source="adm" target="fe" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3" value="Sign credentials" style="edgeStyle=orthogonalEdgeStyle;fontSize=11;" parent="1" source="sgn" target="fe" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4" value="REST API calls&#xa;(JWT cookies)" style="edgeStyle=orthogonalEdgeStyle;fontSize=11;" parent="1" source="fe" target="be" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e5" value="Read / Write&#xa;users, students,&#xa;records, signatures" style="edgeStyle=orthogonalEdgeStyle;fontSize=11;" parent="1" source="be" target="db" edge="1">
+                    <mxGeometry x="-0.0833" y="-45" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e6" value="Store / verify&#xa;credential hashes" style="edgeStyle=orthogonalEdgeStyle;fontSize=11;strokeColor=#9673a6;fontColor=#9673a6;" parent="1" source="be" target="bc" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7" value="Verification result&#xa;+ PDF" style="edgeStyle=orthogonalEdgeStyle;fontSize=11;dashed=1;" parent="1" source="be" target="fe" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="720" y="460"/>
+                            <mxPoint x="420" y="460"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

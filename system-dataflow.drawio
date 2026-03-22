@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- ACTORS                                                          -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <mxCell id="actor_pub" value="Public User" style="shape=mxgraph.general.person;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="60" y="80" width="80" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="actor_admin" value="Admin" style="shape=mxgraph.general.person;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="60" y="320" width="80" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="actor_signer" value="Signer" style="shape=mxgraph.general.person;fillColor=#ffe6cc;strokeColor=#d6b656;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="60" y="560" width="80" height="80" as="geometry" />
+    </mxCell>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- FRONTEND CONTAINER                                              -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <mxCell id="fe_container" value="Frontend  •  web-react&#xa;(React + TanStack Router + Zustand + Axios)" style="swimlane;startSize=40;fillColor=#f0f0f0;strokeColor=#666;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="220" y="40" width="420" height="660" as="geometry" />
+    </mxCell>
+
+    <!-- Public Pages -->
+    <mxCell id="fe_pub" value="Public Pages&#xa;/ (landing + ref search)&#xa;/verify/:ref (show status + PDF)" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="fe_container">
+      <mxGeometry x="20" y="60" width="240" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- Admin Pages -->
+    <mxCell id="fe_adm" value="Admin Pages&#xa;/admin/dashboard&#xa;/admin/issue_credential&#xa;/admin/credentials  /admin/signers&#xa;/admin/students" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="fe_container">
+      <mxGeometry x="20" y="200" width="240" height="100" as="geometry" />
+    </mxCell>
+
+    <!-- Signer Pages -->
+    <mxCell id="fe_sgn" value="Signer Pages&#xa;/signer/dashboard&#xa;/signer/queue (batch sign)&#xa;/signer/history" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=8;" vertex="1" parent="fe_container">
+      <mxGeometry x="20" y="380" width="240" height="90" as="geometry" />
+    </mxCell>
+
+    <!-- Axios Client -->
+    <mxCell id="fe_axios" value="Axios Client&#xa;(httpOnly cookie auth,&#xa;VITE_API_URL)" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="fe_container">
+      <mxGeometry x="20" y="540" width="240" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- BACKEND CONTAINER                                               -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <mxCell id="be_container" value="Backend  •  NestJS REST API" style="swimlane;startSize=40;fillColor=#f5f5f5;strokeColor=#666;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="720" y="40" width="580" height="980" as="geometry" />
+    </mxCell>
+
+    <!-- Auth Module -->
+    <mxCell id="be_auth" value="Auth Module  /auth" style="swimlane;startSize=30;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="be_container">
+      <mxGeometry x="20" y="60" width="540" height="130" as="geometry" />
+    </mxCell>
+    <mxCell id="be_auth_login" value="POST /login&#xa;Passport local strategy&#xa;bcrypt compare → issue JWT cookies (access 24h, refresh 7d)" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="be_auth">
+      <mxGeometry x="10" y="40" width="240" height="70" as="geometry" />
+    </mxCell>
+    <mxCell id="be_auth_reg" value="POST /register&#xa;Hash password (bcrypt)&#xa;Generate ETH wallet keypair&#xa;Store encrypted private key" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="be_auth">
+      <mxGeometry x="280" y="40" width="240" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- Record Module -->
+    <mxCell id="be_rec" value="Record Module  /record" style="swimlane;startSize=30;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="be_container">
+      <mxGeometry x="20" y="210" width="540" height="150" as="geometry" />
+    </mxCell>
+    <mxCell id="be_rec_post" value="POST /record  (Issue Credential)&#xa;1. Fetch Student + AcademicRecords + Subjects&#xa;2. Fetch CredentialType&#xa;3. Normalize data → keccak256 → dataHash&#xa;4. Generate 8-char credentialRef&#xa;5. addRecord on-chain (ref, hash, exp, typeId)&#xa;6. Save Record row (ref, dataHash, txHash)" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="be_rec">
+      <mxGeometry x="10" y="40" width="520" height="95" as="geometry" />
+    </mxCell>
+
+    <!-- Signer Module -->
+    <mxCell id="be_sign" value="Signer Module  /signer" style="swimlane;startSize=30;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="be_container">
+      <mxGeometry x="20" y="380" width="540" height="150" as="geometry" />
+    </mxCell>
+    <mxCell id="be_sign_batch" value="POST /batch-sign  (Batch Sign Flow)&#xa;1. Fetch Records + credential signers&#xa;2. Fetch signer User → decrypt private key&#xa;3. Upsert RecordSignature rows (PENDING)&#xa;4. Create ethers.Wallet → batchSignRecords on-chain&#xa;5. Await TX receipt → update RecordSignature (CONFIRMED)&#xa;6. Increment Record.currentSignatures" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="be_sign">
+      <mxGeometry x="10" y="40" width="520" height="95" as="geometry" />
+    </mxCell>
+
+    <!-- Admin Module -->
+    <mxCell id="be_adm" value="Admin Module  /admin" style="swimlane;startSize=30;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="be_container">
+      <mxGeometry x="20" y="550" width="540" height="110" as="geometry" />
+    </mxCell>
+    <mxCell id="be_adm_rev" value="POST /revoke/:id  /restore/:id&#xa;Call revokeRecord / restoreRecord on-chain&#xa;UPDATE Record.revoked flag in DB" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="be_adm">
+      <mxGeometry x="10" y="40" width="240" height="55" as="geometry" />
+    </mxCell>
+    <mxCell id="be_adm_signer" value="POST /set-credential-signer&#xa;setCredentialTypeSigner on-chain&#xa;Update signers join table in DB" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="be_adm">
+      <mxGeometry x="280" y="40" width="240" height="55" as="geometry" />
+    </mxCell>
+
+    <!-- Verification Module -->
+    <mxCell id="be_ver" value="Verification Module  /verification  (Public, no auth)" style="swimlane;startSize=30;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="be_container">
+      <mxGeometry x="20" y="680" width="540" height="130" as="geometry" />
+    </mxCell>
+    <mxCell id="be_ver_get" value="GET /verify/:credentialRef&#xa;[Parallel] getRecord(ref) from blockchain → { dataHash, expiration, isRevoked, currentSigs }&#xa;[Parallel] Fetch Record + Student + AcademicRecords from DB&#xa;Re-normalize student data → recompute keccak256 → compare hashes&#xa;Return: { isTampered, isRevoked, isExpired, isFullySigned, record }" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="be_ver">
+      <mxGeometry x="10" y="40" width="520" height="75" as="geometry" />
+    </mxCell>
+
+    <!-- CredentialTypes + PDF + Insights (collapsed summary) -->
+    <mxCell id="be_other" value="Other Modules&#xa;/credential-types  — addNewCredentialType on-chain + save CredentialTypeEntity&#xa;/pdf  — React-PDF server-side render (preview &amp; final-pdf)&#xa;/insights  — aggregate DB queries (dashboard stats)&#xa;/user  /student  /subject  /student-academic-record  /record-signature" style="rounded=1;fillColor=#f5f5f5;strokeColor=#999;fontSize=10;align=left;spacingLeft=8;" vertex="1" parent="be_container">
+      <mxGeometry x="20" y="830" width="540" height="120" as="geometry" />
+    </mxCell>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- DATABASE CONTAINER                                              -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <mxCell id="db_container" value="PostgreSQL  •  thesis_db" style="swimlane;startSize=40;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="1380" y="40" width="280" height="700" as="geometry" />
+    </mxCell>
+
+    <mxCell id="db_user" value="User&#xa;id · email · role (ADMIN/SIGNER)&#xa;publicAddress · privateKey (encrypted)&#xa;signerPosition · bcrypt password" style="shape=table;startSize=30;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="db_container">
+      <mxGeometry x="20" y="60" width="240" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="db_student" value="Student&#xa;id · student_id · firstName · lastName&#xa;course · yearLevel · dateOfBirth&#xa;address · academic_distinction" style="shape=table;startSize=30;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="db_container">
+      <mxGeometry x="20" y="160" width="240" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="db_arc" value="StudentAcademicRecord&#xa;+ SubjectTaken + Subject&#xa;schoolYear · semester · grade&#xa;subject code · description · units" style="shape=table;startSize=30;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="db_container">
+      <mxGeometry x="20" y="260" width="240" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="db_cred" value="CredentialTypeEntity&#xa;id · name (DIPLOMA/TRANSCRIPT/…)&#xa;requiredSignaturesCount&#xa;↔ credential_type_signers (join table)" style="shape=table;startSize=30;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="db_container">
+      <mxGeometry x="20" y="360" width="240" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="db_record" value="Record&#xa;id · credentialRef (8-char unique)&#xa;dataHash · txHash · expiration · revoked&#xa;cutOffYear · cutOffSemester · currentSignatures" style="shape=table;startSize=30;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="db_container">
+      <mxGeometry x="20" y="460" width="240" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="db_rsig" value="RecordSignature&#xa;id · status (PENDING/CONFIRMED/FAILED)&#xa;txHash · gasUsed · blockNumber · signedAt&#xa;→ Record  → User (signer)" style="shape=table;startSize=30;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="db_container">
+      <mxGeometry x="20" y="560" width="240" height="80" as="geometry" />
+    </mxCell>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- BLOCKCHAIN CONTAINER                                            -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <mxCell id="bc_container" value="Ethereum Blockchain&#xa;(Sepolia testnet / local Anvil)" style="swimlane;startSize=40;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="1380" y="780" width="280" height="350" as="geometry" />
+    </mxCell>
+
+    <mxCell id="bc_sc" value="CredentialVerifier.sol&#xa;(ethers.js v6 · owner wallet)" style="rounded=1;fillColor=#9673a6;strokeColor=#6b4e8b;fontColor=#ffffff;fontStyle=1;fontSize=11;" vertex="1" parent="bc_container">
+      <mxGeometry x="20" y="50" width="240" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="bc_state1" value="records mapping&#xa;recordKey → { dataHash, expiration,&#xa;isRevoked, credentialTypeId,&#xa;currentSignatures, signedBy[] }" style="shape=table;startSize=30;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="bc_container">
+      <mxGeometry x="20" y="120" width="240" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="bc_state2" value="credentialTypeSigner mapping&#xa;typeId → address → bool&#xa;requiredSignatureCount mapping&#xa;typeId → uint8" style="shape=table;startSize=30;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="bc_container">
+      <mxGeometry x="20" y="220" width="240" height="80" as="geometry" />
+    </mxCell>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- EDGES: Actors → Frontend                                        -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <mxCell id="e_pub_fe" value="enter credentialRef" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontSize=10;" edge="1" source="actor_pub" target="fe_pub" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_adm_fe" value="login · issue · manage" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontSize=10;" edge="1" source="actor_admin" target="fe_adm" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_sgn_fe" value="login · sign queue" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;entryX=0;entryY=0.5;fontSize=10;" edge="1" source="actor_signer" target="fe_sgn" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- EDGES: Frontend → Axios → Backend                               -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <mxCell id="e_fe_pub_ver" value="GET /verify/:ref" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;dashed=1;" edge="1" source="fe_pub" target="be_ver_get" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_fe_adm_login" value="POST /auth/login&#xa;GET /auth/check-auth" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;dashed=1;" edge="1" source="fe_adm" target="be_auth_login" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_fe_adm_reg" value="POST /auth/register" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;dashed=1;" edge="1" source="fe_adm" target="be_auth_reg" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_fe_adm_rec" value="POST /record (issue)" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;dashed=1;" edge="1" source="fe_adm" target="be_rec_post" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_fe_adm_rev" value="POST /admin/revoke|restore" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;dashed=1;" edge="1" source="fe_adm" target="be_adm_rev" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_fe_adm_sigset" value="POST /admin/set-credential-signer" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;dashed=1;" edge="1" source="fe_adm" target="be_adm_signer" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_fe_sgn_login" value="POST /auth/login&#xa;GET /auth/check-auth" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;dashed=1;" edge="1" source="fe_sgn" target="be_auth_login" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_fe_sgn_batch" value="POST /signer/batch-sign" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;dashed=1;" edge="1" source="fe_sgn" target="be_sign_batch" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- EDGES: Backend → PostgreSQL                                     -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <mxCell id="e_auth_user" value="findByEmail / save User" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" edge="1" source="be_auth_login" target="db_user" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_reg_user" value="save User (enc. key)" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" edge="1" source="be_auth_reg" target="db_user" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_rec_student" value="fetch Student" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" edge="1" source="be_rec_post" target="db_student" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_rec_arc" value="fetch AcademicRecords" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" edge="1" source="be_rec_post" target="db_arc" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_rec_cred" value="fetch CredentialType" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" edge="1" source="be_rec_post" target="db_cred" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_rec_record" value="save Record row" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" edge="1" source="be_rec_post" target="db_record" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_sign_record" value="fetch Records / update sigs" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" edge="1" source="be_sign_batch" target="db_record" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_sign_user" value="fetch enc. private key" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" edge="1" source="be_sign_batch" target="db_user" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_sign_rsig" value="upsert RecordSignature (PENDING→CONFIRMED)" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" edge="1" source="be_sign_batch" target="db_rsig" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_rev_record" value="UPDATE revoked flag" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" edge="1" source="be_adm_rev" target="db_record" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_sigset_cred" value="update signers join table" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" edge="1" source="be_adm_signer" target="db_cred" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_ver_record" value="fetch Record + Student + AcademicRecords" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" edge="1" source="be_ver_get" target="db_record" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- EDGES: Backend → Blockchain                                     -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <mxCell id="e_rec_bc" value="addRecord(ref, hash, exp, typeId)" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;strokeColor=#9673a6;fontColor=#9673a6;" edge="1" source="be_rec_post" target="bc_sc" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_sign_bc" value="batchSignRecords(refs[]) via signer wallet" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;strokeColor=#9673a6;fontColor=#9673a6;" edge="1" source="be_sign_batch" target="bc_sc" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_bc_sign_receipt" value="TX receipt (txHash, gasUsed, blockNumber)" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;strokeColor=#9673a6;fontColor=#9673a6;" edge="1" source="bc_sc" target="be_sign_batch" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_rev_bc" value="revokeRecord / restoreRecord" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;strokeColor=#9673a6;fontColor=#9673a6;" edge="1" source="be_adm_rev" target="bc_sc" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_sigset_bc" value="setCredentialTypeSigner" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;strokeColor=#9673a6;fontColor=#9673a6;" edge="1" source="be_adm_signer" target="bc_sc" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_ver_bc" value="getRecord(ref) → { dataHash, expiration, isRevoked, currentSigs }" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;strokeColor=#9673a6;fontColor=#9673a6;" edge="1" source="be_ver_get" target="bc_sc" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_other_bc" value="addNewCredentialType(typeId, signers[], reqCount)" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;strokeColor=#9673a6;fontColor=#9673a6;" edge="1" source="be_other" target="bc_sc" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_bc_state" value="read / write" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;strokeColor=#9673a6;fontColor=#9673a6;" edge="1" source="bc_sc" target="bc_state1" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e_bc_state2" value="" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;strokeColor=#9673a6;fontColor=#9673a6;" edge="1" source="bc_sc" target="bc_state2" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- EDGES: Backend → Frontend (responses)                           -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <mxCell id="e_ver_resp" value="{ isTampered, isRevoked,&#xa;isExpired, isFullySigned, record }" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;dashed=1;strokeColor=#6c8ebf;" edge="1" source="be_ver_get" target="fe_pub" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- LEGEND                                                          -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <mxCell id="legend" value="Legend" style="swimlane;startSize=30;fillColor=#f5f5f5;strokeColor=#999;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="60" y="760" width="560" height="180" as="geometry" />
+    </mxCell>
+    <mxCell id="leg1" value="Actor (user / role)" style="shape=mxgraph.general.person;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="legend">
+      <mxGeometry x="20" y="50" width="50" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="leg2" value="Frontend page / component" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="legend">
+      <mxGeometry x="100" y="60" width="120" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="leg3" value="Backend endpoint / service" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="legend">
+      <mxGeometry x="250" y="60" width="130" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="leg4" value="PostgreSQL table" style="shape=table;startSize=20;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="legend">
+      <mxGeometry x="100" y="110" width="120" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="leg5" value="Blockchain state" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="legend">
+      <mxGeometry x="250" y="115" width="130" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="leg_e1" value="HTTP request (dashed)" style="edgeStyle=orthogonalEdgeStyle;dashed=1;fontSize=10;" edge="1" parent="legend">
+      <mxGeometry x="400" y="65" width="140" height="20" as="geometry"><Array as="points"><mxPoint x="400" y="75" /><mxPoint x="530" y="75" /></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="leg_e2" value="Blockchain TX (purple)" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#9673a6;fontColor=#9673a6;fontSize=10;" edge="1" parent="legend">
+      <mxGeometry x="400" y="110" width="140" height="20" as="geometry"><Array as="points"><mxPoint x="400" y="120" /><mxPoint x="530" y="120" /></Array></mxGeometry>
+    </mxCell>
+    <mxCell id="leg_e3" value="DB read/write (solid)" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" edge="1" parent="legend">
+      <mxGeometry x="400" y="140" width="140" height="20" as="geometry"><Array as="points"><mxPoint x="400" y="150" /><mxPoint x="530" y="150" /></Array></mxGeometry>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

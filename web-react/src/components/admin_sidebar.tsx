@@ -1,10 +1,4 @@
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
 	Sidebar,
 	SidebarContent,
 	SidebarFooter,
@@ -21,14 +15,10 @@ import {
 import { useAuthStore } from "@/stores/auth_store";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import {
-	ChevronUp,
 	GraduationCap,
 	LayoutDashboard,
-	LogOut,
 	Newspaper,
 	Paperclip,
-	Settings,
-	User,
 	UserPen,
 } from "lucide-react";
 import { useEffect, useMemo } from "react";
@@ -153,51 +143,7 @@ export function AdminSidebar() {
 				))}
 			</SidebarContent>
 
-			<SidebarFooter>
-				<SidebarMenu>
-					<SidebarMenuItem>
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<SidebarMenuButton
-									size="lg"
-									className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-								>
-									<div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-										<User className="size-4" />
-									</div>
-									<div className="grid flex-1 text-left text-sm leading-tight">
-										<span className="truncate font-semibold">
-											{userProfile?.firstName
-												? `${userProfile.firstName} ${userProfile.lastName ?? ""}`
-												: "Admin User"}
-										</span>
-										<span className="truncate text-xs">
-											{userProfile?.role ?? "admin"}
-										</span>
-									</div>
-									<ChevronUp className="ml-auto size-4" />
-								</SidebarMenuButton>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent
-								side="top"
-								className="w-[--radix-popper-anchor-width]"
-							>
-								<DropdownMenuItem>
-									<Settings className="mr-2 size-4" />
-									<span>Settings</span>
-								</DropdownMenuItem>
-								<DropdownMenuItem
-									className="text-red-500 focus:text-red-500"
-									onClick={handleLogout}
-								>
-									<LogOut className="mr-2 size-4" />
-									<span>Sign out</span>
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
-					</SidebarMenuItem>
-				</SidebarMenu>
-			</SidebarFooter>
+			<SidebarFooter></SidebarFooter>
 		</Sidebar>
 	);
 }
