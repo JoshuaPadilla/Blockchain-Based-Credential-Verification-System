@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { pdfBlobToDataUrl } from "@/helpers/pdf_helper";
+import { useBlockchainStore } from "@/stores/blockchain_store";
 import { usePdfStore } from "@/stores/pdf_store";
 import { useRecordStore } from "@/stores/record_store";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -16,6 +17,7 @@ import {
 	Download,
 	FileStack,
 	Fingerprint,
+	Fuel,
 	Hash,
 	Loader,
 	Loader2,
@@ -47,6 +49,7 @@ function CredentialDetail() {
 	const { credential_id } = Route.useLoaderData();
 	const { getRecord, revokeRecord } = useRecordStore();
 	const { getFinalPdf } = usePdfStore();
+	const { getEthPhpRate } = useBlockchainStore();
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 
@@ -81,6 +84,14 @@ function CredentialDetail() {
 		queryFn: () => getFinalPdf(record?.id || ""),
 		enabled: !!record,
 		staleTime: 1000 * 60 * 60,
+	});
+
+	// 3. Fetch ETH/PHP rate
+	const { data: ethPhpRate } = useQuery({
+		queryKey: ["eth-php-rate"],
+		queryFn: () => getEthPhpRate(),
+		staleTime: 1000 * 60 * 5,
+		refetchOnWindowFocus: false,
 	});
 
 	useEffect(() => {
@@ -445,6 +456,97 @@ function CredentialDetail() {
 										<Fingerprint className="size-3 mr-1" />
 									}
 								/>
+
+								{/* Total Gas Fee Summary */}
+								{record.signatures &&
+									record.signatures.length > 0 &&
+									(() => {
+										const totalGasUnits =
+											record.signatures.reduce(
+												(sum, sig) =>
+													sum + (sig.gasUsed || 0),
+												0,
+											);
+										// Wei → ETH
+										const totalCostEth =
+											totalGasUnits / 1e18;
+										return (
+											<div className="bg-slate-50 rounded-lg border border-slate-200 p-3 space-y-2">
+												<div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase mb-1">
+													<Fuel className="size-3" />{" "}
+													Transaction Gas Cost
+												</div>
+												<div className="flex justify-between items-center text-xs">
+													<span className="text-slate-500">
+														Total Gas Used
+													</span>
+													<span className="font-mono font-semibold text-slate-700">
+														{totalGasUnits.toLocaleString()}{" "}
+														Wei
+													</span>
+												</div>
+												{ethPhpRate && (
+													<div className="flex justify-between items-center text-xs">
+														<span className="text-slate-500">
+															Est. PHP Cost
+														</span>
+														<span className="font-mono font-semibold text-emerald-600">
+															≈ ₱
+															{(
+																totalCostEth *
+																ethPhpRate
+															).toFixed(4)}
+														</span>
+													</div>
+												)}
+												<div className="flex justify-between items-center text-xs">
+													<span className="text-slate-500">
+														Signatures
+													</span>
+													<span className="font-mono text-slate-600">
+														{
+															record.signatures
+																.length
+														}{" "}
+														tx
+													</span>
+												</div>
+												{record.signatures.map(
+													(sig, i) =>
+														sig.gasUsed ? (
+															<div
+																key={sig.id}
+																className="flex justify-between items-center text-[10px] text-slate-400 pl-2 border-l border-slate-200"
+															>
+																<span>
+																	Sig #{i + 1}{" "}
+																	·{" "}
+																	{sig.signer.signerPosition?.toUpperCase()}
+																</span>
+																<div className="flex flex-col items-end">
+																	<span className="font-mono">
+																		{sig.gasUsed.toLocaleString()}{" "}
+																		Wei
+																	</span>
+																	{ethPhpRate && (
+																		<span className="font-mono text-emerald-500">
+																			₱
+																			{(
+																				(sig.gasUsed /
+																					1e18) *
+																				ethPhpRate
+																			).toFixed(
+																				4,
+																			)}
+																		</span>
+																	)}
+																</div>
+															</div>
+														) : null,
+												)}
+											</div>
+										);
+									})()}
 
 								<div className="flex justify-between items-center text-xs text-slate-400 pt-2">
 									<span className="flex items-center gap-1">

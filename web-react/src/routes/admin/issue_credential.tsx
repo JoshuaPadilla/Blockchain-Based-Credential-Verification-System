@@ -4,6 +4,7 @@ import { StudentSelector } from "@/components/custom_components/student_selector
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
+import { useBlockchainStore } from "@/stores/blockchain_store";
 import { usePdfStore } from "@/stores/pdf_store";
 import { useRecordStore } from "@/stores/record_store";
 import type { CredentialType } from "@/types/credential_type.type";
@@ -37,6 +38,7 @@ function RouteComponent() {
 	const queryClient = useQueryClient();
 	const { getPreview } = usePdfStore();
 	const { createRecord } = useRecordStore();
+	const { getGasEstimate, getEthPhpRate } = useBlockchainStore();
 	const navigate = useNavigate();
 
 	const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -49,6 +51,20 @@ function RouteComponent() {
 		useState<CredentialType | null>(null);
 
 	// --- Queries & Mutations ---
+	const { data: gasEstimate, isFetching: isGasFetching } = useQuery({
+		queryKey: ["gas-estimate"],
+		queryFn: () => getGasEstimate(),
+		staleTime: 1000 * 60 * 2, // refresh every 2 minutes
+		refetchOnWindowFocus: false,
+	});
+
+	const { data: ethPhpRate } = useQuery({
+		queryKey: ["eth-php-rate"],
+		queryFn: () => getEthPhpRate(),
+		staleTime: 1000 * 60 * 5, // refresh every 5 minutes
+		refetchOnWindowFocus: false,
+	});
+
 	const { data: pdfBlob, isFetching: isPreviewLoading } = useQuery({
 		queryKey: [
 			"pdf-preview",
@@ -294,9 +310,41 @@ function RouteComponent() {
 											<Fuel className="size-3.5" /> Est.
 											Gas Fee
 										</div>
-										<span className="font-mono text-xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
-											~0.00034 ETH
-										</span>
+										{isGasFetching ? (
+											<span className="font-mono text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded animate-pulse">
+												fetching...
+											</span>
+										) : gasEstimate ? (
+											<div className="flex flex-col items-end gap-0.5">
+												<span className="font-mono text-xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
+													~
+													{Number(
+														gasEstimate.estimatedCostEth,
+													).toFixed(6)}{" "}
+													ETH
+												</span>
+												{ethPhpRate && (
+													<span className="text-[10px] text-emerald-600 font-semibold font-mono">
+														≈ ₱
+														{(
+															Number(
+																gasEstimate.estimatedCostEth,
+															) * ethPhpRate
+														).toFixed(2)}
+													</span>
+												)}
+												<span className="text-[10px] text-slate-400 font-mono">
+													{Number(
+														gasEstimate.estimatedGasUnits,
+													).toLocaleString()}{" "}
+													gas units
+												</span>
+											</div>
+										) : (
+											<span className="font-mono text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+												Unavailable
+											</span>
+										)}
 									</div>
 								</div>
 

@@ -1,19 +1,18 @@
 import {
+  BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
   OnModuleInit,
-  Logger,
-  BadRequestException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ethers, id } from 'ethers'; // "id" is keccak256 in v6
-import abi from '../../lib/contract.abi.json';
-import { Record } from 'src/common/entities/record.entity';
-import { OnChainRecord } from 'src/common/interfaces/onchain_record.interface';
-import { EMPTY_BYTES } from 'src/common/constants/empty_bytes.constant';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ethers, id } from 'ethers'; // "id" is keccak256 in v6
+import { EMPTY_BYTES } from 'src/common/constants/empty_bytes.constant';
+import { Record } from 'src/common/entities/record.entity';
 import { User } from 'src/common/entities/user.entity';
 import { Repository } from 'typeorm';
+import abi from '../../lib/contract.abi.json';
 
 @Injectable()
 export class BlockChainService implements OnModuleInit {
@@ -235,6 +234,25 @@ export class BlockChainService implements OnModuleInit {
   async getNetwork() {
     const networkDetails = await this.provider.getNetwork();
     return { networkName: networkDetails.name };
+  }
+
+  async getGasEstimate() {
+    const GAS_LIMIT_ESTIMATE = 200_000n;
+    const feeData = await this.provider.getFeeData();
+    // Prefer maxFeePerGas (EIP-1559), fall back to legacy gasPrice
+    const gasPrice = feeData.maxFeePerGas ?? feeData.gasPrice;
+
+    if (!gasPrice || gasPrice === 0n) {
+      throw new BadRequestException('Unable to fetch gas price from network');
+    }
+
+    const estimatedCostWei = gasPrice * GAS_LIMIT_ESTIMATE;
+    const estimatedCostEth = (Number(estimatedCostWei) / 1e18).toFixed(8);
+    return {
+      gasPrice: gasPrice.toString(),
+      estimatedGasUnits: GAS_LIMIT_ESTIMATE.toString(),
+      estimatedCostEth,
+    };
   }
 
   async checkRequireSignCount(credentialTypeId: string) {
