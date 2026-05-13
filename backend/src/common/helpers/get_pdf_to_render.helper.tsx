@@ -129,8 +129,8 @@ export async function generateDiploma(
   });
 
   page.drawImage(qrImage, {
-    x: pageWidth - 125,
-    y: pageHeight - 125,
+    x: pageWidth - 80,
+    y: pageHeight - 550,
     width: 40,
     height: 40,
   });
